@@ -38,17 +38,10 @@ Netro products *Sprite*, *Spark*, *Pixie* and *Whisperer* are actually supported
 
 Please repeat step 4. as mentioned above for each device you want to include, whatever it is a ground sensor, a multi-zone controller (Sprite or Spark) or a single-zone controler (Pixie). Each zone of a controller will be represented by separate device related to the controller it depends on.
 
-![add a config entry](images/add_config_entry.png "Setup of a *Netro* device")
-![device is created](images/device_created.png "Sucess of a *Netro* device setup")
-
 At this point, several devices may have been created related to ten's of entity. This latter are representing the humidity, temperature, illuminance of the sensors as well as the current/last/next status of each zone. Switches have been created allowing to start/stop watering and enable/disable controllers.
 
 Options may be changed related to polling refresh interval of sensors and controllers independently. Default watering duration and schedules options may also be changed specifically for the controllers. 
 
-![change controller options](images/controller_options.png "Controller options")
-![change sensor options](images/sensor_options.png "Sensor options")
-
 **IMPORTANT: to be effective, each time options have been changed the related device must be reloaded.**
 
 ## Running
-![start watering](images/running.png "Dashboard")
