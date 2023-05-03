@@ -1,0 +1,130 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configuration Netro",
+        "description": "Merci de saisir le numéro de série de l'appareil",
+        "data": {
+          "serial_number": "Numéro de série de l'appareil",
+          "device_name": "Nom de l'appareil",
+          "device_type": "Type de l'appareil"
+        }
+      }
+    },
+    "error": {
+      "invalid_serial_number": "Numéro de série incorrect",
+      "unknown_device_type": "Type d'appareil inconnu",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "temperature": {
+        "name": "Température"
+      },
+      "humidity": {
+        "name": "Humidité"
+      },
+      "illuminance": {
+        "name": "Luminosité"
+      },
+      "battery_percent": {
+        "name": "Batterie"
+      },
+      "last_watering_status": {
+        "name": "Dernier arrosage statut",
+        "state": {
+          "executed": "Effectué",
+          "executing": "En cours",
+          "valid": "Planifié",
+          "none": "Inconnu"
+        }
+      },
+      "last_watering_start_datetime": {
+        "name": "Dernier arrosage début"
+      },
+      "last_watering_end_datetime": {
+        "name": "Dernier arrosage fin"
+      },
+      "last_watering_source": {
+        "name": "Dernier arrosage source",
+        "state": {
+          "smart": "Planifié",
+          "fix": "Fixé",
+          "manual": "Manuel",
+          "none": "Inconnu"
+        }
+      },
+      "next_watering_status": {
+        "name": "Prochain arrosage statut",
+        "state": {
+            "executed": "Executed",
+            "executing": "Executing",
+            "valid": "Planifié",
+            "none": "Inconnu"
+          }
+      },
+      "next_watering_start_datetime": {
+        "name": "Prochain arrosage début"
+      },
+      "next_watering_end_datetime": {
+        "name": "Prochain arrosage fin"
+      },
+      "next_watering_source": {
+        "name": "Prochain arrosage source",
+        "state": {
+          "smart": "Planifié",
+          "fix": "Fixé",
+          "manual": "Manuel",
+          "none": "Inconnu"
+        }
+      },
+      "status": {
+        "name": "Statut",
+        "state": {
+          "standby": "En veille",
+          "setup": "Initialisation",
+          "online": "En ligne",
+          "watering": "Arrosage en cours",
+          "offline": "Hors ligne",
+          "sleeping": "Inactif",
+          "poweroff": "Eteint"
+        }
+      }
+    },
+    "switch": {
+      "watering": {
+        "name": "start/stop arrosage"
+      },
+      "enabled": {
+          "name": "activer/désactiver"
+      }
+    },
+    "binary_sensor": {
+      "iswatering": {
+        "name": "Arrosage en cours ?",
+        "state": {
+          "on": "oui",
+          "off": "non"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+            "controller_refresh_interval": "Période de rafraichissement du contrôleur (en minutes)",
+            "months_before_schedules": "Visu planification à partir de (nombre de mois avant aujourd'hui)",
+            "months_after_schedules": "Visu planification jusqu'à (nombre de mois après aujourd'hui)",
+            "sensor_refresh_interval": "Période de rafraichissement du capteur de sol (en minutes)",
+            "watering_duration": "Durée d'arrosage par défaut (en minutes)"
+        },
+        "title": "Option de Netro Arrosage"
+      }
+    }
+  }
+}

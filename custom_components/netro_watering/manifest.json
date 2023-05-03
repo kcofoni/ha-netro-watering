@@ -1,0 +1,14 @@
+{
+  "domain": "netro_watering",
+  "name": "Netro Watering",
+  "codeowners": ["@kcofoni"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/netro_watering",
+  "homekit": {},
+  "iot_class": "cloud_polling",
+  "requirements": ["requests==2.28.2"],
+  "ssdp": [],
+  "zeroconf": [],
+  "version": "0.9.0"
+}

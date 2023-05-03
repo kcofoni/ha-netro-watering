@@ -1,0 +1,130 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "invalid_serial_number": "invalid serial number",
+            "unknown": "Unexpected error",
+            "unknown_device_type": "unknown device type"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "device_name": "Device name",
+                    "device_type": "Device type",
+                    "serial_number": "Serial number of the device"
+                },
+                "description": "Please enter the serial number of your device",
+                "title": "Configure Netro"
+            }
+        }
+    },
+    "entity": {
+        "binary_sensor": {
+            "iswatering": {
+                "name": "Is it watering ?",
+                "state": {
+                    "off": "no",
+                    "on": "yes"
+                }
+            }
+        },
+        "sensor": {
+            "battery_percent": {
+                "name": "battery_percent"
+            },
+            "humidity": {
+                "name": "humidity"
+            },
+            "illuminance": {
+                "name": "illuminance"
+            },
+            "last_watering_end_datetime": {
+                "name": "Last watering end time"
+            },
+            "last_watering_source": {
+                "name": "Last watering source",
+                "state": {
+                    "fix": "Fix",
+                    "manual": "Manual",
+                    "none": "Unknown",
+                    "smart": "Smart"
+                }
+            },
+            "last_watering_start_datetime": {
+                "name": "Last watering start time"
+            },
+            "last_watering_status": {
+                "name": "Last watering status",
+                "state": {
+                    "executed": "Executed",
+                    "executing": "Executing",
+                    "none": "No info",
+                    "valid": "Valid"
+                }
+            },
+            "next_watering_end_datetime": {
+                "name": "Next watering end time"
+            },
+            "next_watering_source": {
+                "name": "Next watering event source",
+                "state": {
+                    "fix": "Fix",
+                    "manual": "Manual",
+                    "none": "Unknown",
+                    "smart": "Smart"
+                }
+            },
+            "next_watering_start_datetime": {
+                "name": "Next watering start time"
+            },
+            "next_watering_status": {
+                "name": "Next watering status",
+                "state": {
+                    "executed": "Executed",
+                    "executing": "Executing",
+                    "none": "No info",
+                    "valid": "Valid"
+                }
+            },
+            "status": {
+                "name": "Status",
+                "state": {
+                    "offline": "Offline",
+                    "online": "Online",
+                    "poweroff": "Poweroff",
+                    "setup": "Setup",
+                    "sleeping": "Sleeping",
+                    "standby": "Standby",
+                    "watering": "Watering"
+                }
+            },
+            "temperature": {
+                "name": "temperature"
+            }
+        },
+        "switch": {
+            "enabled": {
+                "name": "enable/disable"
+            },
+            "watering": {
+                "name": "start/stop arrosage"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "controller_refresh_interval": "Controller refresh interval (in minutes)",
+                    "months_after_schedules": "Get schedules until (in months after today)",
+                    "months_before_schedules": "Get schedules from (in months before today)",
+                    "sensor_refresh_interval": "Sensor refresh interval (in minutes)",
+                    "watering_duration": "Default watering duration (in minutes)"
+                },
+                "title": "Netro Watering options"
+            }
+        }
+    }
+}

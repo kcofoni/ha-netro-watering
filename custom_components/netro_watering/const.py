@@ -1,0 +1,101 @@
+"""Constants for the Netro Watering integration."""
+
+DOMAIN = "netro_watering"
+MANUFACTURER = "Netro"
+
+CONF_SERIAL_NUMBER = "serial_number"
+CONF_DEVICE_NAME = "device_name"
+CONF_DEVICE_TYPE = "device_type"
+CONF_DEVICE_HW_VERSION = "hw_version"
+CONF_DEVICE_SW_VERSION = "sw_version"
+
+CONTROLLER_DEVICE_TYPE = "controller"
+SENSOR_DEVICE_TYPE = "sensor"
+
+NETRO_SENSOR_CELSIUS = "celsius"
+NETRO_SENSOR_FAHRENHEIT = "fahrenheit"
+NETRO_SENSOR_MOISTURE = "moisture"
+NETRO_SENSOR_TEMPERATURE = NETRO_SENSOR_CELSIUS
+NETRO_SENSOR_LOCAL_DATE = "local_date"
+NETRO_SENSOR_LOCAL_TIME = "local_time"
+NETRO_SENSOR_TIME = "time"
+NETRO_SENSOR_SUNLIGHT = "sunlight"
+NETRO_SENSOR_BATTERY_LEVEL = "battery_level"
+NETRO_DEFAULT_SENSOR_MODEL = "Whisperer"
+NETRO_SPRITE_CONTROLLER_MODEL = "Sprite/Spark"
+NETRO_PIXIE_CONTROLLER_MODEL = "Pixie"
+NETRO_DEFAULT_ZONE_MODEL = "Virtual zone"
+
+NETRO_CONTROLLER_ZONENUM = "zone_num"
+NETRO_CONTROLLER_STATUS = "status"
+NETRO_CONTROLLER_BATTERY_LEVEL = "battery_level"
+NETRO_CONTROLLER_ZONES = "zones"
+NETRO_CONTROLLER_WATERING = "start_watering"
+NETRO_CONTROLLER_STOP_WATERING = "stop_watering"
+NETRO_ZONE_ITH = "ith"
+NETRO_ZONE_ENABLED = "enabled"
+NETRO_ZONE_SMART = "smart"
+NETRO_ZONE_NAME = "name"
+NETRO_ZONE_LAST_WATERING_STATUS = "last_watering_status"
+NETRO_ZONE_LAST_WATERING_START = "last_watering_start"
+NETRO_ZONE_LAST_WATERING_END = "last_watering_end"
+NETRO_ZONE_LAST_WATERING_SOURCE = "last_watering_source"
+NETRO_ZONE_NEXT_WATERING_STATUS = "next_watering_status"
+NETRO_ZONE_NEXT_WATERING_START = "next_watering_start"
+NETRO_ZONE_NEXT_WATERING_END = "next_watering_end"
+NETRO_ZONE_NEXT_WATERING_SOURCE = "next_watering_source"
+
+NETRO_METADATA_LAST_ACTIVE = "last_active"
+NETRO_METADATA_TIME = "time"
+NETRO_METADATA_TID = "tid"
+NETRO_METADATA_VERSION = "version"
+NETRO_METADATA_TOKEN_LIMIT = "token_limit"
+NETRO_METADATA_TOKEN_REMAINING = "token_remaining"
+NETRO_METADATA_TOKEN_RESET = "token_reset"
+
+NETRO_STATUS_ENABLE = 1
+NETRO_STATUS_DISABLE = 0
+NETRO_STATUS_STANDBY = "STANDBY"
+NETRO_STATUS_SETUP = "SETUP"
+NETRO_STATUS_ONLINE = "ONLINE"
+NETRO_STATUS_WATERING = "WATERING"
+NETRO_STATUS_OFFLINE = "OFFLINE"
+NETRO_STATUS_SLEEPING = "SLEEPING"
+NETRO_STATUS_POWEROFF = "POWEROFF"
+
+NETRO_SCHEDULE_EXECUTED = "EXECUTED"
+NETRO_SCHEDULE_EXECUTING = "EXECUTING"
+NETRO_SCHEDULE_VALID = "VALID"
+NETRO_SCHEDULE_STATUS = "status"
+NETRO_SCHEDULE_ZONE = "zone"
+NETRO_SCHEDULE_START_TIME = "start_time"
+NETRO_SCHEDULE_ID = "id"
+NETRO_SCHEDULE_END_TIME = "end_time"
+NETRO_SCHEDULE_LOCAL_DATE = "local_date"
+NETRO_SCHEDULE_LOCAL_START_TIME = "local_start_time"
+NETRO_SCHEDULE_LOCAL_END_TIME = "local_end_time"
+NETRO_SCHEDULE_SOURCE = "source"
+
+NETRO_MOISTURE_ID = "id"
+NETRO_MOISTURE_ZONE = "zone"
+NETRO_MOISTURE_DATE = "date"
+NETRO_MOISTURE_MOISTURE = "moisture"
+
+# the following const should be replaced by a configuration entry
+SENS_REFRESH_INTERVAL_MN = 60  # minutes
+CTRL_REFRESH_INTERVAL_MN = 15  # minutes
+TZ_OFFSET = "+00:00"  # natively produced in UTC (do not change)
+DEFAULT_WATERING_DURATION = 30  # minutes
+DEFAULT_WATERING_DELAY = 0  # minutes, should be 0, if not null this parameter is a good way for testing and then be able to cancel the watering manually
+MONTHS_BEFORE_SCHEDULES = 4
+MONTHS_AFTER_SCHEDULES = 2
+DELAY_BEFORE_REFRESH = 5  # seconds
+NETRO_API_URL = "https://api.netrohome.com/npa/v1/"
+
+CONF_DURATION = "watering_duration"
+CONF_SENS_REFRESH_INTERVAL = "sensor_refresh_interval"
+CONF_CTRL_REFRESH_INTERVAL = "controller_refresh_interval"
+CONF_MONTHS_BEFORE_SCHEDULES = "months_before_schedules"
+CONF_MONTHS_AFTER_SCHEDULES = "months_after_schedules"
+CONF_API_URL = "netro_api_url"
+CONF_DELAY_BEFORE_REFRESH = "delay_before_refresh"
