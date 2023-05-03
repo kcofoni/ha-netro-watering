@@ -111,7 +111,7 @@
     },
     "switch": {
       "watering": {
-        "name": "start/stop arrosage"
+        "name": "start/stop watering"
       },
       "enabled": {
         "name": "enable/disable"
