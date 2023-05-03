@@ -109,7 +109,7 @@
                 "name": "enable/disable"
             },
             "watering": {
-                "name": "start/stop arrosage"
+                "name": "start/stop watering"
             }
         }
     },
