@@ -23,7 +23,7 @@
     "entity": {
         "binary_sensor": {
             "iswatering": {
-                "name": "Is it watering ?",
+                "name": "Is it watering right now ?",
                 "state": {
                     "off": "no",
                     "on": "yes"

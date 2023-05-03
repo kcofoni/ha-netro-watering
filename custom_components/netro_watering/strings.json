@@ -119,7 +119,7 @@
     },
     "binary_sensor": {
       "iswatering": {
-        "name": "Is it watering ?",
+        "name": "Is it watering right now ?",
         "state": {
           "on": "yes",
           "off": "no"
