@@ -97,18 +97,18 @@
     },
     "switch": {
       "watering": {
-        "name": "start/stop arrosage"
+        "name": "Démarrer/Arrêter arrosage"
       },
       "enabled": {
-          "name": "activer/désactiver"
+          "name": "Activer/Désactiver"
       }
     },
     "binary_sensor": {
       "iswatering": {
         "name": "Arrosage en cours ?",
         "state": {
-          "on": "oui",
-          "off": "non"
+          "on": "Oui",
+          "off": "Non"
         }
       }
     }

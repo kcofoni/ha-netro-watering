@@ -81,6 +81,8 @@ NETRO_MOISTURE_ZONE = "zone"
 NETRO_MOISTURE_DATE = "date"
 NETRO_MOISTURE_MOISTURE = "moisture"
 
+GLOBAL_PARAMETERS = "parameters"
+
 # the following const should be replaced by a configuration entry
 SENS_REFRESH_INTERVAL_MN = 60  # minutes
 CTRL_REFRESH_INTERVAL_MN = 15  # minutes
@@ -99,3 +101,4 @@ CONF_MONTHS_BEFORE_SCHEDULES = "months_before_schedules"
 CONF_MONTHS_AFTER_SCHEDULES = "months_after_schedules"
 CONF_API_URL = "netro_api_url"
 CONF_DELAY_BEFORE_REFRESH = "delay_before_refresh"
+CONF_DEFAULT_WATERING_DELAY = "default_watering_delay"

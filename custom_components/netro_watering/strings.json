@@ -12,8 +12,8 @@
       }
     },
     "error": {
-      "invalid_serial_number": "invalid serial number",
-      "unknown_device_type": "unknown device type",
+      "invalid_serial_number": "Invalid serial number",
+      "unknown_device_type": "Unknown device type",
       "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "abort": {
@@ -37,16 +37,16 @@
   "entity": {
     "sensor": {
       "temperature": {
-        "name": "temperature"
+        "name": "Temperature"
       },
       "humidity": {
-        "name": "humidity"
+        "name": "Humidity"
       },
       "illuminance": {
-        "name": "illuminance"
+        "name": "Illuminance"
       },
       "battery_percent": {
-        "name": "battery_percent"
+        "name": "Battery percent"
       },
       "last_watering_status": {
         "name": "Last watering status",
@@ -54,7 +54,7 @@
           "executed": "Executed",
           "executing": "Executing",
           "valid": "Valid",
-          "none": "No info"
+          "none": "Unknown"
         }
       },
       "last_watering_start_datetime": {
@@ -78,7 +78,7 @@
           "executed": "Executed",
           "executing": "Executing",
           "valid": "Valid",
-          "none": "No info"
+          "none": "Unknown"
         }
       },
       "next_watering_start_datetime": {
@@ -111,18 +111,18 @@
     },
     "switch": {
       "watering": {
-        "name": "start/stop watering"
+        "name": "Start/Stop watering"
       },
       "enabled": {
-        "name": "enable/disable"
+        "name": "Enable/Disable"
       }
     },
     "binary_sensor": {
       "iswatering": {
         "name": "Is it watering right now ?",
         "state": {
-          "on": "yes",
-          "off": "no"
+          "on": "Yes",
+          "off": "No"
         }
       }
     }

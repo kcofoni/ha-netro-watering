@@ -3,10 +3,13 @@ from __future__ import annotations
 
 import logging
 
+import validators
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.typing import ConfigType
 
 from .const import (
     CONF_CTRL_REFRESH_INTERVAL,
@@ -21,12 +24,14 @@ from .const import (
     CONTROLLER_DEVICE_TYPE,
     CTRL_REFRESH_INTERVAL_MN,
     DOMAIN,
+    GLOBAL_PARAMETERS,
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
     SENS_REFRESH_INTERVAL_MN,
     SENSOR_DEVICE_TYPE,
 )
 from .coordinator import NetroControllerUpdateCoordinator, NetroSensorUpdateCoordinator
+from .netrofunction import set_netro_base_url
 
 # Here is the list of the platforms that we want to support.
 # sensor is for the netro ground sensors, switch is for the zones
@@ -39,9 +44,42 @@ _LOGGER = logging.getLogger(__name__)
 # mypy: disable-error-code="arg-type"
 
 
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Init of the integration."""
+    _LOGGER.info(
+        "Initializing %s integration with platforms: %s with config: %s",
+        DOMAIN,
+        PLATFORMS,
+        config,
+    )
+
+    # reset configuration dictionary
+    hass.data.setdefault(DOMAIN, {})
+
+    # access to configuration.yaml
+    if (netro_watering_config := config.get(DOMAIN)) is not None:
+        if netro_watering_config.get("netro_api_url") is not None:
+            if validators.url(netro_watering_config["netro_api_url"]):
+                set_netro_base_url(netro_watering_config["netro_api_url"])
+                _LOGGER.info(
+                    "Set Netro Public API url to %s",
+                    netro_watering_config["netro_api_url"],
+                )
+            else:
+                _LOGGER.warning(
+                    "The URL provided for Netro Public API is ignored since it is not properly formed, please check '%s' section in the home assistant configuration file and correct the 'netrop_api_url' entry",
+                    DOMAIN,
+                )
+
+    # set global config into the integration shared space
+    hass.data[DOMAIN][GLOBAL_PARAMETERS] = netro_watering_config
+
+    # Return boolean to indicate that initialization was successful.
+    return True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Netro Watering from a config entry."""
-    hass.data.setdefault(DOMAIN, {})
 
     _LOGGER.debug(
         "setting up config entry: device_type = %s, serial_number = %s, config_name = %s",
@@ -66,6 +104,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         await sensor_coordinator.async_config_entry_first_refresh()
         hass.data[DOMAIN][entry.entry_id] = sensor_coordinator
+        _LOGGER.info("Just created : %s", sensor_coordinator)
     elif entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
         controller_coordinator = NetroControllerUpdateCoordinator(
             hass,
@@ -92,6 +131,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         await controller_coordinator.async_config_entry_first_refresh()
         hass.data[DOMAIN][entry.entry_id] = controller_coordinator
+        _LOGGER.info("Just created : %s", controller_coordinator)
     else:
         raise HomeAssistantError(
             f"Config entry netro device type does not exist: {entry.data[CONF_DEVICE_TYPE]}"
@@ -105,6 +145,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        _LOGGER.info("Deleting %s", hass.data[DOMAIN][entry.entry_id])
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok

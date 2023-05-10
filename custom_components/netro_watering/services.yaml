@@ -1,0 +1,17 @@
+start_watering:
+  name: Start watering
+  description: Start the watering for a given duration and a delay before starting
+  target:
+    entity:
+      integration: netro-watering
+      domain: switch
+  fields:
+    duration:
+      name: Duration
+      description: Duration for this sprinkler to be turned on
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 90
+          unit_of_measurement: "minutes"

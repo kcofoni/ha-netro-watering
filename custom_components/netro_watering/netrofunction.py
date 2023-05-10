@@ -52,6 +52,12 @@ NETRO_EVENT_SCHEDULESTART = 3
 NETRO_EVENT_SCHEDULEEND = 4
 
 
+def set_netro_base_url(url: str):
+    """Change the Netro Public API url."""
+    global netro_base_url  # pylint: disable=global-statement
+    netro_base_url = url
+
+
 class NetroException(Exception):
     """standard Netro exception for raising any NPA application error."""
 

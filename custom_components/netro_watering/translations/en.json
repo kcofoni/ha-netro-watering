@@ -4,9 +4,9 @@
             "already_configured": "Device is already configured"
         },
         "error": {
-            "invalid_serial_number": "invalid serial number",
+            "invalid_serial_number": "Invalid serial number",
             "unknown": "Unexpected error",
-            "unknown_device_type": "unknown device type"
+            "unknown_device_type": "Unknown device type"
         },
         "step": {
             "user": {
@@ -25,20 +25,20 @@
             "iswatering": {
                 "name": "Is it watering right now ?",
                 "state": {
-                    "off": "no",
-                    "on": "yes"
+                    "off": "No",
+                    "on": "Yes"
                 }
             }
         },
         "sensor": {
             "battery_percent": {
-                "name": "battery_percent"
+                "name": "Battery percent"
             },
             "humidity": {
-                "name": "humidity"
+                "name": "Humidity"
             },
             "illuminance": {
-                "name": "illuminance"
+                "name": "Illuminance"
             },
             "last_watering_end_datetime": {
                 "name": "Last watering end time"
@@ -60,7 +60,7 @@
                 "state": {
                     "executed": "Executed",
                     "executing": "Executing",
-                    "none": "No info",
+                    "none": "Unknown",
                     "valid": "Valid"
                 }
             },
@@ -84,7 +84,7 @@
                 "state": {
                     "executed": "Executed",
                     "executing": "Executing",
-                    "none": "No info",
+                    "none": "Unknown",
                     "valid": "Valid"
                 }
             },
@@ -101,15 +101,15 @@
                 }
             },
             "temperature": {
-                "name": "temperature"
+                "name": "Temperature"
             }
         },
         "switch": {
             "enabled": {
-                "name": "enable/disable"
+                "name": "Enable/Disable"
             },
             "watering": {
-                "name": "start/stop watering"
+                "name": "Start/Stop watering"
             }
         }
     },
