@@ -1,0 +1,130 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Dispositivo ya configurado"
+        },
+        "error": {
+            "invalid_serial_number": "número de serie incorrecto",
+            "unknown": "Error inesperado",
+            "unknown_device_type": "tipo de dispositivo desconocido"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "device_name": "Nombre del dispositivo",
+                    "device_type": "Tipo del dispositivo",
+                    "serial_number": "Número de serie del dispositivo"
+                },
+                "description": "Por favor, introduzca el número de serie de su dispositivo",
+                "title": "Configure Netro"
+            }
+        }
+    },
+    "entity": {
+        "binary_sensor": {
+            "iswatering": {
+                "name": "¿Está regando ahora?",
+                "state": {
+                    "off": "no",
+                    "on": "sí"
+                }
+            }
+        },
+        "sensor": {
+            "battery_percent": {
+                "name": "Nivel de batería"
+            },
+            "humidity": {
+                "name": "Nivel de humedad"
+            },
+            "illuminance": {
+                "name": "Luz del sol"
+            },
+            "last_watering_end_datetime": {
+                "name": "Hora de finalización del último riego"
+            },
+            "last_watering_source": {
+                "name": "Origen del último riego",
+                "state": {
+                    "fix": "Programas",
+                    "manual": "Manual",
+                    "none": "Desconocido",
+                    "smart": "Horarios inteligentes"
+                }
+            },
+            "last_watering_start_datetime": {
+                "name": "Hora de inicio del último riego"
+            },
+            "last_watering_status": {
+                "name": "Estado del último riego",
+                "state": {
+                    "executed": "Ejecutado",
+                    "executing": "Ejecutándose",
+                    "none": "Sin información",
+                    "valid": "Correcto"
+                }
+            },
+            "next_watering_end_datetime": {
+                "name": "Hora de finalización del próximo riego"
+            },
+            "next_watering_source": {
+                "name": "Origen del próximo riego",
+                "state": {
+                    "fix": "Programas",
+                    "manual": "Manual",
+                    "none": "Desconocido",
+                    "smart": "Horarios inteligentes"
+                }
+            },
+            "next_watering_start_datetime": {
+                "name": "Hora de inicio del próximo riego"
+            },
+            "next_watering_status": {
+                "name": "Estado del próximo riego",
+                "state": {
+                    "executed": "Ejecutado",
+                    "executing": "Ejecutándose",
+                    "none": "Sin información",
+                    "valid": "Correcto"
+                }
+            },
+            "status": {
+                "name": "Estado",
+                "state": {
+                    "offline": "Desconectado",
+                    "online": "Conectado",
+                    "poweroff": "Apagado",
+                    "setup": "Configuración",
+                    "sleeping": "Hibernado",
+                    "standby": "En espera",
+                    "watering": "Regando"
+                }
+            },
+            "temperature": {
+                "name": "Temperatura"
+            }
+        },
+        "switch": {
+            "enabled": {
+                "name": "habilitar/deshabilitar"
+            },
+            "watering": {
+                "name": "iniciar/parar riego"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "controller_refresh_interval": "Intervalo de actualización del controlador (en minutos)",
+                    "months_after_schedules": "Obtener los horarios futuros (en meses desde hoy)",
+                    "months_before_schedules": "Obtener los horarios pasados (en meses hasta hoy)",
+                    "sensor_refresh_interval": "Intervalo de actualización del sensor (en minutos)",
+                    "watering_duration": "Duración del reigo por defecto (en minutos)"
+                },
+                "title": "Netro Opciones de riego"
+            }
+        }
+    }
+}
