@@ -4,9 +4,9 @@
             "already_configured": "Dispositivo ya configurado"
         },
         "error": {
-            "invalid_serial_number": "número de serie incorrecto",
+            "invalid_serial_number": "Número de serie incorrecto",
             "unknown": "Error inesperado",
-            "unknown_device_type": "tipo de dispositivo desconocido"
+            "unknown_device_type": "Tipo de dispositivo desconocido"
         },
         "step": {
             "user": {
@@ -25,8 +25,8 @@
             "iswatering": {
                 "name": "¿Está regando ahora?",
                 "state": {
-                    "off": "no",
-                    "on": "sí"
+                    "off": "No",
+                    "on": "Sí"
                 }
             }
         },
@@ -46,10 +46,10 @@
             "last_watering_source": {
                 "name": "Origen del último riego",
                 "state": {
-                    "fix": "Programas",
+                    "fix": "Programa",
                     "manual": "Manual",
                     "none": "Desconocido",
-                    "smart": "Horarios inteligentes"
+                    "smart": "Inteligente"
                 }
             },
             "last_watering_start_datetime": {
@@ -60,7 +60,7 @@
                 "state": {
                     "executed": "Ejecutado",
                     "executing": "Ejecutándose",
-                    "none": "Sin información",
+                    "none": "Desconocido",
                     "valid": "Correcto"
                 }
             },
@@ -70,10 +70,10 @@
             "next_watering_source": {
                 "name": "Origen del próximo riego",
                 "state": {
-                    "fix": "Programas",
+                    "fix": "Programa",
                     "manual": "Manual",
                     "none": "Desconocido",
-                    "smart": "Horarios inteligentes"
+                    "smart": "Inteligente"
                 }
             },
             "next_watering_start_datetime": {
@@ -84,7 +84,7 @@
                 "state": {
                     "executed": "Ejecutado",
                     "executing": "Ejecutándose",
-                    "none": "Sin información",
+                    "none": "Desconocido",
                     "valid": "Correcto"
                 }
             },
@@ -106,10 +106,10 @@
         },
         "switch": {
             "enabled": {
-                "name": "habilitar/deshabilitar"
+                "name": "Habilitar/Deshabilitar"
             },
             "watering": {
-                "name": "iniciar/parar riego"
+                "name": "Iniciar/Parar riego"
             }
         }
     },
