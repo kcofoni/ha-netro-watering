@@ -51,4 +51,12 @@ Options may be changed related to polling refresh interval of sensors and contro
 **IMPORTANT: to be effective, each time options have been changed the related device must be reloaded.**
 
 ## Running
+No dedicated card has been implemented yet but perhaps there will be user contributions in this direction. In the meantime can be displayed in a very classical layout as follows:
+
 ![start watering](images/running.png "Dashboard")
+
+The Netro Watering entities may be integrated into automations. The following integration custom services are available:
+- **start watering** and **stop watering** services - to be applied to any controller or zone
+- **enable** and **disable** services - to be applied to any controller
+
+![call service](images/service_call.png "Developer Tools")

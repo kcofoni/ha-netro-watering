@@ -14,10 +14,10 @@
     "error": {
       "invalid_serial_number": "Numéro de série incorrect",
       "unknown_device_type": "Type d'appareil inconnu",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
+      "unknown": "Erreur inattendu"
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "L'appareil est déjà configuré"
     }
   },
   "entity": {
@@ -52,8 +52,8 @@
       "last_watering_source": {
         "name": "Dernier arrosage source",
         "state": {
-          "smart": "Planifié",
-          "fix": "Fixé",
+          "smart": "Intelligent",
+          "fix": "Programmé",
           "manual": "Manuel",
           "none": "Inconnu"
         }
@@ -76,8 +76,8 @@
       "next_watering_source": {
         "name": "Prochain arrosage source",
         "state": {
-          "smart": "Planifié",
-          "fix": "Fixé",
+          "smart": "Intelligent",
+          "fix": "Programmé",
           "manual": "Manuel",
           "none": "Inconnu"
         }

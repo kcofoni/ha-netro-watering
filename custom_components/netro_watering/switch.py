@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from enum import IntFlag
 import logging
 from typing import Any
 
@@ -15,11 +16,15 @@ from homeassistant.components.switch import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+import homeassistant.util.dt as dt_util
 
 from .const import (
+    ATTR_WATERING_DELAY,
+    ATTR_WATERING_DURATION,
+    ATTR_WATERING_START_TIME,
     CONF_DEFAULT_WATERING_DELAY,
     CONF_DELAY_BEFORE_REFRESH,
     CONF_DEVICE_TYPE,
@@ -38,8 +43,22 @@ _LOGGER = logging.getLogger(__name__)
 # mypy: disable-error-code="arg-type"
 
 SERVICE_START_WATERING = "start_watering"
+SERVICE_STOP_WATERING = "stop_watering"
+SERVICE_ENABLE = "enable"
+SERVICE_DISABLE = "disable"
 
-SERVICE_SCHEMA_WATERING = {vol.Required("duration"): cv.positive_int}
+SERVICE_SCHEMA_WATERING = {
+    vol.Required(ATTR_WATERING_DURATION): cv.positive_int,
+    vol.Optional(ATTR_WATERING_DELAY): cv.positive_int,
+    vol.Optional(ATTR_WATERING_START_TIME): cv.datetime,
+}
+
+
+class NetroSwitchEntityFeature(IntFlag):
+    """Supported features of the Netro Watering switch."""
+
+    ENABLE_DISABLE = 1
+    START_STOP_WATERING = 2
 
 
 @dataclass
@@ -63,6 +82,7 @@ NETRO_WATERING_SWITCH_DESCRIPTION = NetroSwitchEntityDescription(
     translation_key="watering",
     netro_on_name="start_watering",
     netro_off_name="stop_watering",
+    icon="mdi:sprinkler",
 )
 
 # description of the start/stop watering switch
@@ -111,6 +131,8 @@ async def async_setup_entry(
                     CONF_DELAY_BEFORE_REFRESH
                 ]
 
+        _LOGGER.info("Adding switch entities")
+
         # enable/disable controller switch
         async_add_entities(
             [
@@ -149,13 +171,39 @@ async def async_setup_entry(
             ]
         )
 
+        platform = entity_platform.async_get_current_platform()
 
-#        platform = entity_platform.async_get_current_platform()
-#        platform.async_register_entity_service(
-#            SERVICE_ENABLE_CONTROLLER,
-#            {},
-#            "async_turn_on",
-#        )
+        _LOGGER.info("Adding custom service : %s", SERVICE_START_WATERING)
+        platform.async_register_entity_service(
+            SERVICE_START_WATERING,
+            SERVICE_SCHEMA_WATERING,
+            "async_turn_on",
+            [NetroSwitchEntityFeature.START_STOP_WATERING],
+        )
+
+        _LOGGER.info("Adding custom service : %s", SERVICE_STOP_WATERING)
+        platform.async_register_entity_service(
+            SERVICE_STOP_WATERING,
+            {},
+            "async_turn_off",
+            [NetroSwitchEntityFeature.START_STOP_WATERING],
+        )
+
+        _LOGGER.info("Adding custom service : %s", SERVICE_ENABLE)
+        platform.async_register_entity_service(
+            SERVICE_ENABLE,
+            {},
+            "async_turn_on",
+            [NetroSwitchEntityFeature.ENABLE_DISABLE],
+        )
+
+        _LOGGER.info("Adding custom service : %s", SERVICE_DISABLE)
+        platform.async_register_entity_service(
+            SERVICE_DISABLE,
+            {},
+            "async_turn_off",
+            [NetroSwitchEntityFeature.ENABLE_DISABLE],
+        )
 
 
 class ControllerEnablingSwitch(
@@ -165,6 +213,7 @@ class ControllerEnablingSwitch(
 
     _attr_has_entity_name = True
     _attr_assumed_state = False
+    _attr_supported_features = NetroSwitchEntityFeature.ENABLE_DISABLE
 
     def __init__(
         self,
@@ -201,6 +250,7 @@ class ZoneWateringSwitch(
 
     _attr_has_entity_name = True
     _attr_assumed_state = True
+    _attr_supported_features = NetroSwitchEntityFeature.START_STOP_WATERING
     entity_description: NetroSwitchEntityDescription
 
     def __init__(
@@ -225,25 +275,46 @@ class ZoneWateringSwitch(
         )
         self._attr_device_info = coordinator.active_zones[zone_id].device_info
 
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return state attributes."""
+        return {"zone": self._zone_id}
+
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
+        start_time = kwargs.get(ATTR_WATERING_START_TIME, None)
         await getattr(
             self.coordinator.active_zones[self._zone_id],
             self.entity_description.netro_on_name,
-        )(self._duration_minutes, self._delay_minutes)
-        if self._delay_minutes == 0:
+        )(
+            int(duration := kwargs.get(ATTR_WATERING_DURATION, self._duration_minutes)),
+            int(delay := kwargs.get(ATTR_WATERING_DELAY, self._delay_minutes)),
+            dt_util.as_utc(start_time) if start_time is not None else None,
+        )
+        if delay == 0 and start_time is None:
             _LOGGER.info(
                 'Watering of zone "%s" has been started right now for %s minutes',
                 self.coordinator.active_zones[self._zone_id].name,
                 self._duration_minutes,
             )
         else:
-            _LOGGER.info(
-                "Watering of zone %s will start in %s minutes and will last %s minutes",
-                self.coordinator.active_zones[self._zone_id].name,
-                self._delay_minutes,
-                self._duration_minutes,
-            )
+            if (
+                start_time is not None
+            ):  # start_time is higher priority than delay if both provided
+                _LOGGER.info(
+                    "Watering of zone %s will start on %s and will last %s minutes",
+                    self.coordinator.active_zones[self._zone_id].name,
+                    start_time,
+                    duration,
+                )
+            else:  # delay is necessarily not 0
+                _LOGGER.info(
+                    "Watering of zone %s will start in %s minutes and will last %s minutes",
+                    self.coordinator.active_zones[self._zone_id].name,
+                    delay,
+                    duration,
+                )
+
         _LOGGER.info(
             "Waiting for %s seconds before refreshing info (time it takes for Netro to return the status)",
             self._before_refresh_seconds,
@@ -278,6 +349,7 @@ class ControllerWateringSwitch(
 
     _attr_has_entity_name = True
     _attr_assumed_state = True
+    _attr_supported_features = NetroSwitchEntityFeature.START_STOP_WATERING
     entity_description: NetroSwitchEntityDescription
 
     def __init__(
@@ -300,21 +372,36 @@ class ControllerWateringSwitch(
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
+        start_time = kwargs.get(ATTR_WATERING_START_TIME, None)
         await getattr(
             self.coordinator,
             self.entity_description.netro_on_name,
-        )(self._duration_minutes, self._delay_minutes)
-        if self._delay_minutes == 0:
+        )(
+            int(duration := kwargs.get(ATTR_WATERING_DURATION, self._duration_minutes)),
+            int(delay := kwargs.get(ATTR_WATERING_DELAY, self._delay_minutes)),
+            dt_util.as_utc(start_time) if start_time is not None else None,
+        )
+        if delay == 0 and start_time is None:
             _LOGGER.info(
                 "Watering of all zones has been started right now for %s minutes for each zone",
-                self._duration_minutes,
+                duration,
             )
         else:
-            _LOGGER.info(
-                "Watering of all zones will start in %s minutes and will last %s minutes for each zone",
-                self._delay_minutes,
-                self._duration_minutes,
-            )
+            if (
+                start_time is not None
+            ):  # start_time is higher priority than delay if both provided
+                _LOGGER.info(
+                    "Watering of all zones will start on %s and will last %s minutes for each zone",
+                    start_time,
+                    duration,
+                )
+            else:  # delay is necessarily not 0
+                _LOGGER.info(
+                    "Watering of all zones will start in %s minutes and will last %s minutes for each zone",
+                    delay,
+                    duration,
+                )
+
         _LOGGER.info(
             "Waiting for %s seconds before refreshing info (time it takes for Netro to return the status)",
             self._before_refresh_seconds,

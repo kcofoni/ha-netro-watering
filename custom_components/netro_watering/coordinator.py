@@ -213,7 +213,9 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             self.serial_number = serial_number + "_" + str(ith)  # virtual serial number
             self.parent_controller = controller
 
-        async def start_watering(self, duration: int, delay: int) -> None:
+        async def start_watering(
+            self, duration: int, delay: int, start_time: datetime.time
+        ) -> None:
             """Start watering for the current zone for given duration in minutes."""
             await self.parent_controller.hass.async_add_executor_job(
                 netro_water,
@@ -221,6 +223,9 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                 duration,
                 [str(self.ith)],
                 delay,
+                start_time.strftime("%Y-%m-%d %H:%M")
+                if start_time is not None
+                else None,
             )
 
         async def stop_watering(self) -> None:
@@ -634,10 +639,17 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         )
         return res
 
-    async def start_watering(self, duration: int, delay: int) -> None:
+    async def start_watering(
+        self, duration: int, delay: int, start_time: datetime.time
+    ) -> None:
         """Start watering for the current zone for given duration in minutes."""
         await self.hass.async_add_executor_job(
-            netro_water, self.serial_number, duration, None, delay
+            netro_water,
+            self.serial_number,
+            duration,
+            None,
+            delay,
+            start_time.strftime("%Y-%m-%d %H:%M") if start_time is not None else None,
         )
 
     async def stop_watering(self) -> None:
@@ -646,4 +658,4 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
 
     def __str__(self) -> str:
         """Convert to string, for logging in particular."""
-        return f'sensor coordinator "{self.name}" ({NETRO_PIXIE_CONTROLLER_MODEL if hasattr(self, NETRO_CONTROLLER_BATTERY_LEVEL) else NETRO_SPRITE_CONTROLLER_MODEL})'
+        return f'controller coordinator "{self.name}" ({NETRO_PIXIE_CONTROLLER_MODEL if hasattr(self, NETRO_CONTROLLER_BATTERY_LEVEL) else NETRO_SPRITE_CONTROLLER_MODEL})'

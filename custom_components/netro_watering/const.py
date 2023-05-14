@@ -102,3 +102,7 @@ CONF_MONTHS_AFTER_SCHEDULES = "months_after_schedules"
 CONF_API_URL = "netro_api_url"
 CONF_DELAY_BEFORE_REFRESH = "delay_before_refresh"
 CONF_DEFAULT_WATERING_DELAY = "default_watering_delay"
+
+ATTR_WATERING_DURATION = "duration"
+ATTR_WATERING_DELAY = "delay"
+ATTR_WATERING_START_TIME = "start_time"

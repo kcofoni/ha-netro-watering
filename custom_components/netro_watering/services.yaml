@@ -1,17 +1,53 @@
 start_watering:
   name: Start watering
-  description: Start the watering for a given duration and a delay before starting
+  description: Start watering for a specified duration, delay before start, or start time and date
   target:
     entity:
-      integration: netro-watering
+      integration: netro_watering
       domain: switch
   fields:
     duration:
       name: Duration
-      description: Duration for this sprinkler to be turned on
+      description: Duration of activation of this sprinkler
       required: true
       selector:
         number:
           min: 1
           max: 90
           unit_of_measurement: "minutes"
+    delay:
+      name: Delay
+      description: Waiting time before starting watering
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 90
+          unit_of_measurement: "minutes"
+    start_time:
+      name: Start time
+      description: Watering start date and time
+      required: false
+      selector:
+        datetime:
+stop_watering:
+  name: Stop watering
+  description: Stop watering all zones at once or a specific zone
+  target:
+    entity:
+      integration: netro_watering
+      domain: switch
+enable:
+  name: Enable
+  description: Enable the selected controller
+  target:
+    entity:
+      integration: netro_watering
+      domain: switch
+disable:
+  name: Disable
+  description: Disable the selected controller
+  target:
+    entity:
+      integration: netro_watering
+      domain: switch
