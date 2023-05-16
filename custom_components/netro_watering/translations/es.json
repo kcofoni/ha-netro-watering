@@ -16,7 +16,7 @@
                     "serial_number": "Número de serie del dispositivo"
                 },
                 "description": "Por favor, introduzca el número de serie de su dispositivo",
-                "title": "Configure Netro"
+                "title": "Configuración de Netro"
             }
         }
     },
@@ -61,7 +61,7 @@
                     "executed": "Ejecutado",
                     "executing": "Ejecutándose",
                     "none": "Desconocido",
-                    "valid": "Correcto"
+                    "valid": "Planificado"
                 }
             },
             "next_watering_end_datetime": {
@@ -85,7 +85,7 @@
                     "executed": "Ejecutado",
                     "executing": "Ejecutándose",
                     "none": "Desconocido",
-                    "valid": "Correcto"
+                    "valid": "Planificado"
                 }
             },
             "status": {
