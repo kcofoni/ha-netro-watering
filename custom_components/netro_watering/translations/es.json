@@ -31,6 +31,9 @@
             }
         },
         "sensor": {
+            "token_remaining": {
+                "name": "Token restante"
+            },
             "battery_percent": {
                 "name": "Nivel de batería"
             },

@@ -36,6 +36,9 @@
   },
   "entity": {
     "sensor": {
+      "token_remaining": {
+        "name": "Token remaining"
+      },
       "temperature": {
         "name": "Temperature"
       },

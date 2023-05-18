@@ -14,7 +14,7 @@
     "error": {
       "invalid_serial_number": "Numéro de série incorrect",
       "unknown_device_type": "Type d'appareil inconnu",
-      "unknown": "Erreur inattendu"
+      "unknown": "Erreur inattendue"
     },
     "abort": {
       "already_configured": "L'appareil est déjà configuré"
@@ -22,6 +22,9 @@
   },
   "entity": {
     "sensor": {
+      "token_remaining": {
+        "name": "Jetons restant"
+      },
       "temperature": {
         "name": "Température"
       },

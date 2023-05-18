@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import datetime
 import logging
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -16,13 +18,17 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+import homeassistant.util.dt as dt_util
 
 from .const import (
     CONF_DEVICE_TYPE,
     CONTROLLER_DEVICE_TYPE,
     DOMAIN,
+    EXTRA_STATE_ATTRIBUTE_SEP_LEFT,
+    EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
     NETRO_CONTROLLER_BATTERY_LEVEL,
     NETRO_CONTROLLER_STATUS,
+    NETRO_METADATA_TOKEN_REMAINING,
     NETRO_SENSOR_BATTERY_LEVEL,
     NETRO_SENSOR_MOISTURE,
     NETRO_SENSOR_SUNLIGHT,
@@ -97,6 +103,14 @@ NETRO_SENSOR_DESCRIPTIONS: tuple[NetroSensorEntityDescription, ...] = (
         translation_key="battery_percent",
         netro_name=NETRO_SENSOR_BATTERY_LEVEL,
     ),
+    NetroSensorEntityDescription(
+        key="token_remaining",
+        name="Token Remaining",
+        state_class=SensorStateClass.TOTAL,
+        translation_key="token_remaining",
+        icon="mdi:hand-coin",
+        netro_name=NETRO_METADATA_TOKEN_REMAINING,
+    ),
 )
 
 NETRO_SENSOR_DESCRIPTIONS_KEYS = [desc.key for desc in NETRO_SENSOR_DESCRIPTIONS]
@@ -118,6 +132,14 @@ NETRO_CONTROLLER_DESCRIPTIONS: tuple[NetroSensorEntityDescription, ...] = (
         ],
         translation_key="status",
         netro_name=NETRO_CONTROLLER_STATUS,
+    ),
+    NetroSensorEntityDescription(
+        key="token_remaining",
+        name="Token Remaining",
+        state_class=SensorStateClass.TOTAL,
+        translation_key="token_remaining",
+        icon="mdi:hand-coin",
+        netro_name=NETRO_METADATA_TOKEN_REMAINING,
     ),
 )
 # description of the battery level sensor of the controller when relevant
@@ -302,6 +324,43 @@ class NetroSensor(CoordinatorEntity[NetroSensorUpdateCoordinator], SensorEntity)
         """Return the value reported by the sensor."""
         return getattr(self.coordinator, self.entity_description.netro_name)
 
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return state attributes."""
+        return {
+            "last measurement id": self.coordinator.id,
+            "last measurement time": dt_util.as_local(self.coordinator.time)
+            if self.coordinator.time is not None
+            else None,
+            EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
+            "request time (UTC)": self.coordinator.metadata.time
+            if self.coordinator.metadata is not None
+            else None,
+            "last active date": dt_util.as_local(
+                self.coordinator.metadata.last_active_date.replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            )
+            if self.coordinator.metadata is not None
+            else None,
+            "transaction id": self.coordinator.metadata.tid
+            if self.coordinator.metadata is not None
+            else None,
+            "token limit": self.coordinator.metadata.token_limit
+            if self.coordinator.metadata is not None
+            else None,
+            "token remaining": self.coordinator.metadata.token_remaining
+            if self.coordinator.metadata is not None
+            else None,
+            "token reset": dt_util.as_local(
+                self.coordinator.metadata.token_reset_date.replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            )
+            if self.coordinator.metadata is not None
+            else None,
+        }
+
 
 class NetroController(
     CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntity
@@ -334,6 +393,39 @@ class NetroController(
     @callback
     def _handle_coordinator_update(self) -> None:
         return super()._handle_coordinator_update()
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return state attributes."""
+        return {
+            EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
+            "request time (UTC)": self.coordinator.metadata.time
+            if self.coordinator.metadata is not None
+            else None,
+            "last active date": dt_util.as_local(
+                self.coordinator.metadata.last_active_date.replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            )
+            if self.coordinator.metadata is not None
+            else None,
+            "transaction id": self.coordinator.metadata.tid
+            if self.coordinator.metadata is not None
+            else None,
+            "token limit": self.coordinator.metadata.token_limit
+            if self.coordinator.metadata is not None
+            else None,
+            "token remaining": self.coordinator.metadata.token_remaining
+            if self.coordinator.metadata is not None
+            else None,
+            "token reset": dt_util.as_local(
+                self.coordinator.metadata.token_reset_date.replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            )
+            if self.coordinator.metadata is not None
+            else None,
+        }
 
 
 class NetroZone(CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntity):
@@ -375,3 +467,37 @@ class NetroZone(CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntit
     @callback
     def _handle_coordinator_update(self) -> None:
         return super()._handle_coordinator_update()
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return state attributes."""
+        return {
+            "zone id": self.zone_id,
+            EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
+            "request time (UTC)": self.coordinator.metadata.time
+            if self.coordinator.metadata is not None
+            else None,
+            "last active date": dt_util.as_local(
+                self.coordinator.metadata.last_active_date.replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            )
+            if self.coordinator.metadata is not None
+            else None,
+            "transaction id": self.coordinator.metadata.tid
+            if self.coordinator.metadata is not None
+            else None,
+            "token limit": self.coordinator.metadata.token_limit
+            if self.coordinator.metadata is not None
+            else None,
+            "token remaining": self.coordinator.metadata.token_remaining
+            if self.coordinator.metadata is not None
+            else None,
+            "token reset": dt_util.as_local(
+                self.coordinator.metadata.token_reset_date.replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            )
+            if self.coordinator.metadata is not None
+            else None,
+        }

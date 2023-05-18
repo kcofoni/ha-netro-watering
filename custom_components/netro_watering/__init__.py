@@ -20,9 +20,11 @@ from .const import (
     CONF_MONTHS_AFTER_SCHEDULES,
     CONF_MONTHS_BEFORE_SCHEDULES,
     CONF_SENS_REFRESH_INTERVAL,
+    CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     CONF_SERIAL_NUMBER,
     CONTROLLER_DEVICE_TYPE,
     CTRL_REFRESH_INTERVAL_MN,
+    DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     DOMAIN,
     GLOBAL_PARAMETERS,
     MONTHS_AFTER_SCHEDULES,
@@ -89,6 +91,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     if entry.data[CONF_DEVICE_TYPE] == SENSOR_DEVICE_TYPE:
+        # get global parameters we are intested in
+        sensor_value_days_before_today = DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY
+        if hass.data[DOMAIN].get(GLOBAL_PARAMETERS) is not None:
+            if (
+                hass.data[DOMAIN][GLOBAL_PARAMETERS].get(
+                    CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY
+                )
+                is not None
+            ):
+                sensor_value_days_before_today = hass.data[DOMAIN][GLOBAL_PARAMETERS][
+                    CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY
+                ]
+
         sensor_coordinator = NetroSensorUpdateCoordinator(
             hass,
             refresh_interval=(
@@ -96,6 +111,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 if entry.options.get(CONF_SENS_REFRESH_INTERVAL) is not None
                 else SENS_REFRESH_INTERVAL_MN
             ),
+            sensor_value_days_before_today=sensor_value_days_before_today,
             serial_number=entry.data[CONF_SERIAL_NUMBER],
             device_type=entry.data[CONF_DEVICE_TYPE],
             device_name=entry.data[CONF_DEVICE_NAME],

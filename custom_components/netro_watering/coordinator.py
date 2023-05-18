@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+from datetime import timedelta
 import logging
 
 from dateutil.relativedelta import relativedelta
@@ -40,6 +41,7 @@ from .const import (
     NETRO_SENSOR_BATTERY_LEVEL,
     NETRO_SENSOR_CELSIUS,
     NETRO_SENSOR_FAHRENHEIT,
+    NETRO_SENSOR_ID,
     NETRO_SENSOR_LOCAL_DATE,
     NETRO_SENSOR_LOCAL_TIME,
     NETRO_SENSOR_MOISTURE,
@@ -99,10 +101,23 @@ class Meta:
 class NetroSensorUpdateCoordinator(DataUpdateCoordinator):
     """Coordinator for Netro sensors NPA calls."""
 
+    # create the sensor measure attributes in order to prevent AttributeError when not yet initialized
+    id = None
+    celsius = None
+    moisture = None
+    sunlight = None
+    fahrenheit = None
+    battery_level = None
+    time = None
+    local_date = None
+    local_time = None
+    _metadata = None
+
     def __init__(
         self,
         hass: HomeAssistant,
         refresh_interval: int,
+        sensor_value_days_before_today: int,
         serial_number: str,
         device_type: str,
         device_name: str,
@@ -121,6 +136,7 @@ class NetroSensorUpdateCoordinator(DataUpdateCoordinator):
         self.device_name = device_name
         self.hw_version = hw_version
         self.sw_version = sw_version
+        self.sensor_value_days_before_today = sensor_value_days_before_today
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -133,6 +149,18 @@ class NetroSensorUpdateCoordinator(DataUpdateCoordinator):
             sw_version=self.sw_version,
             default_model=NETRO_DEFAULT_SENSOR_MODEL,
         )
+
+    @property
+    def metadata(self) -> Meta | None:
+        """Return the meta data of the sensor."""
+        if self._metadata:
+            return self._metadata
+        return None
+
+    @property
+    def token_remaining(self) -> int | None:
+        """Return the remaining token of the sensor."""
+        return self.metadata.token_remaining if self.metadata is not None else None
 
     async def _async_update_data(self):
         """Fetch data from API endpoint.
@@ -149,28 +177,39 @@ class NetroSensorUpdateCoordinator(DataUpdateCoordinator):
         res = await self.hass.async_add_executor_job(
             netro_get_sensor_data,
             self.serial_number,
+            (
+                datetime.date.today()
+                - timedelta(days=self.sensor_value_days_before_today)
+            ).strftime("%Y-%m-%d"),
             datetime.date.today().strftime("%Y-%m-%d"),
-            datetime.date.today().strftime("%Y-%m-%d"),
+        )
+
+        # get meta data
+        meta_data = res["meta"]
+
+        self._metadata = Meta(
+            meta_data[NETRO_METADATA_LAST_ACTIVE],
+            meta_data[NETRO_METADATA_TIME],
+            meta_data[NETRO_METADATA_TID],
+            meta_data[NETRO_METADATA_VERSION],
+            meta_data[NETRO_METADATA_TOKEN_LIMIT],
+            meta_data[NETRO_METADATA_TOKEN_REMAINING],
+            meta_data[NETRO_METADATA_TOKEN_RESET],
         )
 
         # only take the last sensor data report
         if len(res["data"]["sensor_data"]) > 0:
             sensor_data = res["data"]["sensor_data"][0]
-            meta_data = res["meta"]
-
-            self._metadata = Meta(
-                meta_data[NETRO_METADATA_LAST_ACTIVE],
-                meta_data[NETRO_METADATA_TIME],
-                meta_data[NETRO_METADATA_TID],
-                meta_data[NETRO_METADATA_VERSION],
-                meta_data[NETRO_METADATA_TOKEN_LIMIT],
-                meta_data[NETRO_METADATA_TOKEN_REMAINING],
-                meta_data[NETRO_METADATA_TOKEN_RESET],
+            self.id = sensor_data[NETRO_SENSOR_ID]
+            self.time = datetime.datetime.fromisoformat(
+                sensor_data[NETRO_SENSOR_TIME] + TZ_OFFSET
             )
-
-            self.time = sensor_data[NETRO_SENSOR_TIME]
-            self.local_date = sensor_data[NETRO_SENSOR_LOCAL_DATE]
-            self.local_time = sensor_data[NETRO_SENSOR_LOCAL_TIME]
+            self.local_date = datetime.date.fromisoformat(
+                sensor_data[NETRO_SENSOR_LOCAL_DATE]
+            )
+            self.local_time = datetime.time.fromisoformat(
+                sensor_data[NETRO_SENSOR_LOCAL_TIME]
+            )
             self.moisture = sensor_data[NETRO_SENSOR_MOISTURE]
             self.sunlight = sensor_data[NETRO_SENSOR_SUNLIGHT]
             self.celsius = sensor_data[NETRO_SENSOR_CELSIUS]
@@ -327,6 +366,15 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             return None
 
         @property
+        def token_remaining(self) -> int | None:
+            """Return the remaining token of the parent controller."""
+            return (
+                self.parent_controller.metadata.token_remaining
+                if self.parent_controller.metadata is not None
+                else None
+            )
+
+        @property
         def device_info(self) -> DeviceInfo:
             """Return information about the zone as a device. To be used when creating related entities."""
             return DeviceInfo(
@@ -473,11 +521,17 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             return len(self._active_zones)
         return None
 
-    def meta(self) -> object | None:
+    @property
+    def metadata(self) -> Meta | None:
         """Return the meta data of the controller."""
         if self._metadata:
             return self._metadata
         return None
+
+    @property
+    def token_remaining(self) -> int | None:
+        """Return the remaining token of the controller."""
+        return self.metadata.token_remaining if self.metadata is not None else None
 
     async def _async_update_data(self):
         """Fetch data from API endpoint.

@@ -102,6 +102,9 @@
             },
             "temperature": {
                 "name": "Temperature"
+            },
+            "token_remaining": {
+                "name": "Token remaining"
             }
         },
         "switch": {

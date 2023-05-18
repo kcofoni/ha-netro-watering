@@ -12,6 +12,7 @@ CONF_DEVICE_SW_VERSION = "sw_version"
 CONTROLLER_DEVICE_TYPE = "controller"
 SENSOR_DEVICE_TYPE = "sensor"
 
+NETRO_SENSOR_ID = "id"
 NETRO_SENSOR_CELSIUS = "celsius"
 NETRO_SENSOR_FAHRENHEIT = "fahrenheit"
 NETRO_SENSOR_MOISTURE = "moisture"
@@ -81,6 +82,9 @@ NETRO_MOISTURE_ZONE = "zone"
 NETRO_MOISTURE_DATE = "date"
 NETRO_MOISTURE_MOISTURE = "moisture"
 
+EXTRA_STATE_ATTRIBUTE_SEP_LEFT = "------------------------------"
+EXTRA_STATE_ATTRIBUTE_SEP_RIGHT = "------------------------------"
+
 GLOBAL_PARAMETERS = "parameters"
 
 # the following const should be replaced by a configuration entry
@@ -92,10 +96,12 @@ DEFAULT_WATERING_DELAY = 0  # minutes, should be 0, if not null this parameter i
 MONTHS_BEFORE_SCHEDULES = 4
 MONTHS_AFTER_SCHEDULES = 2
 DELAY_BEFORE_REFRESH = 5  # seconds
+DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY = 1
 NETRO_API_URL = "https://api.netrohome.com/npa/v1/"
 
 CONF_DURATION = "watering_duration"
 CONF_SENS_REFRESH_INTERVAL = "sensor_refresh_interval"
+CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY = "sensor_value_days_before_today"
 CONF_CTRL_REFRESH_INTERVAL = "controller_refresh_interval"
 CONF_MONTHS_BEFORE_SCHEDULES = "months_before_schedules"
 CONF_MONTHS_AFTER_SCHEDULES = "months_after_schedules"
