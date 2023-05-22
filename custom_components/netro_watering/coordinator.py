@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 from datetime import timedelta
 import logging
+from time import gmtime, strftime
 
 from dateutil.relativedelta import relativedelta
 
@@ -71,8 +72,52 @@ from .netrofunction import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# pylint: disable=attribute-defined-outside-init,consider-using-dict-items
-# mypy: disable-error-code="var-annotated"
+# pylint: disable=attribute-defined-outside-init,consider-using-dict-items,chained-comparison
+# mypy: disable-error-code="var-annotated,arg-type"
+
+
+def prepare_slowdown_factors(slowdown_factor: list) -> list | None:
+    """Convert 'from' and 'to' fields of the slowdown factor table into decimal time value in order to make it usable for getting new possible update interval."""
+    if slowdown_factor is not None:
+        # convert hh:mm:ss time string to decimal
+        def hhmm_to_decimal(hhmm: str) -> float:
+            fields = hhmm.split(":")
+            hours = fields[0] if len(fields) > 0 else 0.0
+            minutes = fields[1] if len(fields) > 1 else 0.0
+            seconds = fields[2] if len(fields) > 2 else 0.0
+            return float(hours) + float(minutes) / 60.0 + float(seconds) / pow(60.0, 2)
+
+        for slot in slowdown_factor:
+            slot["from"] = hhmm_to_decimal(slot["from"])
+            slot["to"] = hhmm_to_decimal(slot["to"])
+            if slot["from"] > slot["to"]:
+                slot["from"] = slot["from"] - 24
+
+    return slowdown_factor
+
+
+def get_slowdown_factor(slowdown_factors, this_time: datetime.time) -> int:
+    """Return the update interval obtained by multiplying the refresh interval by a slowdown factor possibly applicable to this time."""
+
+    # this is the default value
+    selected_factor = 1
+
+    if slowdown_factors is not None and slowdown_factors:
+        positive_this_time = (
+            this_time.hour + this_time.minute / 60.0 + this_time.second / pow(60.0, 2)
+        )
+        negative_this_time = positive_this_time - 24
+
+        for slot in slowdown_factors:
+            if (
+                positive_this_time >= slot["from"] and positive_this_time <= slot["to"]
+            ) or (
+                negative_this_time >= slot["from"] and negative_this_time <= slot["to"]
+            ):
+                selected_factor = slot["sdf"]
+                break
+
+    return selected_factor
 
 
 class Meta:
@@ -129,7 +174,7 @@ class NetroSensorUpdateCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name=device_name,
-            update_interval=datetime.timedelta(minutes=refresh_interval),
+            update_interval=timedelta(minutes=refresh_interval),
         )
         self.serial_number = serial_number
         self.device_type = device_type
@@ -396,6 +441,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         self,
         hass: HomeAssistant,
         refresh_interval: int,
+        slowdown_factors: list,
         schedules_months_before: int,
         schedules_months_after: int,
         serial_number: str,
@@ -416,6 +462,11 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         self.device_name = device_name
         self.hw_version = hw_version
         self.sw_version = sw_version
+        self.refresh_interval = refresh_interval
+        self.slowdown_factors = slowdown_factors
+        self.current_slowdown_factor = (
+            1  # will be properly calculated when calling update_data at first refresh
+        )
         self.schedules_months_before = schedules_months_before
         self.schedules_months_after = schedules_months_after
         self._active_zones = {}
@@ -468,6 +519,8 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                 for schedule in schedules
                 if schedule[NETRO_SCHEDULE_ZONE] == zone_key
                 and schedule[NETRO_SCHEDULE_STATUS] == NETRO_SCHEDULE_VALID
+                and schedule[NETRO_SCHEDULE_START_TIME]
+                > strftime("%Y-%m-%dT%H:%M:%S", gmtime())
             ]
 
             # sorting filtered coming schedules on start time ascending
@@ -603,10 +656,21 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             - stop watering (zone)
         """
 
+        # set update_interval according to current slowndown factor
+        self.current_slowdown_factor = get_slowdown_factor(
+            self.slowdown_factors, datetime.datetime.now()
+        )
+        self.update_interval = datetime.timedelta(
+            minutes=self.refresh_interval * self.current_slowdown_factor
+        )
+
         _LOGGER.info(
-            "Polling info for %s controller (repeated every %d minutes)",
+            "Polling info for %s controller (repeated every %d minutes%s)",
             self.name,
             self.update_interval.total_seconds() / 60,
+            f", current slowdown factor is {self.current_slowdown_factor}"
+            if self.current_slowdown_factor > 1
+            else "",
         )
 
         # get main data

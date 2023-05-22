@@ -1,4 +1,5 @@
 # ha-netro-watering
+## About
 This is a Home Assistant integration for Netro Smart Garden devices
 
 This custom component allows you to manage the [*Netro*](https://Netrohome.com/) ecosystem, ensuring the automatic watering of the garden, thanks to the controllers and sensors of the brand. It relies on *Netro*'s [Public API](http://www.Netrohome.com/en/shop/articles/10).
@@ -50,3 +51,44 @@ No dedicated card has been implemented yet but perhaps there will be user contri
 The Netro Watering entities may be integrated into automations. The following integration custom services are available:
 - **start watering** and **stop watering** services - to be applied to any controller or zone
 - **enable** and **disable** services - to be applied to any controller
+
+## Advanced configuration
+Some general settings can be set for the Netro Watering integration in the Home Assistant configuration file (*configuration.yaml*). They correspond to both optional and non-device specific parameters. The integration works well without its parameters which can nevertheless provide optimizations and respond to specific situations. If not set, the default values are applied.
+
+  - **delay_before_refresh** [default value = 5]: This is the **time to wait, in seconds, before getting a status feedback** from [NPA](http://www.Netrohome.com/en/shop/articles/10) after executing a given action (i.e. start watering). My experience shows that at least 4 secondes are needed, so I personally put 5 to be comfortable.
+  - **default_watering_delay** [default value = 0]: This is the **time to wait before actually proceeding when starting the irrigation**. I don't see much point in setting this parameter in production. I use it to test start/stop irrigation switches without having to actually run my solenoid valves each time.
+  - **sensor_value_days_before_today** [default value = 1, must be > 1]: This is the depth of the history of the values ​​reported by the sensors, used by the integration. Useful when a sensor is inoperative for a while and you still want to retrieve its last values.
+  - **slowdown_factors** [default value = None]: It is a dictionary that defines time slots during which the polling process of controllers (not applicable for sensors) will be slowed down by applying a multiplier coefficient to the refresh period (see explanations below)
+  - **netro_api_url**: internal use
+
+### About the slowdown factor
+
+As indicated in the documentation, the number of calls to the [Public API of Netro](http://www.Netrohome.com/en/shop/articles/10) is limited. Today, a maximum of 2,000 calls per day and per device is permitted and the counter is reset every day at midnight UTC. Netro does not provide mechanisms that reference a callback function, as do a number of similar systems, so that each event is notified as it occurs. For this reason, it is useful to frequently request the system to obtain a state of the situation, as faithful as possible to reality, at "t" time.
+
+The configuration of a device (controller or sensor) within UI makes it possible to define, as showed above, a specific polling frequency (refresh interval). One may wonder if this refresh period should be the same regardless of the time of day. There are indeed time slots on which there is no gain in polling the system very often (at night for example) and at the opposite times when watering is very likely and which requires close monitoring.
+
+The slowdown factor parameter (sdf) reduce the refresh rate at certain times. Let us take an example:
+
+    slowdown_factors:
+    - from: '23:00' # everybody sleeps during the night, isn't it ?
+        to: '05:55'
+        sdf: 15     # the refresh period will be multiplied by 15 during the given time slot
+    - from: '10:30' # it is too hot and sunny to reasonably decide to water (or very ponctual watering)
+        to: '17:00'
+        sdf: 5      # that means that if the nominal refresh period is 2 mn for a given controller it becomes 10 mn between 10:30am and 5pm
+
+**The rest of the time, the nominal refresh period is applied**. Thanks to this mechanism of slowing down at certain times of the day, **one can decide on a fairly short polling period**.
+
+### Example of Netro Configuration in *configuration.yaml*
+
+    netro_watering:
+        delay_before_refresh: 5 # in seconds
+        default_watering_delay: 0 # starting watering right now
+        sensor_value_days_before_today: 2 # getting values of the sensors until the day before yesterday
+        slowdown_factors:
+            - from: '23:00' # everybody sleeps during the night...
+            to: '05:55'
+            sdf: 15
+            - from: '10:30' # it is too hot and sunny to reasonably decide to water (or very ponctual watering)
+            to: '17:00'
+            sdf: 5

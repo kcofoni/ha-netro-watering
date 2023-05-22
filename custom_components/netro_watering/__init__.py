@@ -22,6 +22,7 @@ from .const import (
     CONF_SENS_REFRESH_INTERVAL,
     CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     CONF_SERIAL_NUMBER,
+    CONF_SLOWDOWN_FACTOR,
     CONTROLLER_DEVICE_TYPE,
     CTRL_REFRESH_INTERVAL_MN,
     DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
@@ -32,7 +33,11 @@ from .const import (
     SENS_REFRESH_INTERVAL_MN,
     SENSOR_DEVICE_TYPE,
 )
-from .coordinator import NetroControllerUpdateCoordinator, NetroSensorUpdateCoordinator
+from .coordinator import (
+    NetroControllerUpdateCoordinator,
+    NetroSensorUpdateCoordinator,
+    prepare_slowdown_factors,
+)
 from .netrofunction import set_netro_base_url
 
 # Here is the list of the platforms that we want to support.
@@ -52,7 +57,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         "Initializing %s integration with platforms: %s with config: %s",
         DOMAIN,
         PLATFORMS,
-        config,
+        config.get(DOMAIN),
     )
 
     # reset configuration dictionary
@@ -76,6 +81,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # set global config into the integration shared space
     hass.data[DOMAIN][GLOBAL_PARAMETERS] = netro_watering_config
 
+    # prepare slow down factor
+    if hass.data[DOMAIN].get(GLOBAL_PARAMETERS) is not None:
+        if hass.data[DOMAIN][GLOBAL_PARAMETERS].get(CONF_SLOWDOWN_FACTOR) is not None:
+            prepare_slowdown_factors(
+                hass.data[DOMAIN][GLOBAL_PARAMETERS][CONF_SLOWDOWN_FACTOR]
+            )
+
     # Return boolean to indicate that initialization was successful.
     return True
 
@@ -89,6 +101,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data[CONF_SERIAL_NUMBER],
         entry.data[CONF_DEVICE_NAME],
     )
+
+    # get global parameters any type of device could be interested in
+    slowdown_factors = None
+    if hass.data[DOMAIN].get(GLOBAL_PARAMETERS) is not None:
+        if hass.data[DOMAIN][GLOBAL_PARAMETERS].get(CONF_SLOWDOWN_FACTOR) is not None:
+            slowdown_factors = hass.data[DOMAIN][GLOBAL_PARAMETERS][
+                CONF_SLOWDOWN_FACTOR
+            ]
 
     if entry.data[CONF_DEVICE_TYPE] == SENSOR_DEVICE_TYPE:
         # get global parameters we are intested in
@@ -129,6 +149,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 if entry.options.get(CONF_CTRL_REFRESH_INTERVAL) is not None
                 else CTRL_REFRESH_INTERVAL_MN
             ),
+            slowdown_factors=slowdown_factors,
             schedules_months_before=(
                 entry.options.get(CONF_MONTHS_BEFORE_SCHEDULES)
                 if entry.options.get(CONF_MONTHS_BEFORE_SCHEDULES) is not None

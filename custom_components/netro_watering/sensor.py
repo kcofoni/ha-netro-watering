@@ -332,6 +332,9 @@ class NetroSensor(CoordinatorEntity[NetroSensorUpdateCoordinator], SensorEntity)
             "last measurement time": dt_util.as_local(self.coordinator.time)
             if self.coordinator.time is not None
             else None,
+            "update interval": f"{self.coordinator.update_interval.total_seconds() / 60} mn"
+            if self.coordinator.update_interval is not None
+            else None,
             EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
             "request time (UTC)": self.coordinator.metadata.time
             if self.coordinator.metadata is not None
@@ -397,7 +400,16 @@ class NetroController(
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return state attributes."""
-        return {
+        zone_attributes = {
+            "update interval": f"{self.coordinator.update_interval.total_seconds() / 60} mn"
+            if self.coordinator.update_interval is not None
+            else None,
+        }
+        if self.coordinator.current_slowdown_factor > 1:
+            zone_attributes[
+                "slowdown factor"
+            ] = self.coordinator.current_slowdown_factor  # type: ignore[assignment]
+        meta_attributes = {
             EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
             "request time (UTC)": self.coordinator.metadata.time
             if self.coordinator.metadata is not None
@@ -426,6 +438,7 @@ class NetroController(
             if self.coordinator.metadata is not None
             else None,
         }
+        return zone_attributes | meta_attributes
 
 
 class NetroZone(CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntity):
@@ -471,8 +484,17 @@ class NetroZone(CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntit
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return state attributes."""
-        return {
+        zone_attributes = {
             "zone id": self.zone_id,
+            "update interval": f"{self.coordinator.update_interval.total_seconds() / 60} mn"
+            if self.coordinator.update_interval is not None
+            else None,
+        }
+        if self.coordinator.current_slowdown_factor > 1:
+            zone_attributes[
+                "slowdown factor"
+            ] = self.coordinator.current_slowdown_factor
+        meta_attributes = {
             EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
             "request time (UTC)": self.coordinator.metadata.time
             if self.coordinator.metadata is not None
@@ -501,3 +523,4 @@ class NetroZone(CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntit
             if self.coordinator.metadata is not None
             else None,
         }
+        return zone_attributes | meta_attributes
