@@ -1,3 +1,23 @@
+set_moisture:
+  name: Set moisture
+  description: Force the moisture value to a particular zone, a way to provide Netro with the value of an external sensor
+  fields:
+    zone_id:
+      name: Zone
+      description: The zone whose moisture should be set (please select among zone devices only)
+      required: true
+      selector:
+        device:
+          integration: netro_watering
+    moisture:
+      name: Moisture
+      description: The humidity value to be set to the zone (in %)
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
 start_watering:
   name: Start watering
   description: Start watering for a specified duration, delay before start, or start time and date
@@ -10,6 +30,7 @@ start_watering:
       name: Duration
       description: Duration of activation of this sprinkler
       required: true
+      default: 30
       selector:
         number:
           min: 1

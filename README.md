@@ -1,4 +1,7 @@
-# ha-netro-watering
+# Netro Smart Garden Integration for Home Assistant
+
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+
 ## About
 This is a Home Assistant integration for Netro Smart Garden devices
 
@@ -56,11 +59,19 @@ No dedicated card has been implemented yet but perhaps there will be user contri
 
 ![start watering](images/running.png "Dashboard")
 
+### Automation
 The Netro Watering entities may be integrated into automations. The following integration custom services are available:
 - **start watering** and **stop watering** services - to be applied to any controller or zone
 - **enable** and **disable** services - to be applied to any controller
 
 ![call service](images/service_call.png "Developer Tools")
+
+### Force moisture level
+The nominal functioning of the Netro ecosystem is based on irrigation planning algorithms that take into account the physiognomy of the areas to be irrigated, the plants that compose them and the properties of the soil as well as a certain number of other factors. In addition to this information, Netro needs to know at a given time the temperature and humidity of the areas to be watered in order to precisely determine the watering periods. Soil sensors supplied by Netro (Whisperer model) allow these measurements to be made. If you do not have these sensors which are an integral part of the ecosystem but other external sensors, you can provide Netro with the level of humidity given by these sensors so that it can apply its algorithms in the same way.
+
+The **set moisture**"** service provided by the integration and applicable to a particular zone, allows this to be done.
+
+![set moistures](images/set_moisture.png "Developer Tools")
 
 ## Advanced configuration
 Some general settings can be set for the Netro Watering integration in the Home Assistant configuration file (*configuration.yaml*). They correspond to both optional and non-device specific parameters. The integration works well without its parameters which can nevertheless provide optimizations and respond to specific situations. If not set, the default values are applied.
@@ -77,7 +88,7 @@ As indicated in the documentation, the number of calls to the [Public API of Net
 
 The configuration of a device (controller or sensor) within UI makes it possible to define, as showed above, a specific polling frequency (refresh interval). One may wonder if this refresh period should be the same regardless of the time of day. There are indeed time slots on which there is no gain in polling the system very often (at night for example) and at the opposite times when watering is very likely and which requires close monitoring.
 
-The slowdown factor parameter (sdf) reduce the refresh rate at certain times. Let us take an example:
+The slowdown factor parameter (sdf) reduces the refresh rate at certain times. Let us take an example:
 
     slowdown_factors:
     - from: '23:00' # everybody sleeps during the night, isn't it ?

@@ -4,14 +4,18 @@ from __future__ import annotations
 import logging
 
 import validators
+import voluptuous as vol
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.typing import ConfigType
 
 from .const import (
+    ATTR_MOISTURE,
+    ATTR_ZONE_ID,
     CONF_CTRL_REFRESH_INTERVAL,
     CONF_DEVICE_HW_VERSION,
     CONF_DEVICE_NAME,
@@ -38,7 +42,7 @@ from .coordinator import (
     NetroSensorUpdateCoordinator,
     prepare_slowdown_factors,
 )
-from .netrofunction import set_netro_base_url
+from .netrofunction import set_moisture as netro_set_moisture, set_netro_base_url
 
 # Here is the list of the platforms that we want to support.
 # sensor is for the netro ground sensors, switch is for the zones
@@ -49,6 +53,16 @@ PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH, Platform.BINARY_S
 _LOGGER = logging.getLogger(__name__)
 
 # mypy: disable-error-code="arg-type"
+
+SERVICE_SET_MOISTURE_NAME = "set_moisture"
+SERVICE_SET_MOISTURE_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_ZONE_ID): cv.string,
+        vol.Required(ATTR_MOISTURE): vol.All(
+            vol.Coerce(int), vol.Range(min=0, max=100)
+        ),
+    }
+)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -176,6 +190,64 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
+
+        async def set_moisture(call: ServiceCall) -> None:
+            moisture = call.data[ATTR_MOISTURE]
+
+            # get the device related to the selected zone
+            device_id = call.data[ATTR_ZONE_ID]
+            device_registry = dr.async_get(hass)
+            if (device_entry := device_registry.async_get(device_id)) is None:
+                raise HomeAssistantError(
+                    f"Invalid Netro Watering device ID: {device_id}"
+                )
+            if device_entry.model is None or "zone" not in device_entry.model.lower():
+                raise HomeAssistantError(
+                    f"Invalid Netro Watering device ID: {device_id}, it doesn't seem to be a zone !?"
+                )
+
+            # retrieve the config entry related to this device
+            for entry_id in device_entry.config_entries:
+                if (entry := hass.config_entries.async_get_entry(entry_id)) is None:
+                    continue
+                if entry.domain == DOMAIN:
+                    config_entry = entry
+                    break
+            if config_entry is None:
+                raise HomeAssistantError(
+                    f"Cannot find config entry for device ID: {device_id}"
+                )
+
+            # get serial number and zone_id
+            key = config_entry.data[CONF_SERIAL_NUMBER]
+            for identifier in device_entry.identifiers:
+                if identifier[1].startswith(key):
+                    # assume that device info returned by Zone class is <controller_serial>_<zone_id> as identifiers
+                    zone_id = identifier[1].split("_")[1]
+                    break
+
+            # set moisture by Netro
+            _LOGGER.info(
+                "Running custom service set_moisture : the humidity level has been forced to %s%% for zone %s (id = %s)",
+                moisture,
+                device_entry.name,
+                zone_id,
+            )
+            await hass.async_add_executor_job(
+                netro_set_moisture, key, moisture, zone_id
+            )
+
+        # only one moisture_service to be created for all controllers
+        if not hass.services.has_service(DOMAIN, SERVICE_SET_MOISTURE_NAME):
+            _LOGGER.info("Adding custom service : %s", SERVICE_SET_MOISTURE_NAME)
+            hass.services.async_register(
+                DOMAIN,
+                SERVICE_SET_MOISTURE_NAME,
+                set_moisture,
+                schema=SERVICE_SET_MOISTURE_SCHEMA,
+            )
+
     return True
 
 
@@ -184,5 +256,18 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         _LOGGER.info("Deleting %s", hass.data[DOMAIN][entry.entry_id])
         hass.data[DOMAIN].pop(entry.entry_id)
+
+    # the set_moisture service has to be removed if the current entry is a controller and the last one
+    if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
+        loaded_entries = [
+            entry
+            for entry in hass.config_entries.async_entries(DOMAIN)
+            if entry.state == ConfigEntryState.LOADED
+            and entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE
+        ]
+
+        if len(loaded_entries) == 1:
+            _LOGGER.info("Removing service %s", SERVICE_SET_MOISTURE_NAME)
+            hass.services.async_remove(DOMAIN, SERVICE_SET_MOISTURE_NAME)
 
     return unload_ok

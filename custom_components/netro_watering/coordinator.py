@@ -29,6 +29,7 @@ from .const import (
     NETRO_METADATA_TOKEN_REMAINING,
     NETRO_METADATA_TOKEN_RESET,
     NETRO_METADATA_VERSION,
+    NETRO_MOISTURE_MOISTURE,
     NETRO_MOISTURE_ZONE,
     NETRO_PIXIE_CONTROLLER_MODEL,
     NETRO_SCHEDULE_END_TIME,
@@ -407,7 +408,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         def moisture(self) -> dict | None:
             """Get the last reported moisture."""
             if len(self.moistures) != 0:
-                return self.moistures[0]
+                return self.moistures[0][NETRO_MOISTURE_MOISTURE]
             return None
 
         @property

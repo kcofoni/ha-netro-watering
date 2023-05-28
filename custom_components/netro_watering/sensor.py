@@ -29,6 +29,7 @@ from .const import (
     NETRO_CONTROLLER_BATTERY_LEVEL,
     NETRO_CONTROLLER_STATUS,
     NETRO_METADATA_TOKEN_REMAINING,
+    NETRO_MOISTURE_MOISTURE,
     NETRO_SENSOR_BATTERY_LEVEL,
     NETRO_SENSOR_MOISTURE,
     NETRO_SENSOR_SUNLIGHT,
@@ -242,6 +243,16 @@ NETRO_ZONE_DESCRIPTIONS: tuple[NetroSensorEntityDescription, ...] = (
         ],
         translation_key="next_watering_source",
         netro_name=NETRO_ZONE_NEXT_WATERING_SOURCE,
+    ),
+    NetroSensorEntityDescription(
+        key="humidity",
+        name="Humidity",
+        entity_registry_enabled_default=True,
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.HUMIDITY,
+        translation_key="humidity",
+        netro_name=NETRO_MOISTURE_MOISTURE,
     ),
 )
 
