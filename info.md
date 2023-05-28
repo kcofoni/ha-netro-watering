@@ -59,7 +59,7 @@ The Netro Watering entities may be integrated into automations. The following in
 ### Force moisture level
 The nominal functioning of the Netro ecosystem is based on irrigation planning algorithms that take into account the physiognomy of the areas to be irrigated, the plants that compose them and the properties of the soil as well as a certain number of other factors. In addition to this information, Netro needs to know at a given time the temperature and humidity of the areas to be watered in order to precisely determine the watering periods. Soil sensors supplied by Netro (Whisperer model) allow these measurements to be made. If you do not have these sensors which are an integral part of the ecosystem but other external sensors, you can provide Netro with the level of humidity given by these sensors so that it can apply its algorithms in the same way.
 
-The **set moisture**"** service provided by the integration and applicable to a particular zone, allows this to be done.
+The **set moisture** service provided by the integration and applicable to a particular zone, allows this to be done.
 
 ## Advanced configuration
 Some general settings can be set for the Netro Watering integration in the Home Assistant configuration file (*configuration.yaml*). They correspond to both optional and non-device specific parameters. The integration works well without its parameters which can nevertheless provide optimizations and respond to specific situations. If not set, the default values are applied.
