@@ -3,7 +3,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 ## About
-This is a Home Assistant integration for Netro Smart Garden devices
+This is a Home Assistant integration for Netro Smart Garden devices.
 
 This custom component allows you to manage the [*Netro*](https://Netrohome.com/) ecosystem, ensuring the automatic watering of the garden, thanks to the controllers and sensors of the brand. It relies on *Netro*'s [Public API](http://www.Netrohome.com/en/shop/articles/10).
 
@@ -52,22 +52,22 @@ Options may be changed related to polling refresh interval of sensors and contro
 ![change controller options](images/controller_options.png "Controller options")
 ![change sensor options](images/sensor_options.png "Sensor options")
 
-**IMPORTANT: to be effective, each time options have been changed the related device must be reloaded.**
+**IMPORTANT: to be effective, each time options have been changed, the related device must be reloaded.**
 
 ## Running
-No dedicated card has been implemented yet but perhaps there will be user contributions in this direction. In the meantime can be displayed in a very classical layout as follows:
+No dedicated card has been implemented yet but perhaps there will be user contributions in this direction. In the meantime it can be displayed in a very classical layout as follows:
 
 ![start watering](images/running.png "Dashboard")
 
 ### Automation
 The Netro Watering entities may be integrated into automations. The following integration custom services are available:
-- **start watering** and **stop watering** services - to be applied to any controller or zone
-- **enable** and **disable** services - to be applied to any controller
+- **start watering** and **stop watering** services - to be applied to any controller or zone.
+- **enable** and **disable** services - to be applied to any controller.
 
 ![call service](images/service_call.png "Developer Tools")
 
-### Force moisture level
-The nominal functioning of the Netro ecosystem is based on irrigation planning algorithms that take into account the physiognomy of the areas to be irrigated, the plants that compose them and the properties of the soil as well as a certain number of other factors. In addition to this information, Netro needs to know at a given time the temperature and humidity of the areas to be watered in order to precisely determine the watering periods. Soil sensors supplied by Netro (Whisperer model) allow these measurements to be made. If you do not have these sensors which are an integral part of the ecosystem but other external sensors, you can provide Netro with the level of humidity given by these sensors so that it can apply its algorithms in the same way.
+### Set moisture level
+The nominal functioning of the Netro ecosystem is based on irrigation planning algorithms that take into account the physiognomy of the areas to be irrigated, the plants that compose them and the properties of the soil, the weather forecast, as well as a certain number of other factors. In addition to this information, Netro needs to know at a given time the temperature and humidity of the areas to be watered in order to precisely determine the watering periods. Soil sensors supplied by Netro (Whisperer model) allow these measurements to be made. If you do not have these sensors which are an integral part of the ecosystem but other external sensors, you can provide Netro with the level of humidity given by these sensors so that it can apply its algorithms in the same way.
 
 The **set moisture** service provided by the integration and applicable to a particular zone, allows this to be done.
 
@@ -78,8 +78,8 @@ Some general settings can be set for the Netro Watering integration in the Home 
 
   - **delay_before_refresh** [default value = 5]: This is the **time to wait, in seconds, before getting a status feedback** from [NPA](http://www.Netrohome.com/en/shop/articles/10) after executing a given action (i.e. start watering). My experience shows that at least 4 secondes are needed, so I personally put 5 to be comfortable.
   - **default_watering_delay** [default value = 0]: This is the **time to wait before actually proceeding when starting the irrigation**. I don't see much point in setting this parameter in production. I use it to test start/stop irrigation switches without having to actually run my solenoid valves each time.
-  - **sensor_value_days_before_today** [default value = 1, must be > 1]: This is the depth of the history of the values ​​reported by the sensors, used by the integration. Useful when a sensor is inoperative for a while and you still want to retrieve its last values.
-  - **slowdown_factors** [default value = None]: It is a dictionary that defines time slots during which the polling process of controllers (not applicable for sensors) will be slowed down by applying a multiplier coefficient to the refresh period (see explanations below)
+  - **sensor_value_days_before_today** [default value = 1, must be greater than or equal to 1]: This is the depth of the history of the values ​​reported by the sensors, used by the integration. Useful when a sensor is inoperative for a while and you still want to retrieve its last values.
+  - **slowdown_factors** [default value = None]: It is a dictionary that defines time slots during which the polling process of controllers (not applicable for sensors) will be slowed down by applying a multiplier coefficient to the refresh period (see explanations below).
   - **netro_api_url**: internal use
 
 ### About the slowdown factor
