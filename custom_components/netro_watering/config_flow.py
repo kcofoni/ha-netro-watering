@@ -32,23 +32,20 @@ from .const import (
     SENS_REFRESH_INTERVAL_MN,
     SENSOR_DEVICE_TYPE,
 )
-from .netrofunction import NetroException, get_info as netro_get_info
+from .netrofunction import (
+    NETRO_ERROR_CODE_INVALID_KEY,
+    NetroException,
+    get_info as netro_get_info,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 # mypy: disable-error-code="return"
 
 # a "serial number" has to be provided for identifying the device.
-# "device name" is got from the info provided by the API for any controller so that
-# it is not required for that type of device. But should be given for any sensor
-# since the name is not given in that case. It will be automatically generated of required
-# The "type of device" can be automatically determined and the consistency with
-# the user entry give will be checked if given.
 DEVICE_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_SERIAL_NUMBER): selector.TextSelector(),
-        vol.Optional(CONF_DEVICE_NAME): selector.TextSelector(),
-        vol.Optional(CONF_DEVICE_TYPE): selector.TextSelector(),
     }
 )
 
@@ -74,14 +71,13 @@ class PlaceholderHub:
         """Check if the device is a sensor."""
         return self.info["data"].get("sensor") is not None
 
-    def get_device_type(self) -> str:
+    def get_device_type(self) -> str | None:
         """Give the type of the device, controller or sensor."""
-        dtype: str
         if self.is_a_sensor():
-            dtype = SENSOR_DEVICE_TYPE
-        elif self.is_a_controller():
-            dtype = CONTROLLER_DEVICE_TYPE
-        return dtype
+            return SENSOR_DEVICE_TYPE
+        if self.is_a_controller():
+            return CONTROLLER_DEVICE_TYPE
+        return None
 
     def get_name(self) -> str:
         """Give the name of the device, if any."""
@@ -130,7 +126,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     hub = PlaceholderHub(data[CONF_SERIAL_NUMBER])
     try:
         await hub.check(hass)
-        if hub.get_device_type():
+        if hub.get_device_type() is not None:
             config_item[CONF_DEVICE_TYPE] = hub.get_device_type()
             config_item[CONF_SERIAL_NUMBER] = data[CONF_SERIAL_NUMBER]
             config_item[CONF_DEVICE_NAME] = f"{hub.get_name()}"
@@ -140,7 +136,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             raise UnknownDeviceType
 
     except NetroException as netro_error:
-        raise InvalidSerialNumber from netro_error
+        if netro_error.code == NETRO_ERROR_CODE_INVALID_KEY:
+            raise InvalidSerialNumber from netro_error
+        raise NetroDeviceError from netro_error
 
     return config_item
 
@@ -170,6 +168,9 @@ class NetroConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "invalid_serial_number"
             except UnknownDeviceType:
                 errors["base"] = "unknown_device_type"
+            except NetroDeviceError:
+                _LOGGER.exception("Unexpected Netro API exception")
+                errors["base"] = "netro_error_occurred"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -189,6 +190,10 @@ class InvalidSerialNumber(HomeAssistantError):
 
 class UnknownDeviceType(HomeAssistantError):
     """Error to indicate an unknown device type."""
+
+
+class NetroDeviceError(HomeAssistantError):
+    """Error to indicate a netro error."""
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):

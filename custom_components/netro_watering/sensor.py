@@ -343,7 +343,7 @@ class NetroSensor(CoordinatorEntity[NetroSensorUpdateCoordinator], SensorEntity)
             "last measurement time": dt_util.as_local(self.coordinator.time)
             if self.coordinator.time is not None
             else None,
-            "update interval": f"{self.coordinator.update_interval.total_seconds() / 60} mn"
+            "update interval": f"{round(self.coordinator.update_interval.total_seconds() / 60)} mn"
             if self.coordinator.update_interval is not None
             else None,
             EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
@@ -412,7 +412,7 @@ class NetroController(
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return state attributes."""
         zone_attributes = {
-            "update interval": f"{self.coordinator.update_interval.total_seconds() / 60} mn"
+            "update interval": f"{round(self.coordinator.update_interval.total_seconds() / 60)} mn"
             if self.coordinator.update_interval is not None
             else None,
         }
@@ -497,7 +497,7 @@ class NetroZone(CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntit
         """Return state attributes."""
         zone_attributes = {
             "zone id": self.zone_id,
-            "update interval": f"{self.coordinator.update_interval.total_seconds() / 60} mn"
+            "update interval": f"{round(self.coordinator.update_interval.total_seconds() / 60)} mn"
             if self.coordinator.update_interval is not None
             else None,
         }

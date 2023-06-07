@@ -13,6 +13,7 @@
     },
     "error": {
       "invalid_serial_number": "Numéro de série incorrect",
+      "netro_error_occurred": "Netro (NPA) a retourné une erreur pour ce numéro de série",
       "unknown_device_type": "Type d'appareil inconnu",
       "unknown": "Erreur inattendue"
     },
@@ -91,7 +92,7 @@
           "standby": "En veille",
           "setup": "Initialisation",
           "online": "En ligne",
-          "watering": "Arrosage en cours",
+          "watering": "En arrosage",
           "offline": "Hors ligne",
           "sleeping": "Inactif",
           "poweroff": "Eteint"

@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import datetime
 import logging
+from typing import Any
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -13,8 +15,15 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+import homeassistant.util.dt as dt_util
 
-from .const import CONF_DEVICE_TYPE, CONTROLLER_DEVICE_TYPE, DOMAIN
+from .const import (
+    CONF_DEVICE_TYPE,
+    CONTROLLER_DEVICE_TYPE,
+    DOMAIN,
+    EXTRA_STATE_ATTRIBUTE_SEP_LEFT,
+    EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
+)
 from .coordinator import NetroControllerUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -97,3 +106,47 @@ class NetroZone(
             self.coordinator.active_zones[self.zone_id],
             self.entity_description.netro_name,
         )
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return state attributes."""
+        zone_attributes = {
+            "zone id": self.zone_id,
+            "update interval": f"{round(self.coordinator.update_interval.total_seconds() / 60)} mn"
+            if self.coordinator.update_interval is not None
+            else None,
+        }
+        if self.coordinator.current_slowdown_factor > 1:
+            zone_attributes[
+                "slowdown factor"
+            ] = self.coordinator.current_slowdown_factor
+        meta_attributes = {
+            EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
+            "request time (UTC)": self.coordinator.metadata.time
+            if self.coordinator.metadata is not None
+            else None,
+            "last active date": dt_util.as_local(
+                self.coordinator.metadata.last_active_date.replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            )
+            if self.coordinator.metadata is not None
+            else None,
+            "transaction id": self.coordinator.metadata.tid
+            if self.coordinator.metadata is not None
+            else None,
+            "token limit": self.coordinator.metadata.token_limit
+            if self.coordinator.metadata is not None
+            else None,
+            "token remaining": self.coordinator.metadata.token_remaining
+            if self.coordinator.metadata is not None
+            else None,
+            "token reset": dt_util.as_local(
+                self.coordinator.metadata.token_reset_date.replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            )
+            if self.coordinator.metadata is not None
+            else None,
+        }
+        return zone_attributes | meta_attributes

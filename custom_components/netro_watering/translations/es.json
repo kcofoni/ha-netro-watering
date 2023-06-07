@@ -6,6 +6,7 @@
         "error": {
             "invalid_serial_number": "Número de serie incorrecto",
             "unknown": "Error inesperado",
+            "netro_error_occurred": "Netro (NPA) devolvió un error para este número de serie",
             "unknown_device_type": "Tipo de dispositivo desconocido"
         },
         "step": {

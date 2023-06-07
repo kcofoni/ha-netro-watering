@@ -1,6 +1,8 @@
 """Support for Netro Watering system."""
 from __future__ import annotations
 
+from datetime import date
+import enum
 import logging
 
 import validators
@@ -12,9 +14,22 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
+    ATTR_CONFIG_ENTRY_ID,
     ATTR_MOISTURE,
+    ATTR_WEATHER_CONDITION,
+    ATTR_WEATHER_DATE,
+    ATTR_WEATHER_HUMIDITY,
+    ATTR_WEATHER_PRESSURE,
+    ATTR_WEATHER_RAIN,
+    ATTR_WEATHER_RAIN_PROB,
+    ATTR_WEATHER_T_DEW,
+    ATTR_WEATHER_T_MAX,
+    ATTR_WEATHER_T_MIN,
+    ATTR_WEATHER_TEMP,
+    ATTR_WEATHER_WIND_SPEED,
     ATTR_ZONE_ID,
     CONF_CTRL_REFRESH_INTERVAL,
     CONF_DEVICE_HW_VERSION,
@@ -34,6 +49,7 @@ from .const import (
     GLOBAL_PARAMETERS,
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
+    NETRO_DEFAULT_ZONE_MODEL,
     SENS_REFRESH_INTERVAL_MN,
     SENSOR_DEVICE_TYPE,
 )
@@ -42,7 +58,11 @@ from .coordinator import (
     NetroSensorUpdateCoordinator,
     prepare_slowdown_factors,
 )
-from .netrofunction import set_moisture as netro_set_moisture, set_netro_base_url
+from .netrofunction import (
+    report_weather as netro_report_weather,
+    set_moisture as netro_set_moisture,
+    set_netro_base_url,
+)
 
 # Here is the list of the platforms that we want to support.
 # sensor is for the netro ground sensors, switch is for the zones
@@ -60,6 +80,58 @@ SERVICE_SET_MOISTURE_SCHEMA = vol.Schema(
         vol.Required(ATTR_ZONE_ID): cv.string,
         vol.Required(ATTR_MOISTURE): vol.All(
             vol.Coerce(int), vol.Range(min=0, max=100)
+        ),
+    }
+)
+
+SERVICE_REFRESH_NAME = "refresh_data"
+SERVICE_REFRESH_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
+    }
+)
+
+
+class WeatherConditions(enum.Enum):
+    """Class to represent the possible weather conditions."""
+
+    clear = 0
+    cloudy = 1
+    rain = 2
+    snow = 3
+    wind = 4
+
+
+SERVICE_REPORT_WEATHER_NAME = "report_weather"
+SERVICE_REPORT_WEATHER_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
+        vol.Required(ATTR_WEATHER_DATE): cv.date,
+        vol.Optional(ATTR_WEATHER_CONDITION): cv.enum(WeatherConditions),
+        vol.Optional(ATTR_WEATHER_RAIN): cv.positive_float,
+        vol.Optional(ATTR_WEATHER_RAIN_PROB): vol.All(
+            vol.Coerce(int), vol.Range(min=0, max=100)
+        ),
+        vol.Optional(ATTR_WEATHER_TEMP): vol.All(
+            vol.Coerce(float), vol.Range(min=0, max=60)
+        ),
+        vol.Optional(ATTR_WEATHER_T_MIN): vol.All(
+            vol.Coerce(float), vol.Range(min=0, max=60)
+        ),
+        vol.Optional(ATTR_WEATHER_T_MAX): vol.All(
+            vol.Coerce(float), vol.Range(min=0, max=60)
+        ),
+        vol.Optional(ATTR_WEATHER_T_DEW): vol.All(
+            vol.Coerce(float), vol.Range(min=0, max=60)
+        ),
+        vol.Optional(ATTR_WEATHER_WIND_SPEED): vol.All(
+            vol.Coerce(float), vol.Range(min=0, max=60)
+        ),
+        vol.Required(ATTR_WEATHER_HUMIDITY): vol.All(
+            vol.Coerce(int), vol.Range(min=0, max=100)
+        ),
+        vol.Optional(ATTR_WEATHER_PRESSURE): vol.All(
+            vol.Coerce(float), vol.Range(min=850.0, max=1100.0)
         ),
     }
 )
@@ -202,7 +274,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise HomeAssistantError(
                     f"Invalid Netro Watering device ID: {device_id}"
                 )
-            if device_entry.model is None or "zone" not in device_entry.model.lower():
+            if (
+                device_entry.model is None
+                or device_entry.model != NETRO_DEFAULT_ZONE_MODEL
+            ):
                 raise HomeAssistantError(
                     f"Invalid Netro Watering device ID: {device_id}, it doesn't seem to be a zone !?"
                 )
@@ -229,7 +304,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             # set moisture by Netro
             _LOGGER.info(
-                "Running custom service set_moisture : the humidity level has been forced to %s%% for zone %s (id = %s)",
+                "Running custom service 'Set moisture' : the humidity level has been forced to %s%% for zone %s (id = %s)",
                 moisture,
                 device_entry.name,
                 zone_id,
@@ -238,7 +313,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 netro_set_moisture, key, moisture, zone_id
             )
 
-        # only one moisture_service to be created for all controllers
+        # only one Set moisture service to be created for all controllers
         if not hass.services.has_service(DOMAIN, SERVICE_SET_MOISTURE_NAME):
             _LOGGER.info("Adding custom service : %s", SERVICE_SET_MOISTURE_NAME)
             hass.services.async_register(
@@ -247,6 +322,141 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 set_moisture,
                 schema=SERVICE_SET_MOISTURE_SCHEMA,
             )
+
+    async def report_weather(call: ServiceCall) -> None:
+        weather_asof: date = call.data[ATTR_WEATHER_DATE]
+        weather_condition = (
+            call.data[ATTR_WEATHER_CONDITION]
+            if call.data.get(ATTR_WEATHER_CONDITION) is not None
+            else None
+        )
+        weather_rain = (
+            call.data[ATTR_WEATHER_RAIN]
+            if call.data.get(ATTR_WEATHER_RAIN) is not None
+            else None
+        )
+        weather_rain_prob = (
+            call.data[ATTR_WEATHER_RAIN_PROB]
+            if call.data.get(ATTR_WEATHER_RAIN_PROB) is not None
+            else None
+        )
+        weather_temp = (
+            call.data[ATTR_WEATHER_TEMP]
+            if call.data.get(ATTR_WEATHER_TEMP) is not None
+            else None
+        )
+        weather_t_min = (
+            call.data[ATTR_WEATHER_T_MIN]
+            if call.data.get(ATTR_WEATHER_T_MIN) is not None
+            else None
+        )
+        weather_t_max = (
+            call.data[ATTR_WEATHER_T_MAX]
+            if call.data.get(ATTR_WEATHER_T_MAX) is not None
+            else None
+        )
+        weather_t_dew = (
+            call.data[ATTR_WEATHER_T_DEW]
+            if call.data.get(ATTR_WEATHER_T_DEW) is not None
+            else None
+        )
+        weather_wind_speed = (
+            call.data[ATTR_WEATHER_WIND_SPEED]
+            if call.data.get(ATTR_WEATHER_WIND_SPEED) is not None
+            else None
+        )
+        weather_humidity = (
+            call.data[ATTR_WEATHER_HUMIDITY]
+            if call.data.get(ATTR_WEATHER_HUMIDITY) is not None
+            else None
+        )
+        weather_pressure = (
+            call.data[ATTR_WEATHER_PRESSURE]
+            if call.data.get(ATTR_WEATHER_PRESSURE) is not None
+            else None
+        )
+
+        # get serial number
+        entry_id = call.data[ATTR_CONFIG_ENTRY_ID]
+        if entry_id not in hass.data[DOMAIN]:
+            raise HomeAssistantError(f"Config entry id does not exist: {entry_id}")
+        coordinator = hass.data[DOMAIN][entry_id]
+
+        key = coordinator.serial_number
+
+        # report weather by Netro
+        _LOGGER.info(
+            "Running custom service report_weather : %s",
+            {
+                "controller": coordinator.name,
+                "date": str(weather_asof) if weather_asof else weather_asof,
+                "condition": weather_condition.value,
+                "rain": weather_rain,
+                "rain_prob": weather_rain_prob,
+                "temp": weather_temp,
+                "t_min": weather_t_min,
+                "t_max": weather_t_max,
+                "t_dew": weather_t_dew,
+                "wind_speed": weather_wind_speed,
+                "humidity": int(weather_humidity),
+                "pressure": weather_pressure,
+            },
+        )
+
+        if not weather_asof:
+            raise HomeAssistantError(
+                "'date' parameter is missing when running 'Report weather' service provided by Netro Watering integration"
+            )
+
+        await hass.async_add_executor_job(
+            netro_report_weather,
+            key,
+            str(weather_asof),
+            weather_condition.value,
+            weather_rain,
+            weather_rain_prob,
+            weather_temp,
+            weather_t_min,
+            weather_t_max,
+            weather_t_dew,
+            weather_wind_speed,
+            weather_humidity,
+            weather_pressure,
+        )
+
+    # only one Report weather service to be created for all config entries
+    if not hass.services.has_service(DOMAIN, SERVICE_REPORT_WEATHER_NAME):
+        _LOGGER.info("Adding custom service : %s", SERVICE_REPORT_WEATHER_NAME)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_REPORT_WEATHER_NAME,
+            report_weather,
+            schema=SERVICE_REPORT_WEATHER_SCHEMA,
+        )
+
+    async def refresh(call: ServiceCall) -> None:
+        """Service call to refresh data of Netro devices."""
+
+        entry_id = call.data[ATTR_CONFIG_ENTRY_ID]
+        if entry_id not in hass.data[DOMAIN]:
+            raise HomeAssistantError(f"Config entry id does not exist: {entry_id}")
+        coordinator: DataUpdateCoordinator = hass.data[DOMAIN][entry_id]
+
+        _LOGGER.info(
+            "Running custom service 'Refresh data' for %s devices", coordinator.name
+        )
+
+        await coordinator.async_request_refresh()
+
+    # only one Refresh data service to be created for all config entry
+    if not hass.services.has_service(DOMAIN, SERVICE_REFRESH_NAME):
+        _LOGGER.info("Adding custom service : %s", SERVICE_REFRESH_NAME)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_REFRESH_NAME,
+            refresh,
+            schema=SERVICE_REFRESH_SCHEMA,
+        )
 
     return True
 
@@ -257,7 +467,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.info("Deleting %s", hass.data[DOMAIN][entry.entry_id])
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    # the set_moisture service has to be removed if the current entry is a controller and the last one
+    # the Set moisture service has to be removed if the current entry is a controller and the last one
     if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
         loaded_entries = [
             entry
@@ -269,5 +479,18 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if len(loaded_entries) == 1:
             _LOGGER.info("Removing service %s", SERVICE_SET_MOISTURE_NAME)
             hass.services.async_remove(DOMAIN, SERVICE_SET_MOISTURE_NAME)
+
+    # if there is no more entry after this one, one must remove the config entry level services
+    loaded_entries = [
+        entry
+        for entry in hass.config_entries.async_entries(DOMAIN)
+        if entry.state == ConfigEntryState.LOADED
+    ]
+
+    if len(loaded_entries) == 1:
+        _LOGGER.info("Removing service %s", SERVICE_REPORT_WEATHER_NAME)
+        hass.services.async_remove(DOMAIN, SERVICE_REPORT_WEATHER_NAME)
+        _LOGGER.info("Removing service %s", SERVICE_REFRESH_NAME)
+        hass.services.async_remove(DOMAIN, SERVICE_REFRESH_NAME)
 
     return unload_ok

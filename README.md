@@ -61,17 +61,22 @@ No dedicated card has been implemented yet but perhaps there will be user contri
 
 ### Automation
 The Netro Watering entities may be integrated into automations. The following integration custom services are available:
-- **start watering** and **stop watering** services - to be applied to any controller or zone.
-- **enable** and **disable** services - to be applied to any controller.
+- **Start watering** and **Stop watering** services - to be applied to any controller or zone.
+- **Enable** and **Disable** services - to be applied to any controller.
+- **Refresh data** - allows to update the data of the devices (controller, zones, sensors) when desired
+- **Report weather** - for reporting weather data, overriding system default weather data
 
 ![call service](images/service_call.png "Developer Tools")
 
 ### Set moisture level
 The nominal functioning of the Netro ecosystem is based on irrigation planning algorithms that take into account the physiognomy of the areas to be irrigated, the plants that compose them and the properties of the soil, the weather forecast, as well as a certain number of other factors. In addition to this information, Netro needs to know at a given time the temperature and humidity of the areas to be watered in order to precisely determine the watering periods. Soil sensors supplied by Netro (Whisperer model) allow these measurements to be made. If you do not have these sensors which are an integral part of the ecosystem but other external sensors, you can provide Netro with the level of humidity given by these sensors so that it can apply its algorithms in the same way.
 
-The **set moisture** service provided by the integration and applicable to a particular zone, allows this to be done.
+The **Set moisture** service provided by the integration and applicable to a particular zone, allows this to be done.
 
 ![set moistures](images/set_moisture.png "Developer Tools")
+
+### Report weather
+Netro offers to obtain weather data, very useful for establishing automatic watering schedules, from a number of weather providers. In some cases, national services may be more relevant and more precise so that we will want to feed Netro with data from these services instead of the listed providers. The **Report weather** service is offered for this purpose. Each user will be able to establish his own Home Assistant script which will call on this service after having collected custom weather information.
 
 ## Advanced configuration
 Some general settings can be set for the Netro Watering integration in the Home Assistant configuration file (*configuration.yaml*). They correspond to both optional and non-device specific parameters. The integration works well without its parameters which can nevertheless provide optimizations and respond to specific situations. If not set, the default values are applied.

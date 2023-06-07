@@ -5,6 +5,7 @@
         },
         "error": {
             "invalid_serial_number": "Invalid serial number",
+            "netro_error_occurred": "Netro (NPA) error occurred for this serial number",
             "unknown": "Unexpected error",
             "unknown_device_type": "Unknown device type"
         },

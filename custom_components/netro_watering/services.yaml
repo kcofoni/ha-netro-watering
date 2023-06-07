@@ -1,14 +1,146 @@
+refresh_data:
+  name: Refresh data
+  description: Refresh data of Netro devices (controller, zone, sensors)
+  fields:
+    config_entry_id:
+      name: Config entry
+      description: The configuration entry whose devices to be refreshed are referring to
+      required: true
+      selector:
+        config_entry:
+          integration: netro_watering
+report_weather:
+  name: Report weather
+  description: This is for reporting weather data, overriding system default weather data
+  fields:
+    config_entry_id:
+      name: Config entry
+      description: The configuration entry whose weather data should be reported
+      required: true
+      selector:
+        config_entry:
+          integration: netro_watering
+    date:
+      name: Date
+      description: Weather date, can not be earlier than yesterday
+      required: true
+      selector:
+        date:
+    condition:
+      name: Condition
+      description: Weather condition
+      required: false
+      selector:
+        select:
+          options:
+            - clear
+            - cloudy
+            - rain
+            - snow
+            - wind
+    rain:
+      name: Rain
+      description: Rain fall amount (floating value in mm)
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 500
+          step: 0.01
+          mode: box
+          unit_of_measurement: "mm"
+    rain_prob:
+      name: Rain probability
+      description: Rainfall probability, in the range of [0,100]
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+    temp:
+      name: Temperature
+      description: Average temperature, Celsius temperature
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 60
+          step: 0.1
+          unit_of_measurement: "°C"
+    t_min:
+      name: Minimum temperature
+      description: Minimum temperature, Celsius temperature
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 60
+          step: 0.1
+          unit_of_measurement: "°C"
+    t_max:
+      name: Maximum temperature
+      description: Maximum temperature, Celsius temperature
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 60
+          step: 0.1
+          unit_of_measurement: "°C"
+    t_dew:
+      name: Dew temperature
+      description: Dew point temperature, Celsius temperature
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 60
+          step: 0.1
+          unit_of_measurement: "°C"
+    wind_speed:
+      name: Wind speed
+      description: Wind speed, unit of m/s
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 60
+          step: 0.01
+          unit_of_measurement: "m/s"
+    humidity:
+      name: Humidity
+      description: Humidity, in the range of [0,100]
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+    pressure:
+      name: Pressure
+      description: Air pressure, in the unit of hpa
+      required: false
+      selector:
+        number:
+          min: 850
+          max: 1100
+          step: 0.1
+          unit_of_measurement: "hpa"
+          mode: box
 set_moisture:
   name: Set moisture
-  description: Force the moisture value to a particular zone, a way to provide Netro with the value of an external sensor
+  description: Set moisture value to a given zone, a way to provide Netro with the value of an external sensor
   fields:
     zone_id:
       name: Zone
-      description: The zone whose moisture should be set (please select among zone devices only)
+      description: The zone whose moisture should be set
       required: true
       selector:
         device:
           integration: netro_watering
+          filter:
+            model: Virtual zone
     moisture:
       name: Moisture
       description: The humidity value to be set to the zone (in %)

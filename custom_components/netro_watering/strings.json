@@ -14,6 +14,7 @@
     "error": {
       "invalid_serial_number": "Invalid serial number",
       "unknown_device_type": "Unknown device type",
+      "netro_error_occurred": "Netro (NPA) error occurred for this serial number",
       "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "abort": {
