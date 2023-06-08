@@ -11,10 +11,10 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/kcofoni/ha-netro-watering/issues",
   "requirements": [
-    "requests==2.28.2",
+    "requests==2.31.0",
     "validators==0.20.0"
   ],
   "ssdp": [],
-  "version": "1.1.0",
+  "version": "1.1.1",
   "zeroconf": []
 }
