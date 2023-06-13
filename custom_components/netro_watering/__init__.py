@@ -127,7 +127,7 @@ SERVICE_REPORT_WEATHER_SCHEMA = vol.Schema(
         vol.Optional(ATTR_WEATHER_WIND_SPEED): vol.All(
             vol.Coerce(float), vol.Range(min=0, max=60)
         ),
-        vol.Required(ATTR_WEATHER_HUMIDITY): vol.All(
+        vol.Optional(ATTR_WEATHER_HUMIDITY): vol.All(
             vol.Coerce(int), vol.Range(min=0, max=100)
         ),
         vol.Optional(ATTR_WEATHER_PRESSURE): vol.All(
@@ -398,7 +398,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 "t_max": weather_t_max,
                 "t_dew": weather_t_dew,
                 "wind_speed": weather_wind_speed,
-                "humidity": int(weather_humidity),
+                "humidity": int(weather_humidity)
+                if weather_humidity
+                else weather_humidity,
                 "pressure": weather_pressure,
             },
         )
