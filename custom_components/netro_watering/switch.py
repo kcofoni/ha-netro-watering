@@ -85,7 +85,7 @@ NETRO_WATERING_SWITCH_DESCRIPTION = NetroSwitchEntityDescription(
     icon="mdi:sprinkler",
 )
 
-# description of the start/stop watering switch
+# description of the enable/disable switch
 NETRO_ENABLED_SWITCH_DESCRIPTION = SwitchEntityDescription(
     key="enabled",
     name="Enabled",

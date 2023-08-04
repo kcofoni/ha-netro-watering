@@ -26,8 +26,8 @@
             "iswatering": {
                 "name": "¿Está regando ahora?",
                 "state": {
-                    "off": "No",
-                    "on": "Sí"
+                    "off": "inactivo",
+                    "on": "activo"
                 }
             }
         },

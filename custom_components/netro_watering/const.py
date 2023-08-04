@@ -82,8 +82,8 @@ NETRO_MOISTURE_ZONE = "zone"
 NETRO_MOISTURE_DATE = "date"
 NETRO_MOISTURE_MOISTURE = "moisture"
 
-EXTRA_STATE_ATTRIBUTE_SEP_LEFT = "------------------------------"
-EXTRA_STATE_ATTRIBUTE_SEP_RIGHT = "------------------------------"
+EXTRA_STATE_ATTRIBUTE_SEP_LEFT = "-------------------------"
+EXTRA_STATE_ATTRIBUTE_SEP_RIGHT = "-------------------------"
 
 GLOBAL_PARAMETERS = "parameters"
 

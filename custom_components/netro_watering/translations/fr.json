@@ -111,8 +111,8 @@
       "iswatering": {
         "name": "Arrosage en cours ?",
         "state": {
-          "on": "Oui",
-          "off": "Non"
+          "on": "actif",
+          "off": "inactif"
         }
       }
     }

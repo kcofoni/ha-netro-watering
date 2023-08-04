@@ -188,12 +188,12 @@ class NetroSensorUpdateCoordinator(DataUpdateCoordinator):
     def device_info(self) -> DeviceInfo:
         """Return information about the device."""
         return DeviceInfo(
-            default_name=f"{self.device_name}",
+            name=f"{self.device_name}",
             identifiers={(DOMAIN, self.serial_number)},
             manufacturer=MANUFACTURER,
             hw_version=self.hw_version,
             sw_version=self.sw_version,
-            default_model=NETRO_DEFAULT_SENSOR_MODEL,
+            model=NETRO_DEFAULT_SENSOR_MODEL,
         )
 
     @property
@@ -424,12 +424,12 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         def device_info(self) -> DeviceInfo:
             """Return information about the zone as a device. To be used when creating related entities."""
             return DeviceInfo(
-                default_name=f"{self.name}"
+                name=f"{self.name}"
                 if self.name  # if name is not set this is a Pixie and so we concatenate the controller name and the index of the zone
                 else f"{self.parent_controller.name} {self.ith}",
                 identifiers={(DOMAIN, self.serial_number)},
                 manufacturer=MANUFACTURER,
-                default_model=NETRO_DEFAULT_ZONE_MODEL,
+                model=NETRO_DEFAULT_ZONE_MODEL,
                 via_device=(DOMAIN, self.parent_controller.serial_number),
             )
 
@@ -476,12 +476,12 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
     def device_info(self) -> DeviceInfo:
         """Return information about the controller as a device. To be used when creating related entities."""
         return DeviceInfo(
-            default_name=f"{self.device_name}",
+            name=f"{self.device_name}",
             identifiers={(DOMAIN, self.serial_number)},
             manufacturer=MANUFACTURER,
             hw_version=self.hw_version,
             sw_version=self.sw_version,
-            default_model=NETRO_PIXIE_CONTROLLER_MODEL
+            model=NETRO_PIXIE_CONTROLLER_MODEL
             if hasattr(self, NETRO_CONTROLLER_BATTERY_LEVEL)
             else NETRO_SPRITE_CONTROLLER_MODEL,
         )

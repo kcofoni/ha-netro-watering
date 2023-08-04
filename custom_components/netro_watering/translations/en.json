@@ -26,8 +26,8 @@
             "iswatering": {
                 "name": "Is it watering right now ?",
                 "state": {
-                    "off": "No",
-                    "on": "Yes"
+                    "off": "off",
+                    "on": "on"
                 }
             }
         },
