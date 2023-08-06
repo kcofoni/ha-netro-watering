@@ -130,5 +130,115 @@
         }
       }
     }
+  },
+  "services": {
+    "refresh_data": {
+      "name": "Refresh data",
+      "description": "Refresh data of Netro devices (controller, zone, sensors)",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config entry",
+          "description": "The configuration entry whose devices to be refreshed are referring to"
+        }
+      }
+    },
+    "report_weather": {
+      "name": "Report weather",
+      "description": "This is for reporting weather data, overriding system default weather data",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config entry",
+          "description": "The configuration entry whose weather data should be reported"
+        },
+        "date": {
+          "name": "Date",
+          "description": "Weather date, can not be earlier than yesterday"
+        },
+        "condition": {
+          "name": "Condition",
+          "description": "Weather condition"
+        },
+        "rain": {
+          "name": "Rain",
+          "description": "Rain fall amount (floating value in mm)"
+        },
+        "rain_prob": {
+          "name": "Rain probability",
+          "description": "Rainfall probability, in the range of [0,100]"
+        },
+        "temp": {
+          "name": "Temperature",
+          "description": "Average temperature, Celsius temperature"
+        },
+        "t_min": {
+          "name": "Minimum temperature",
+          "description": "Minimum temperature, Celsius temperature"
+        },
+        "t_max": {
+          "name": "Maximum temperature",
+          "description": "Maximum temperature, Celsius temperature"
+        },
+        "t_dew": {
+          "name": "Dew temperature",
+          "description": "Dew point temperature, Celsius temperature"
+        },
+        "wind_speed": {
+          "name": "Wind speed",
+          "description": "Wind speed, unit of m/s"
+        },
+        "humidity": {
+          "name": "Humidity",
+          "description": "Humidity, in the range of [0,100]"
+        },
+        "pressure": {
+          "name": "Pressure",
+          "description": "Air pressure, in the unit of hpa"
+        }
+      }
+    },
+    "set_moisture": {
+      "name": "Set moisture",
+      "description": "Set moisture value to a given zone, a way to provide Netro with the value of an external sensor",
+      "fields": {
+        "zone_id": {
+          "name": "Zone",
+          "description": "The zone whose moisture should be set"
+        },
+        "moisture": {
+          "name": "Moisture",
+          "description": "The humidity value to be set to the zone (in %)"
+        }
+      }
+    },
+    "start_watering": {
+      "name": "Start watering",
+      "description": "Start watering for a specified duration, delay before start, or start time and date",
+      "fields": {
+        "duration": {
+          "name": "Duration",
+          "description": "Duration of activation of this sprinkler"
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Waiting time before starting watering"
+        },
+        "start_time": {
+          "name": "Start time",
+          "description": "Watering start date and time"
+        }
+      }
+    },
+    "stop_watering": {
+      "name": "Stop watering",
+      "description": "Stop watering all zones at once or a specific zone"
+    },
+    "enable": {
+      "name": "Enable",
+      "description": "Enable the selected controller"
+    },
+    "disable": {
+      "name": "Disable",
+      "description": "Disable the selected controller"
+    }
   }
 }

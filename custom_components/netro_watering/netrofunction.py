@@ -58,6 +58,7 @@ NETRO_ERROR_CODE_INTERNAL_ERROR = 5
 NETRO_ERROR_CODE_PARAMETER_ERROR = 6
 
 
+# ruff: noqa
 def set_netro_base_url(url: str):
     """Change the Netro Public API url."""
     global netro_base_url  # pylint: disable=global-statement

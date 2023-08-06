@@ -243,6 +243,7 @@ class ControllerEnablingSwitch(
         return self.coordinator.enabled
 
 
+# ruff: noqa
 class ZoneWateringSwitch(
     CoordinatorEntity[NetroControllerUpdateCoordinator], SwitchEntity
 ):

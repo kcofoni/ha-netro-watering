@@ -65,11 +65,11 @@
       "next_watering_status": {
         "name": "Prochain arrosage statut",
         "state": {
-            "executed": "Executed",
-            "executing": "Executing",
-            "valid": "Planifié",
-            "none": "Inconnu"
-          }
+          "executed": "Executed",
+          "executing": "Executing",
+          "valid": "Planifié",
+          "none": "Inconnu"
+        }
       },
       "next_watering_start_datetime": {
         "name": "Prochain arrosage début"
@@ -104,7 +104,7 @@
         "name": "Démarrer/Arrêter arrosage"
       },
       "enabled": {
-          "name": "Activer/Désactiver"
+        "name": "Activer/Désactiver"
       }
     },
     "binary_sensor": {
@@ -121,14 +121,124 @@
     "step": {
       "init": {
         "data": {
-            "controller_refresh_interval": "Période de rafraichissement du contrôleur (en minutes)",
-            "months_before_schedules": "Visu planification à partir de (nombre de mois avant aujourd'hui)",
-            "months_after_schedules": "Visu planification jusqu'à (nombre de mois après aujourd'hui)",
-            "sensor_refresh_interval": "Période de rafraichissement du capteur de sol (en minutes)",
-            "watering_duration": "Durée d'arrosage par défaut (en minutes)"
+          "controller_refresh_interval": "Période de rafraichissement du contrôleur (en minutes)",
+          "months_before_schedules": "Visu planification à partir de (nombre de mois avant aujourd'hui)",
+          "months_after_schedules": "Visu planification jusqu'à (nombre de mois après aujourd'hui)",
+          "sensor_refresh_interval": "Période de rafraichissement du capteur de sol (en minutes)",
+          "watering_duration": "Durée d'arrosage par défaut (en minutes)"
         },
         "title": "Option de Netro Arrosage"
       }
+    }
+  },
+  "services": {
+    "refresh_data": {
+      "name": "Mise à jour des données",
+      "description": "Mets à jour les données des appareils Netro (contrôleur, zone, capteur)",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrée de configuration",
+          "description": "L'entrée de configuration auquel se réfère l'appareil dont les données seront mises à jour"
+        }
+      }
+    },
+    "report_weather": {
+      "name": "Publier la météo",
+      "description": "Fournit des données météo qui remplaceront celles utilisées par défaut par Nétro",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrée de configuration",
+          "description": "L'entrée de configuration dont les données météorologiques sont publiées"
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date des données météo, ne peut pas être antérieure à hier"
+        },
+        "condition": {
+          "name": "Conditions",
+          "description": "Conditions météo"
+        },
+        "rain": {
+          "name": "Pluie",
+          "description": "Quantité de précipitations (valeur flottante en mm)"
+        },
+        "rain_prob": {
+          "name": "Risques de pluie",
+          "description": "Probabilité de précipitations, en pourcentage"
+        },
+        "temp": {
+          "name": "Température",
+          "description": "Température moyenne, en degrés Celsius"
+        },
+        "t_min": {
+          "name": "Température minimale",
+          "description": "Température minimale, en degrés Celsius"
+        },
+        "t_max": {
+          "name": "Température maximale",
+          "description": "Température maximale, en degrés Celsius"
+        },
+        "t_dew": {
+          "name": "Température de rosée",
+          "description": "Température de rosée, en degrés Celsius"
+        },
+        "wind_speed": {
+          "name": "Vitesse du vent",
+          "description": "Vitesse du vent, en m/s"
+        },
+        "humidity": {
+          "name": "Humidité",
+          "description": "Humidité, en pourcentage"
+        },
+        "pressure": {
+          "name": "Pression atmosphérique",
+          "description": "Pression de l'air, en hectopascal (hpa)"
+        }
+      }
+    },
+    "set_moisture": {
+      "name": "Définir l'humidité",
+      "description": "Réglez la valeur d'humidité sur une zone donnée, un moyen de fournir à Netro la valeur d'un capteur externe",
+      "fields": {
+        "zone_id": {
+          "name": "Zone",
+          "description": "La zone dont l'humidité est indiquée"
+        },
+        "moisture": {
+          "name": "Humidité",
+          "description": "La valeur d'humidité de la zone, en pourcentage"
+        }
+      }
+    },
+    "start_watering": {
+      "name": "Démarrer l'arrosage",
+      "description": "Démarrer l'arrosage pendant une durée spécifiée, un indiquant optionnellement un délai avant le démarrage ou une date/heure de démarrage",
+      "fields": {
+        "duration": {
+          "name": "Durée",
+          "description": "Durée d'activation de cet arroseur"
+        },
+        "delay": {
+          "name": "Retard",
+          "description": "Retard au démarrage"
+        },
+        "start_time": {
+          "name": "Heure de début",
+          "description": "Date/heure de début d'arrosage"
+        }
+      }
+    },
+    "stop_watering": {
+      "name": "Arrêter l'arrosage",
+      "description": "Arrêter d'arroser toutes les zones à la fois ou une zone spécifique"
+    },
+    "enable": {
+      "name": "Activer",
+      "description": "Activer le contrôleur sélectionné"
+    },
+    "disable": {
+      "name": "Désactiver",
+      "description": "Désactiver le contrôleur sélectionné"
     }
   }
 }
