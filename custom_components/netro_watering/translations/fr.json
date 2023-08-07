@@ -133,8 +133,8 @@
   },
   "services": {
     "refresh_data": {
-      "name": "Mise à jour des données",
-      "description": "Mets à jour les données des appareils Netro (contrôleur, zone, capteur)",
+      "name": "Actualiser les données",
+      "description": "Mets à jour les données des appareils Netro (contrôleur, zone, capteur) à partir du cloud",
       "fields": {
         "config_entry_id": {
           "name": "Entrée de configuration",

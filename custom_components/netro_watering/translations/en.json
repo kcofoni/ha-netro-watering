@@ -134,7 +134,7 @@
   "services": {
     "refresh_data": {
       "name": "Refresh data",
-      "description": "Refresh data of Netro devices (controller, zone, sensors)",
+      "description": "Refresh data of Netro devices (controller, zone, sensors) from cloud",
       "fields": {
         "config_entry_id": {
           "name": "Config entry",

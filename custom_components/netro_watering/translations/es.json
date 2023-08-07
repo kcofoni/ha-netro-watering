@@ -134,7 +134,7 @@
   "services": {
     "refresh_data": {
       "name": "Actualizar datos",
-      "description": "Actualizar datos de dispositivos Netro (controlador, zona, sensores)",
+      "description": "Actualizar datos de dispositivos Netro (controlador, zona, sensores) desde la cloud",
       "fields": {
         "config_entry_id": {
           "name": "Entrada de configuración",
