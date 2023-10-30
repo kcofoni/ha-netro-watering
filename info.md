@@ -1,6 +1,6 @@
 # Netro Smart Garden Integration for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs) ![GitHub repo size](https://img.shields.io/github/repo-size/kcofoni/ha-netro-watering) ![GitHub](https://img.shields.io/github/license/kcofoni/ha-netro-watering)
 
 ## About
 This is a Home Assistant integration for Netro Smart Garden devices.
@@ -26,10 +26,9 @@ Netro products *Sprite*, *Spark*, *Pixie* and *Whisperer* are actually supported
 ### From HACS
 
 1. Install HACS if you haven't already (see [installation guide](https://hacs.netlify.com/docs/installation/manual)).
-2. Add custom repository "https://github.com/kcofoni/ha-netro-watering.git" as "Integration" in the settings tab of HACS.
-3. Find and install "Netro Watering" integration in HACS's "Integrations" tab.
-4. Restart your Home Assistant.
-5. Add "Netro Watering" integration in Home Assistant's "Configuration -> Integrations" tab.
+2. Find and install "Netro Watering" integration in HACS's "Integrations" tab.
+3. Restart your Home Assistant.
+4. Add "Netro Watering" integration in Home Assistant's "Configuration -> Integrations" tab.
 
 ### Manual
 
