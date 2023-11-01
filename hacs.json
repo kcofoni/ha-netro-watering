@@ -1,5 +1,5 @@
 {
-    "name": "Netro Smart Garden integration for Home Assistant",
+    "name": "Netro Watering",
     "homeassistant": "2023.4.0",
     "render_readme": false
 }
