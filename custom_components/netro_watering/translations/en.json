@@ -115,6 +115,9 @@
       "watering": {
         "name": "Start/Stop watering"
       }
+    },
+    "calendar": {
+      "irrigation": "Irrigation"
     }
   },
   "options": {
