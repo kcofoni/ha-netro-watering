@@ -53,10 +53,13 @@ Options may be changed related to polling refresh interval of sensors and contro
 
 **IMPORTANT: to be effective, each time options have been changed, the related device must be reloaded.**
 
-## Running
-No dedicated card has been implemented yet but perhaps there will be user contributions in this direction. In the meantime it can be displayed in a very classical layout as follows:
+## Lovelace cards
+Here are some lovelace cards I am presently using to control my watering system with the help of this integration.
 
-![start watering](images/running.png "Dashboard")
+![watering](images/watering-controller-main.png "Controller") ![planning](images/planning-arrosage.png "Planning")
+![sensors](images/ground-sensors.png "Sensors") ![start](images/start-watering.png "Start")
+![charts](images/courbes-capteurs.png "Charts") ![weather](images/meteo.png "Weather")
+
 
 ### Automation
 The Netro Watering entities may be integrated into automations. The following integration custom services are available:
