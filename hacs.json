@@ -1,5 +1,5 @@
 {
     "name": "Netro Watering",
     "homeassistant": "2023.4.0",
-    "render_readme": false
+    "render_readme": true
 }
