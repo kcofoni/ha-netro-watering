@@ -75,7 +75,7 @@ The nominal functioning of the Netro ecosystem is based on irrigation planning a
 
 The **Set moisture** service provided by the integration and applicable to a particular zone, allows this to be done.
 
-![set moistures](/images/set_moisture.png "Developer Tools")
+![set moistures](https://kcofoni.github.io/ha-netro-watering/images/set_moisture.png "Developer Tools")
 
 ### Report weather
 Netro offers to obtain weather data, very useful for establishing automatic watering schedules, from a number of weather providers. In some cases, national services may be more relevant and more precise so that we will want to feed Netro with data from these services instead of the listed providers. The **Report weather** service is offered for this purpose. Each user will be able to establish his own Home Assistant script which will call on this service after having collected custom weather information.
