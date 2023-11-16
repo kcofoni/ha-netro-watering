@@ -6,6 +6,7 @@ import datetime
 from datetime import timedelta
 import logging
 from time import gmtime, strftime
+from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 
@@ -587,6 +588,34 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         """Return the remaining token of the controller."""
         return self.metadata.token_remaining if self.metadata is not None else None
 
+    def calendar_schedules(self, start_date: Optional[datetime.date] = None, end_date: Optional[datetime.date] = None):
+        """Return the calendar events of the controller."""
+
+        return [
+            {
+                "start": datetime.datetime.fromisoformat(schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET),
+                "end": datetime.datetime.fromisoformat(schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET),
+                "summary": self._active_zones[schedule[NETRO_SCHEDULE_ZONE]].name,
+                "description": "Duration: {} - Source: {}".format(
+                    datetime.datetime.fromisoformat(schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET) -
+                    datetime.datetime.fromisoformat(schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET),
+                    schedule[NETRO_SCHEDULE_SOURCE]
+                )
+            }
+            for schedule in self._schedules
+            if (schedule[NETRO_SCHEDULE_START_TIME] > start_date.strftime("%Y-%m-%d") if start_date is not None else True)
+            and (schedule[NETRO_SCHEDULE_START_TIME] < end_date.strftime("%Y-%m-%d") if end_date is not None else True)
+        ]
+    
+    @property
+    def current_calendar_event(self) -> dict | None:
+        filtered = [
+            schedule
+            for schedule in self.calendar_schedules()
+            if schedule['end'] > datetime.datetime.now(datetime.timezone.utc)
+        ]
+        return filtered[0] if len(filtered) > 0 else None
+
     async def _async_update_data(self):
         """Fetch data from API endpoint.
 
@@ -649,6 +678,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             - next watering event source (smart, fix, manual) - sensor - zone
             - battery - sensor - controller (only for non standalone controllers (e.g. Pixie))
             - on/off - switch - controller
+            - irrigation - calendar - controller
 
         services
             - start watering (controller)

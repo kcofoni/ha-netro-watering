@@ -115,6 +115,9 @@
       "watering": {
         "name": "Iniciar/Parar riego"
       }
+    },
+    "calendar": {
+      "irrigation": "Riego"
     }
   },
   "options": {
