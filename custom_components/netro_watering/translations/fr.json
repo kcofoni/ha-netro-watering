@@ -115,6 +115,11 @@
           "off": "inactif"
         }
       }
+    },
+    "calendar": {
+      "schedules": {
+        "name": "Arrosage"
+      }
     }
   },
   "options": {

@@ -41,24 +41,24 @@ Netro products *Sprite*, *Spark*, *Pixie* and *Whisperer* are actually supported
 
 Please repeat step 4. as mentioned above for each device you want to include, whatever it is a ground sensor, a multi-zone controller (Sprite or Spark) or a single-zone controler (Pixie). Each zone of a controller will be represented by separate device related to the controller it depends on.
 
-![add a config entry](images/add_config_entry.png "Setup of a *Netro* device")
-![device is created](images/device_created.png "Sucess of a *Netro* device setup")
+![add a config entry](https://kcofoni.github.io/ha-netro-watering/images/add_config_entry.png "Setup of a *Netro* device")
+![device is created](https://kcofoni.github.io/ha-netro-watering/images/device_created.png "Sucess of a *Netro* device setup")
 
 At this point, several devices may have been created related to ten's of entity. This latter are representing the humidity, temperature, illuminance of the sensors as well as the current/last/next status of each zone. Switches have been created allowing to start/stop watering and enable/disable controllers.
 
 Options may be changed related to polling refresh interval of sensors and controllers independently. Default watering duration and schedules options may also be changed specifically for the controllers. 
 
-![change controller options](images/controller_options.png "Controller options")
-![change sensor options](images/sensor_options.png "Sensor options")
+![change controller options](https://kcofoni.github.io/ha-netro-watering/images/controller_options.png "Controller options")
+![change sensor options](https://kcofoni.github.io/ha-netro-watering/images/sensor_options.png "Sensor options")
 
 **IMPORTANT: to be effective, each time options have been changed, the related device must be reloaded.**
 
 ## Lovelace cards
 Here are some lovelace cards I am presently using to control my watering system with the help of this integration.
 
-![watering](images/watering-controller-main.png "Controller") ![planning](images/planning-arrosage.png "Planning")
-![sensors](images/ground-sensors.png "Sensors") ![start](images/start-watering.png "Start")
-![charts](images/courbes-capteurs.png "Charts") ![weather](images/meteo.png "Weather")
+![watering](https://kcofoni.github.io/ha-netro-watering/images/watering-controller-main.png "Controller") ![planning](https://kcofoni.github.io/ha-netro-watering/images/planning-arrosage.png "Planning")
+![sensors](https://kcofoni.github.io/ha-netro-watering/images/ground-sensors.png "Sensors") ![start](https://kcofoni.github.io/ha-netro-watering/images/start-watering.png "Start")
+![charts](https://kcofoni.github.io/ha-netro-watering/images/courbes-capteurs.png "Charts") ![weather](https://kcofoni.github.io/ha-netro-watering/images/meteo.png "Weather")
 
 
 ### Automation
@@ -68,14 +68,14 @@ The Netro Watering entities may be integrated into automations. The following in
 - **Refresh data** - allows to update the data of the devices (controller, zones, sensors) when desired
 - **Report weather** - for reporting weather data, overriding system default weather data
 
-![call service](images/service_call.png "Developer Tools")
+![call service](https://kcofoni.github.io/ha-netro-watering/images/service_call.png "Developer Tools")
 
 ### Set moisture level
 The nominal functioning of the Netro ecosystem is based on irrigation planning algorithms that take into account the physiognomy of the areas to be irrigated, the plants that compose them and the properties of the soil, the weather forecast, as well as a certain number of other factors. In addition to this information, Netro needs to know at a given time the temperature and humidity of the areas to be watered in order to precisely determine the watering periods. Soil sensors supplied by Netro (Whisperer model) allow these measurements to be made. If you do not have these sensors which are an integral part of the ecosystem but other external sensors, you can provide Netro with the level of humidity given by these sensors so that it can apply its algorithms in the same way.
 
 The **Set moisture** service provided by the integration and applicable to a particular zone, allows this to be done.
 
-![set moistures](images/set_moisture.png "Developer Tools")
+![set moistures](https://kcofoni.github.io/ha-netro-watering/images/set_moisture.png "Developer Tools")
 
 ### Report weather
 Netro offers to obtain weather data, very useful for establishing automatic watering schedules, from a number of weather providers. In some cases, national services may be more relevant and more precise so that we will want to feed Netro with data from these services instead of the listed providers. The **Report weather** service is offered for this purpose. Each user will be able to establish his own Home Assistant script which will call on this service after having collected custom weather information.
