@@ -436,7 +436,9 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
 
     # _schedules and _moistures are list of dict whose key = str and value = any
     # _active_zones is a dictionary indexed by the zone ith and whose value is a Zone object
+    # _coming_schedules_ordered is the coming schedules oredered as generated from _schedules
     _schedules = []
+    _coming_schedules_ordered = []
     _moistures = []
 
     def __init__(
@@ -496,6 +498,26 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         Each list is ordered so that the first element return the most recent past schedule and coming schedule respectively.
         """
         self._schedules = schedules
+
+        # filtering current and coming schedules
+        coming_schedules_filtered = [
+            schedule
+            for schedule in schedules
+            if schedule[NETRO_SCHEDULE_STATUS]
+            in [NETRO_SCHEDULE_VALID, NETRO_SCHEDULE_EXECUTING]
+            and schedule[NETRO_SCHEDULE_START_TIME]
+            > strftime("%Y-%m-%dT%H:%M:%S", gmtime())
+        ]
+
+        # sorting filtered coming schedules on start time ascending
+        coming_schedules_sorted = sorted(
+            coming_schedules_filtered,
+            key=(lambda schedule: schedule[NETRO_SCHEDULE_START_TIME]),
+            reverse=False,
+        )
+        # set the current and coming schedules attribute with the result
+        self._coming_schedules_ordered = coming_schedules_sorted
+
         for zone_key in self._active_zones:
             # filtering past schedules, keeping the current zone
             past_schedules_zone_filtered = [
@@ -588,33 +610,84 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         """Return the remaining token of the controller."""
         return self.metadata.token_remaining if self.metadata is not None else None
 
-    def calendar_schedules(self, start_date: Optional[datetime.date] = None, end_date: Optional[datetime.date] = None):
+    def calendar_schedules(
+        self,
+        start_date: Optional[datetime.date] = None,
+        end_date: Optional[datetime.date] = None,
+    ):
         """Return the calendar events of the controller."""
 
         return [
             {
-                "start": datetime.datetime.fromisoformat(schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET),
-                "end": datetime.datetime.fromisoformat(schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET),
-                "summary": self._active_zones[schedule[NETRO_SCHEDULE_ZONE]].name,
-                "description": "Duration: {} - Source: {}".format(
-                    datetime.datetime.fromisoformat(schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET) -
-                    datetime.datetime.fromisoformat(schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET),
-                    schedule[NETRO_SCHEDULE_SOURCE]
-                )
+                "start": datetime.datetime.fromisoformat(
+                    schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
+                ),
+                "end": datetime.datetime.fromisoformat(
+                    schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
+                ),
+                "summary": f"{self._active_zones[schedule[NETRO_SCHEDULE_ZONE]].name}",
+                "description": "Duration: {} min. - Source: {}".format(
+                    round(
+                        (
+                            datetime.datetime.fromisoformat(
+                                schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
+                            )
+                            - datetime.datetime.fromisoformat(
+                                schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
+                            )
+                        ).seconds
+                        / 60
+                    ),
+                    schedule[NETRO_SCHEDULE_SOURCE],
+                ),
             }
-            for schedule in self._schedules
-            if (schedule[NETRO_SCHEDULE_START_TIME] > start_date.strftime("%Y-%m-%d") if start_date is not None else True)
-            and (schedule[NETRO_SCHEDULE_START_TIME] < end_date.strftime("%Y-%m-%d") if end_date is not None else True)
+            for schedule in self._coming_schedules_ordered
+            if (
+                datetime.datetime.fromisoformat(
+                    schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
+                )
+                > start_date
+                if start_date is not None
+                else True
+            )
+            and (
+                datetime.datetime.fromisoformat(
+                    schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
+                )
+                < end_date
+                if end_date is not None
+                else True
+            )
         ]
-    
+
     @property
-    def current_calendar_event(self) -> dict | None:
-        filtered = [
-            schedule
-            for schedule in self.calendar_schedules()
-            if schedule['end'] > datetime.datetime.now(datetime.timezone.utc)
-        ]
-        return filtered[0] if len(filtered) > 0 else None
+    def current_calendar_schedule(self) -> dict | None:
+        """Return current or next coming schedule if any."""
+        if len(self._coming_schedules_ordered) > 0:
+            schedule = self._coming_schedules_ordered[0]
+            return {
+                "start": datetime.datetime.fromisoformat(
+                    schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
+                ),
+                "end": datetime.datetime.fromisoformat(
+                    schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
+                ),
+                "summary": f"{self._active_zones[schedule[NETRO_SCHEDULE_ZONE]].name}",
+                "description": "Duration: {} - Source: {}".format(
+                    round(
+                        (
+                            datetime.datetime.fromisoformat(
+                                schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
+                            )
+                            - datetime.datetime.fromisoformat(
+                                schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
+                            )
+                        ).seconds
+                        / 60
+                    ),
+                    schedule[NETRO_SCHEDULE_SOURCE],
+                ),
+            }
 
     async def _async_update_data(self):
         """Fetch data from API endpoint.
@@ -678,7 +751,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             - next watering event source (smart, fix, manual) - sensor - zone
             - battery - sensor - controller (only for non standalone controllers (e.g. Pixie))
             - on/off - switch - controller
-            - irrigation - calendar - controller
+            - schedules - calendar - controller
 
         services
             - start watering (controller)
@@ -738,8 +811,11 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                     zone[NETRO_ZONE_ENABLED],
                     zone[NETRO_ZONE_SMART],
                     zone[NETRO_ZONE_NAME]
-                    if zone[NETRO_ZONE_NAME] is not None
-                    else self.device_name + "-" + zone[NETRO_ZONE_ITH],
+                    if (
+                        zone[NETRO_ZONE_NAME] is not None
+                        and len(zone[NETRO_ZONE_NAME]) > 0
+                    )
+                    else self.device_name + "-" + str(zone[NETRO_ZONE_ITH]),
                     self.serial_number,
                 )
 

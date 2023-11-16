@@ -117,7 +117,9 @@
       }
     },
     "calendar": {
-      "irrigation": "Riego"
+      "schedules": {
+        "name": "Riego"
+      }
     }
   },
   "options": {

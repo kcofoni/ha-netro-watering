@@ -129,6 +129,11 @@
           "off": "No"
         }
       }
+    },
+    "calendar": {
+      "schedules": {
+        "name": "Schedules"
+      }
     }
   },
   "services": {

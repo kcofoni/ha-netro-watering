@@ -117,7 +117,9 @@
       }
     },
     "calendar": {
-      "irrigation": "Irrigation"
+      "schedules": {
+        "name": "Irrigation"
+      }
     }
   },
   "options": {
