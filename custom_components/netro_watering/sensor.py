@@ -352,7 +352,7 @@ class NetroSensor(CoordinatorEntity[NetroSensorUpdateCoordinator], SensorEntity)
             else None,
             "last active date": dt_util.as_local(
                 self.coordinator.metadata.last_active_date.replace(
-                    tzinfo=datetime.UTC
+                    tzinfo=datetime.timezone.utc
                 )
             )
             if self.coordinator.metadata is not None
@@ -368,7 +368,7 @@ class NetroSensor(CoordinatorEntity[NetroSensorUpdateCoordinator], SensorEntity)
             else None,
             "token reset": dt_util.as_local(
                 self.coordinator.metadata.token_reset_date.replace(
-                    tzinfo=datetime.UTC
+                    tzinfo=datetime.timezone.utc
                 )
             )
             if self.coordinator.metadata is not None
@@ -427,7 +427,7 @@ class NetroController(
             else None,
             "last active date": dt_util.as_local(
                 self.coordinator.metadata.last_active_date.replace(
-                    tzinfo=datetime.UTC
+                    tzinfo=datetime.timezone.utc
                 )
             )
             if self.coordinator.metadata is not None
@@ -443,7 +443,7 @@ class NetroController(
             else None,
             "token reset": dt_util.as_local(
                 self.coordinator.metadata.token_reset_date.replace(
-                    tzinfo=datetime.UTC
+                    tzinfo=datetime.timezone.utc
                 )
             )
             if self.coordinator.metadata is not None
@@ -512,7 +512,7 @@ class NetroZone(CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntit
             else None,
             "last active date": dt_util.as_local(
                 self.coordinator.metadata.last_active_date.replace(
-                    tzinfo=datetime.UTC
+                    tzinfo=datetime.timezone.utc
                 )
             )
             if self.coordinator.metadata is not None
@@ -528,7 +528,7 @@ class NetroZone(CoordinatorEntity[NetroControllerUpdateCoordinator], SensorEntit
             else None,
             "token reset": dt_util.as_local(
                 self.coordinator.metadata.token_reset_date.replace(
-                    tzinfo=datetime.UTC
+                    tzinfo=datetime.timezone.utc
                 )
             )
             if self.coordinator.metadata is not None

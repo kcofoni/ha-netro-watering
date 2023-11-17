@@ -67,7 +67,7 @@ from .netrofunction import (
 # Here is the list of the platforms that we want to support.
 # sensor is for the netro ground sensors, switch is for the zones
 # PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH]
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH, Platform.BINARY_SENSOR, Platform.CALENDAR]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH, Platform.BINARY_SENSOR]
 
 
 _LOGGER = logging.getLogger(__name__)
