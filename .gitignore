@@ -1,3 +1,5 @@
 updatefromdev
 **/__pycache*
 .venv
+pipfile
+pipfile.lock

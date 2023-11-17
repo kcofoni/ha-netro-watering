@@ -115,6 +115,11 @@
       "watering": {
         "name": "Start/Stop watering"
       }
+    },
+    "calendar": {
+      "schedules": {
+        "name": "Irrigation"
+      }
     }
   },
   "options": {
