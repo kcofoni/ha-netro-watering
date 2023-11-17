@@ -56,9 +56,8 @@ Options may be changed related to polling refresh interval of sensors and contro
 ## Lovelace cards
 Here are some lovelace cards I am presently using to control my watering system with the help of this integration.
 
-![watering](https://kcofoni.github.io/ha-netro-watering/images/watering-controller-main.png "Controller") ![planning](https://kcofoni.github.io/ha-netro-watering/images/planning-arrosage.png "Planning")
-![sensors](https://kcofoni.github.io/ha-netro-watering/images/ground-sensors.png "Sensors") ![start](https://kcofoni.github.io/ha-netro-watering/images/start-watering.png "Start")
-![charts](https://kcofoni.github.io/ha-netro-watering/images/courbes-capteurs.png "Charts") ![calendar](https://kcofoni.github.io/ha-netro-watering/images/calendar.png "Calendar")
+![watering](https://kcofoni.github.io/ha-netro-watering/images/watering-controller-main.png "Controller") ![planning](https://kcofoni.github.io/ha-netro-watering/images/planning-arrosage.png "Planning") ![sensors](https://kcofoni.github.io/ha-netro-watering/images/ground-sensors.png "Sensors") 
+![charts](https://kcofoni.github.io/ha-netro-watering/images/courbes-capteurs.png "Charts") ![calendar](https://kcofoni.github.io/ha-netro-watering/images/calendar.png "Calendar") ![start](https://kcofoni.github.io/ha-netro-watering/images/start-watering.png "Start")
 
 
 ### Automation
