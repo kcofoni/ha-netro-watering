@@ -44,7 +44,7 @@ Please repeat step 4. as mentioned above for each device you want to include, wh
 ![add a config entry](https://kcofoni.github.io/ha-netro-watering/images/add_config_entry.png "Setup of a *Netro* device")
 ![device is created](https://kcofoni.github.io/ha-netro-watering/images/device_created.png "Sucess of a *Netro* device setup")
 
-At this point, several devices may have been created related to ten's of entity. This latter are representing the humidity, temperature, illuminance of the sensors as well as the current/last/next status of each zone. Switches have been created allowing to start/stop watering and enable/disable controllers.
+At this point, several devices may have been created related to ten's of entity. This latter are representing the humidity, temperature, illuminance of the sensors as well as the current/last/next status of each zone. Switches have been created allowing to start/stop watering and enable/disable controllers. A calendar is available for each controller which displays the watering schedules planned by Netro.
 
 Options may be changed related to polling refresh interval of sensors and controllers independently. Default watering duration and schedules options may also be changed specifically for the controllers. 
 
@@ -58,7 +58,7 @@ Here are some lovelace cards I am presently using to control my watering system 
 
 ![watering](https://kcofoni.github.io/ha-netro-watering/images/watering-controller-main.png "Controller") ![planning](https://kcofoni.github.io/ha-netro-watering/images/planning-arrosage.png "Planning")
 ![sensors](https://kcofoni.github.io/ha-netro-watering/images/ground-sensors.png "Sensors") ![start](https://kcofoni.github.io/ha-netro-watering/images/start-watering.png "Start")
-![charts](https://kcofoni.github.io/ha-netro-watering/images/courbes-capteurs.png "Charts") ![weather](https://kcofoni.github.io/ha-netro-watering/images/meteo.png "Weather")
+![charts](https://kcofoni.github.io/ha-netro-watering/images/courbes-capteurs.png "Charts") ![calendar](https://kcofoni.github.io/ha-netro-watering/images/calendar.png "Calendar")
 
 
 ### Automation
