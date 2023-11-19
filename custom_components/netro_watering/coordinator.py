@@ -606,48 +606,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         """Return the calendar events of the controller."""
 
         return [
-            {
-                "start": datetime.datetime.fromisoformat(
-                    schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
-                ),
-                "end": datetime.datetime.fromisoformat(
-                    schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
-                ),
-                "summary": f"{self._active_zones[schedule[NETRO_SCHEDULE_ZONE]].name}",
-                "description": "Duration: {} minutes, {}, {}.".format(
-                    round(
-                        (
-                            datetime.datetime.fromisoformat(
-                                schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
-                            )
-                            - datetime.datetime.fromisoformat(
-                                schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
-                            )
-                        ).seconds
-                        / 60
-                    ),
-                    {
-                        NETRO_SCHEDULE_FIX: "schedule from programs",
-                        NETRO_SCHEDULE_SMART: "Netro generated schedule",
-                        NETRO_SCHEDULE_MANUAL: "manual watering",
-                    }[schedule[NETRO_SCHEDULE_SOURCE]]
-                    if schedule[NETRO_SCHEDULE_SOURCE]
-                    in (NETRO_SCHEDULE_FIX, NETRO_SCHEDULE_SMART, NETRO_SCHEDULE_MANUAL)
-                    else "unknown source",
-                    {
-                        NETRO_SCHEDULE_EXECUTED: "has been executed",
-                        NETRO_SCHEDULE_EXECUTING: "currently being executed",
-                        NETRO_SCHEDULE_VALID: "is planned",
-                    }[schedule[NETRO_SCHEDULE_STATUS]]
-                    if schedule[NETRO_SCHEDULE_STATUS]
-                    in (
-                        NETRO_SCHEDULE_EXECUTED,
-                        NETRO_SCHEDULE_EXECUTING,
-                        NETRO_SCHEDULE_VALID,
-                    )
-                    else "unknown status",
-                ),
-            }
+            self._calendar_schedule(schedule)
             for schedule in self._schedules
             if (
                 datetime.datetime.fromisoformat(
@@ -674,52 +633,56 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             if schedule[NETRO_SCHEDULE_END_TIME] > strftime(
                 "%Y-%m-%dT%H:%M:%S", gmtime()
             ):
-                return {
-                    "start": datetime.datetime.fromisoformat(
-                        schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
-                    ),
-                    "end": datetime.datetime.fromisoformat(
-                        schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
-                    ),
-                    "summary": f"{self._active_zones[schedule[NETRO_SCHEDULE_ZONE]].name}",
-                    "description": "Duration: {} minutes, {}, {}.".format(
-                        round(
-                            (
-                                datetime.datetime.fromisoformat(
-                                    schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
-                                )
-                                - datetime.datetime.fromisoformat(
-                                    schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
-                                )
-                            ).seconds
-                            / 60
-                        ),
-                        {
-                            NETRO_SCHEDULE_FIX: "schedule from programs",
-                            NETRO_SCHEDULE_SMART: "Netro generated schedule",
-                            NETRO_SCHEDULE_MANUAL: "manual watering",
-                        }[schedule[NETRO_SCHEDULE_SOURCE]]
-                        if schedule[NETRO_SCHEDULE_SOURCE]
-                        in (
-                            NETRO_SCHEDULE_FIX,
-                            NETRO_SCHEDULE_SMART,
-                            NETRO_SCHEDULE_MANUAL,
+                return self._calendar_schedule(schedule)
+
+    def _calendar_schedule(self, schedule):
+        """Return a calendar schedule dictionary from the given Netro schedule."""
+        return {
+            "start": datetime.datetime.fromisoformat(
+                schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
+            ),
+            "end": datetime.datetime.fromisoformat(
+                schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
+            ),
+            "summary": f"{self.active_zones[schedule[NETRO_SCHEDULE_ZONE]].name}",
+            "description": "Duration: {} minutes, {}, {}.".format(
+                round(
+                    (
+                        datetime.datetime.fromisoformat(
+                            schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
                         )
-                        else "unknown source",
-                        {
-                            NETRO_SCHEDULE_EXECUTED: "has been executed",
-                            NETRO_SCHEDULE_EXECUTING: "currently being executed",
-                            NETRO_SCHEDULE_VALID: "is planned",
-                        }[schedule[NETRO_SCHEDULE_STATUS]]
-                        if schedule[NETRO_SCHEDULE_STATUS]
-                        in (
-                            NETRO_SCHEDULE_EXECUTED,
-                            NETRO_SCHEDULE_EXECUTING,
-                            NETRO_SCHEDULE_VALID,
+                        - datetime.datetime.fromisoformat(
+                            schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
                         )
-                        else "unknown status",
-                    ),
-                }
+                    ).seconds
+                    / 60
+                ),
+                {
+                    NETRO_SCHEDULE_FIX: "schedule from programs",
+                    NETRO_SCHEDULE_SMART: "Netro generated schedule",
+                    NETRO_SCHEDULE_MANUAL: "manual watering",
+                }[schedule[NETRO_SCHEDULE_SOURCE]]
+                if schedule[NETRO_SCHEDULE_SOURCE]
+                in (
+                    NETRO_SCHEDULE_FIX,
+                    NETRO_SCHEDULE_SMART,
+                    NETRO_SCHEDULE_MANUAL,
+                )
+                else f"unknown source({schedule[NETRO_SCHEDULE_SOURCE]})",
+                {
+                    NETRO_SCHEDULE_EXECUTED: "has been executed",
+                    NETRO_SCHEDULE_EXECUTING: "currently being executed",
+                    NETRO_SCHEDULE_VALID: "is planned",
+                }[schedule[NETRO_SCHEDULE_STATUS]]
+                if schedule[NETRO_SCHEDULE_STATUS]
+                in (
+                    NETRO_SCHEDULE_EXECUTED,
+                    NETRO_SCHEDULE_EXECUTING,
+                    NETRO_SCHEDULE_VALID,
+                )
+                else f"unknown status({schedule[NETRO_SCHEDULE_STATUS]})",
+            ),
+        }
 
     async def _async_update_data(self):
         """Fetch data from API endpoint.
