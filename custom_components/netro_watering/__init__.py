@@ -67,7 +67,12 @@ from .netrofunction import (
 # Here is the list of the platforms that we want to support.
 # sensor is for the netro ground sensors, switch is for the zones
 # PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH]
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH, Platform.BINARY_SENSOR, Platform.CALENDAR]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.BINARY_SENSOR,
+    Platform.CALENDAR,
+]
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -390,7 +395,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             {
                 "controller": coordinator.name,
                 "date": str(weather_asof) if weather_asof else weather_asof,
-                "condition": weather_condition.value,
+                "condition": weather_condition.value
+                if weather_condition is not None
+                else None,
                 "rain": weather_rain,
                 "rain_prob": weather_rain_prob,
                 "temp": weather_temp,
@@ -414,7 +421,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             netro_report_weather,
             key,
             str(weather_asof),
-            weather_condition.value,
+            weather_condition.value if weather_condition is not None else None,
             weather_rain,
             weather_rain_prob,
             weather_temp,
