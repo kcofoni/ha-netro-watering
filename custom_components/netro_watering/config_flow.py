@@ -260,6 +260,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 ),
             )
 
+        # Ensure a return value in case no conditions are met
+        return self.async_abort(reason="unknown_device_type")
+
     async def _update_options(self) -> FlowResult:
         """Update config entry options."""
         return self.async_create_entry(title="", data=self.options)

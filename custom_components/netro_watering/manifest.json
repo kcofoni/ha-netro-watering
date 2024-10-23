@@ -10,6 +10,6 @@
   "issue_tracker": "https://github.com/kcofoni/ha-netro-watering/issues",
   "requirements": ["requests==2.32.3", "validators==0.20.0"],
   "ssdp": [],
-  "version": "1.2.1",
+  "version": "1.2.2",
   "zeroconf": []
 }

@@ -118,19 +118,19 @@ SERVICE_REPORT_WEATHER_SCHEMA = vol.Schema(
             vol.Coerce(int), vol.Range(min=0, max=100)
         ),
         vol.Optional(ATTR_WEATHER_TEMP): vol.All(
-            vol.Coerce(float), vol.Range(min=0, max=60)
+            vol.Coerce(float), vol.Range(min=-60, max=60)
         ),
         vol.Optional(ATTR_WEATHER_T_MIN): vol.All(
-            vol.Coerce(float), vol.Range(min=0, max=60)
+            vol.Coerce(float), vol.Range(min=-60, max=60)
         ),
         vol.Optional(ATTR_WEATHER_T_MAX): vol.All(
-            vol.Coerce(float), vol.Range(min=0, max=60)
+            vol.Coerce(float), vol.Range(min=-60, max=60)
         ),
         vol.Optional(ATTR_WEATHER_T_DEW): vol.All(
-            vol.Coerce(float), vol.Range(min=0, max=60)
+            vol.Coerce(float), vol.Range(min=-60, max=60)
         ),
         vol.Optional(ATTR_WEATHER_WIND_SPEED): vol.All(
-            vol.Coerce(float), vol.Range(min=0, max=60)
+            vol.Coerce(float), vol.Range(min=0, max=111)
         ),
         vol.Optional(ATTR_WEATHER_HUMIDITY): vol.All(
             vol.Coerce(int), vol.Range(min=0, max=100)

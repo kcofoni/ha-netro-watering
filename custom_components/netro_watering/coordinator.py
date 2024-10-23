@@ -6,7 +6,6 @@ import datetime
 from datetime import timedelta
 import logging
 from time import gmtime, strftime
-from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 
@@ -600,8 +599,8 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
 
     def calendar_schedules(
         self,
-        start_date: Optional[datetime.date] = None,
-        end_date: Optional[datetime.date] = None,
+        start_date: datetime.date | None = None,
+        end_date: datetime.date | None = None,
     ):
         """Return the calendar events of the controller."""
 
@@ -634,6 +633,9 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                 "%Y-%m-%dT%H:%M:%S", gmtime()
             ):
                 return self._calendar_schedule(schedule)
+
+        # Ensure that None is returned if no schedule is found
+        return None
 
     def _calendar_schedule(self, schedule):
         """Return a calendar schedule dictionary from the given Netro schedule."""
@@ -843,21 +845,19 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
 
     async def enable(self):
         """Enable controller."""
-        res = await self.hass.async_add_executor_job(
+        return await self.hass.async_add_executor_job(
             netro_set_status,
             self.serial_number,
             NETRO_STATUS_ENABLE,
         )
-        return res
 
     async def disable(self):
         """Disable controller."""
-        res = await self.hass.async_add_executor_job(
+        return await self.hass.async_add_executor_job(
             netro_set_status,
             self.serial_number,
             NETRO_STATUS_DISABLE,
         )
-        return res
 
     async def start_watering(
         self, duration: int, delay: int, start_time: datetime.time
