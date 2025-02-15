@@ -478,25 +478,25 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # the Set moisture service has to be removed if the current entry is a controller and the last one
     if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
-        loaded_entries = [
-            entry
-            for entry in hass.config_entries.async_entries(DOMAIN)
-            if entry.state == ConfigEntryState.LOADED
+        other_loaded_entries = [
+            _entry
+            for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
+            if _entry.entry_id != entry.entry_id
             and entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE
         ]
 
-        if len(loaded_entries) == 1:
+        if not other_loaded_entries:
             _LOGGER.info("Removing service %s", SERVICE_SET_MOISTURE_NAME)
             hass.services.async_remove(DOMAIN, SERVICE_SET_MOISTURE_NAME)
 
     # if there is no more entry after this one, one must remove the config entry level services
-    loaded_entries = [
-        entry
-        for entry in hass.config_entries.async_entries(DOMAIN)
-        if entry.state == ConfigEntryState.LOADED
+    other_loaded_entries = [
+        _entry
+        for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
+        if _entry.entry_id != entry.entry_id
     ]
 
-    if len(loaded_entries) == 1:
+    if not other_loaded_entries:
         _LOGGER.info("Removing service %s", SERVICE_REPORT_WEATHER_NAME)
         hass.services.async_remove(DOMAIN, SERVICE_REPORT_WEATHER_NAME)
         _LOGGER.info("Removing service %s", SERVICE_REFRESH_NAME)
