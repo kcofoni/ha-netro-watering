@@ -25,7 +25,7 @@ Netro products *Sprite*, *Spark*, *Pixie* and *Whisperer* are actually supported
 
 ### From HACS
 
-1. Install HACS if you haven't already (see [installation guide](https://hacs.netlify.com/docs/installation/manual)).
+1. Install HACS if you haven't already (see [installation guide](https://www.hacs.xyz/docs/use/download/download/#to-download-hacs-container)).
 2. Find and install "Netro Watering" integration in HACS's "Integrations" tab.
 3. Restart your Home Assistant.
 4. Add "Netro Watering" integration in Home Assistant's "Configuration -> Integrations" tab.
