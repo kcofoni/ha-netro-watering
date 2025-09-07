@@ -1,4 +1,5 @@
 """Support for Netro Watering system."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -8,7 +9,7 @@ import logging
 import validators
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigEntry, ConfigEntryState
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
@@ -19,6 +20,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from .const import (
     ATTR_CONFIG_ENTRY_ID,
     ATTR_MOISTURE,
+    ATTR_NOWATER_DAYS,
     ATTR_WEATHER_CONDITION,
     ATTR_WEATHER_DATE,
     ATTR_WEATHER_HUMIDITY,
@@ -68,10 +70,10 @@ from .netrofunction import (
 # sensor is for the netro ground sensors, switch is for the zones
 # PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH]
 PLATFORMS: list[Platform] = [
-    Platform.SENSOR,
-    Platform.SWITCH,
     Platform.BINARY_SENSOR,
     Platform.CALENDAR,
+    Platform.SENSOR,
+    Platform.SWITCH,
 ]
 
 
@@ -93,6 +95,16 @@ SERVICE_REFRESH_NAME = "refresh_data"
 SERVICE_REFRESH_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
+    }
+)
+
+SERVICE_NO_WATER_NAME = "no_water"
+SERVICE_NO_WATER_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
+        vol.Required(ATTR_NOWATER_DAYS): vol.All(
+            vol.Coerce(int), vol.Range(min=1, max=30)
+        ),
     }
 )
 
@@ -183,7 +195,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  # noqa: C901
     """Set up Netro Watering from a config entry."""
 
     _LOGGER.debug(
@@ -202,7 +214,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             ]
 
     if entry.data[CONF_DEVICE_TYPE] == SENSOR_DEVICE_TYPE:
-        # get global parameters we are intested in
+        # get global parameters we are interested in
         sensor_value_days_before_today = DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY
         if hass.data[DOMAIN].get(GLOBAL_PARAMETERS) is not None:
             if (
@@ -467,6 +479,32 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             schema=SERVICE_REFRESH_SCHEMA,
         )
 
+    async def nowater(call: ServiceCall) -> None:
+        """Service call to stop watering for a given number of days."""
+
+        entry_id = call.data[ATTR_CONFIG_ENTRY_ID]
+        if entry_id not in hass.data[DOMAIN]:
+            raise HomeAssistantError(f"Config entry id does not exist: {entry_id}")
+        coordinator: DataUpdateCoordinator = hass.data[DOMAIN][entry_id]
+
+        _LOGGER.info(
+            "Running custom service 'Refresh data' for %s devices", coordinator.name
+        )
+
+        days: int = call.data[ATTR_NOWATER_DAYS]
+        await coordinator.no_water(int(days))
+        await coordinator.async_request_refresh()
+
+    # only one nowater data service to be created for all config entry
+    if not hass.services.has_service(DOMAIN, SERVICE_NO_WATER_NAME):
+        _LOGGER.info("Adding custom service : %s", SERVICE_NO_WATER_NAME)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_NO_WATER_NAME,
+            nowater,
+            schema=SERVICE_NO_WATER_SCHEMA,
+        )
+
     return True
 
 
@@ -501,5 +539,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.services.async_remove(DOMAIN, SERVICE_REPORT_WEATHER_NAME)
         _LOGGER.info("Removing service %s", SERVICE_REFRESH_NAME)
         hass.services.async_remove(DOMAIN, SERVICE_REFRESH_NAME)
+        _LOGGER.info("Removing service %s", SERVICE_NO_WATER_NAME)
+        hass.services.async_remove(DOMAIN, SERVICE_NO_WATER_NAME)
 
     return unload_ok

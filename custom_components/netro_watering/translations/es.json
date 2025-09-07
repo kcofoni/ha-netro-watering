@@ -137,6 +137,20 @@
     }
   },
   "services": {
+    "no_water": {
+      "name": "Sin riego",
+      "description": "Suspende el riego durante un número de días en el controlador especificado.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrada de configuración",
+          "description": "Identificador de la entrada cuyo controlador se pondrá en modo sin riego."
+        },
+        "days": {
+          "name": "Días",
+          "description": "Número de días consecutivos sin riego (1–30)."
+        }
+      }
+    },
     "refresh_data": {
       "name": "Actualizar datos",
       "description": "Actualizar datos de dispositivos Netro (controlador, zona, sensores) desde la cloud",

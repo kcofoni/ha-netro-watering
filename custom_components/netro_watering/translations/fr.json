@@ -137,6 +137,20 @@
     }
   },
   "services": {
+    "no_water": {
+      "name": "Sans arrosage",
+      "description": "Suspend l'arrosage pendant un nombre de jours sur le contrôleur spécifié.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Entrée de configuration",
+          "description": "Identifiant de l'entrée dont le contrôleur sera mis en mode sans arrosage."
+        },
+        "days": {
+          "name": "Nombre de jours",
+          "description": "Nombre de jours consécutifs sans arrosage (1–30)."
+        }
+      }
+    },
     "refresh_data": {
       "name": "Actualiser les données",
       "description": "Mets à jour les données des appareils Netro (contrôleur, zone, capteur) à partir du cloud",

@@ -137,6 +137,20 @@
     }
   },
   "services": {
+    "no_water": {
+      "name": "No water",
+      "description": "Suspend watering for a given number of days on the specified controller.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config entry",
+          "description": "The configuration entry whose controller will be put in no-watering mode."
+        },
+        "days": {
+          "name": "Days",
+          "description": "Number of consecutive days without watering (1–30)."
+        }
+      }
+    },
     "refresh_data": {
       "name": "Refresh data",
       "description": "Refresh data of Netro devices (controller, zone, sensors) from cloud",
