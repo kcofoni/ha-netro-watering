@@ -129,9 +129,6 @@ async def async_get_config_entry_diagnostics(
             "device_name": getattr(coordinator, "device_name", None),
             "hw_version": getattr(coordinator, "hw_version", None),
             "sw_version": getattr(coordinator, "sw_version", None),
-            "default_no_water_days": getattr(
-                coordinator, "default_no_water_days", None
-            ),
         }
         coordinator_data = _safe(getattr(coordinator, "data", None))
 

@@ -29,7 +29,7 @@
   "entity": {
     "binary_sensor": {
       "iswatering": {
-        "name": "Wird gerade bewässert?",
+        "name": "Ist Bewässerung?",
         "state": {
           "off": "aus",
           "on": "ein"

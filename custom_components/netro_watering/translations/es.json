@@ -29,7 +29,7 @@
   "entity": {
     "binary_sensor": {
       "iswatering": {
-        "name": "¿Está regando ahora mismo?",
+        "name": "¿Se está regando?",
         "state": {
           "off": "apagado",
           "on": "encendido"

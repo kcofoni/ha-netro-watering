@@ -29,7 +29,7 @@
   "entity": {
     "binary_sensor": {
       "iswatering": {
-        "name": "Est-ce que l’arrosage est en cours ?",
+        "name": "Arrosage en cours ?",
         "state": {
           "off": "arrêté",
           "on": "en marche"
