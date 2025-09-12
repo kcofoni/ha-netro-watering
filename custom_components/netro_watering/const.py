@@ -95,11 +95,12 @@ SENS_REFRESH_INTERVAL_MN = 60  # minutes
 CTRL_REFRESH_INTERVAL_MN = 15  # minutes
 TZ_OFFSET = "+00:00"  # natively produced in UTC (do not change)
 DEFAULT_WATERING_DURATION = 30  # minutes
-DEFAULT_WATERING_DELAY = 0  # minutes, should be 0, if not null this parameter is a good way for testing and then be able to cancel the watering manually
+DEFAULT_WATERING_DELAY = 0  # seconds, should be 0, if not null this parameter is a good way for testing and then be able to cancel the watering manually
 MONTHS_BEFORE_SCHEDULES = 4
 MONTHS_AFTER_SCHEDULES = 2
 DELAY_BEFORE_REFRESH = 5  # seconds
 DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY = 1
+MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY = 365
 DEFAULT_NOWATER_DAYS = 3
 NETRO_API_URL = "https://api.netrohome.com/npa/v1/"
 

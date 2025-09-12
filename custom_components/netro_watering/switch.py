@@ -97,42 +97,86 @@ NETRO_ENABLED_SWITCH_DESCRIPTION = SwitchEntityDescription(
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    config_entry: ConfigEntry,
+    entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up entry for all controller switches."""
-    if config_entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
-        controller: NetroControllerUpdateCoordinator = hass.data[DOMAIN][
-            config_entry.entry_id
-        ]
+    if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
+        controller: NetroControllerUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+
+        gp = hass.data.get(DOMAIN, {}).get(GLOBAL_PARAMETERS, {})
 
         # get the configuration options we are interested in
         default_watering_duration = (
-            (config_entry.options.get(CONF_DURATION))
-            if (config_entry.options.get(CONF_DURATION) is not None)
+            (entry.options.get(CONF_DURATION))
+            if (entry.options.get(CONF_DURATION) is not None)
             else DEFAULT_WATERING_DURATION
         )
 
-        # get the parameters we are interested in
-        default_watering_delay = DEFAULT_WATERING_DELAY
-        delay_before_refresh = DELAY_BEFORE_REFRESH
-        if hass.data[DOMAIN].get(GLOBAL_PARAMETERS) is not None:
-            if (
-                hass.data[DOMAIN][GLOBAL_PARAMETERS].get(CONF_DEFAULT_WATERING_DELAY)
-                is not None
-            ):
-                default_watering_delay = hass.data[DOMAIN][GLOBAL_PARAMETERS][
-                    CONF_DEFAULT_WATERING_DELAY
-                ]
-            if (
-                hass.data[DOMAIN][GLOBAL_PARAMETERS].get(CONF_DELAY_BEFORE_REFRESH)
-                is not None
-            ):
-                delay_before_refresh = hass.data[DOMAIN][GLOBAL_PARAMETERS][
-                    CONF_DELAY_BEFORE_REFRESH
-                ]
+        # default_watering_delay
+        val = next(
+            v
+            for v in (
+                entry.options.get(CONF_DEFAULT_WATERING_DELAY),
+                gp.get(CONF_DEFAULT_WATERING_DELAY),
+                DEFAULT_WATERING_DELAY,
+            )
+            if v is not None
+        )
+        try:
+            default_watering_delay = int(val)
+        except (TypeError, ValueError):
+            default_watering_delay = DEFAULT_WATERING_DELAY
+            _LOGGER.warning(
+                "The value provided for '%s' is invalid, defaulting to %d",
+                CONF_DEFAULT_WATERING_DELAY,
+                DEFAULT_WATERING_DELAY,
+            )
+
+        if default_watering_delay < 0:
+            default_watering_delay = DEFAULT_WATERING_DELAY
+            _LOGGER.warning(
+                "The value provided for '%s' should not be negative, defaulting to %d",
+                CONF_DEFAULT_WATERING_DELAY,
+                DEFAULT_WATERING_DELAY,
+            )
+
+        # delay_before_refresh
+        val = next(
+            v
+            for v in (
+                entry.options.get(CONF_DELAY_BEFORE_REFRESH),
+                gp.get(CONF_DELAY_BEFORE_REFRESH),
+                DELAY_BEFORE_REFRESH,
+            )
+            if v is not None
+        )
+        try:
+            delay_before_refresh = int(val)
+        except (TypeError, ValueError):
+            delay_before_refresh = DELAY_BEFORE_REFRESH
+            _LOGGER.warning(
+                "The value provided for '%s' is invalid, defaulting to %d",
+                CONF_DELAY_BEFORE_REFRESH,
+                DELAY_BEFORE_REFRESH,
+            )
+
+        if delay_before_refresh < 0:
+            delay_before_refresh = DELAY_BEFORE_REFRESH
+            _LOGGER.warning(
+                "The value provided for '%s' should not be negative, defaulting to %d",
+                CONF_DELAY_BEFORE_REFRESH,
+                DELAY_BEFORE_REFRESH,
+            )
 
         _LOGGER.info("Adding switch entities")
+        _LOGGER.debug(
+            "creating switch entities: controller = %s, default_watering_duration = %s, default_watering_delay = %s, delay_before_refresh = %s",
+            controller.device_name,
+            default_watering_duration,
+            default_watering_delay,
+            delay_before_refresh,
+        )
 
         # enable/disable controller switch
         async_add_entities(

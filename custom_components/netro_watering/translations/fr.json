@@ -1,33 +1,49 @@
 {
   "config": {
-    "step": {
-      "user": {
-        "title": "Configuration Netro",
-        "description": "Merci de saisir le numéro de série de l'appareil",
-        "data": {
-          "serial_number": "Numéro de série de l'appareil",
-          "device_name": "Nom de l'appareil",
-          "device_type": "Type de l'appareil"
-        }
-      }
+    "abort": {
+      "already_configured": "L’appareil est déjà configuré"
     },
     "error": {
-      "invalid_serial_number": "Numéro de série incorrect",
-      "netro_error_occurred": "Netro (NPA) a retourné une erreur pour ce numéro de série",
-      "unknown_device_type": "Type d'appareil inconnu",
-      "unknown": "Erreur inattendue"
+      "invalid_serial_number": "Numéro de série invalide",
+      "netro_error_occurred": "Netro (NPA) a renvoyé une erreur pour ce numéro de série",
+      "unknown": "Erreur inconnue",
+      "unknown_device_type": "Type d’appareil inconnu"
     },
-    "abort": {
-      "already_configured": "L'appareil est déjà configuré"
+    "step": {
+      "user": {
+        "data": {
+          "device_name": "Nom de l’appareil",
+          "device_type": "Type d’appareil",
+          "serial_number": "Numéro de série de l’appareil"
+        },
+        "data_description": {
+          "device_name": "Un nom facultatif pour votre appareil",
+          "device_type": "Le type de votre appareil (ex. : « Contrôleur d’arrosage », « Capteur de sol »)",
+          "serial_number": "Vous pouvez trouver le numéro de série sur l’appareil ou dans l’application Netro"
+        },
+        "description": "Veuillez entrer le numéro de série de votre appareil",
+        "title": "Configurer Netro"
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "iswatering": {
+        "name": "Est-ce que l’arrosage est en cours ?",
+        "state": {
+          "off": "arrêté",
+          "on": "en marche"
+        }
+      }
+    },
+    "calendar": {
+      "schedules": {
+        "name": "Arrosage"
+      }
+    },
     "sensor": {
-      "token_remaining": {
-        "name": "Jetons restant"
-      },
-      "temperature": {
-        "name": "Température"
+      "battery_percent": {
+        "name": "Batterie"
       },
       "humidity": {
         "name": "Humidité"
@@ -35,90 +51,79 @@
       "illuminance": {
         "name": "Luminosité"
       },
-      "battery_percent": {
-        "name": "Batterie"
+      "last_watering_end_datetime": {
+        "name": "Fin du dernier arrosage"
       },
-      "last_watering_status": {
-        "name": "Dernier arrosage statut",
+      "last_watering_source": {
+        "name": "Source du dernier arrosage",
         "state": {
-          "executed": "Effectué",
-          "executing": "En cours",
-          "valid": "Planifié",
-          "none": "Inconnu"
+          "fix": "Programmé",
+          "manual": "Manuel",
+          "none": "Inconnu",
+          "smart": "Intelligent"
         }
       },
       "last_watering_start_datetime": {
-        "name": "Dernier arrosage début"
+        "name": "Début du dernier arrosage"
       },
-      "last_watering_end_datetime": {
-        "name": "Dernier arrosage fin"
-      },
-      "last_watering_source": {
-        "name": "Dernier arrosage source",
+      "last_watering_status": {
+        "name": "Statut du dernier arrosage",
         "state": {
-          "smart": "Intelligent",
-          "fix": "Programmé",
-          "manual": "Manuel",
-          "none": "Inconnu"
+          "executed": "Effectué",
+          "executing": "En cours",
+          "none": "Inconnu",
+          "valid": "Planifié"
         }
       },
-      "next_watering_status": {
-        "name": "Prochain arrosage statut",
+      "next_watering_end_datetime": {
+        "name": "Fin du prochain arrosage"
+      },
+      "next_watering_source": {
+        "name": "Source du prochain arrosage",
         "state": {
-          "executed": "Executed",
-          "executing": "Executing",
-          "valid": "Planifié",
-          "none": "Inconnu"
+          "fix": "Programmé",
+          "manual": "Manuel",
+          "none": "Inconnu",
+          "smart": "Intelligent"
         }
       },
       "next_watering_start_datetime": {
-        "name": "Prochain arrosage début"
+        "name": "Début du prochain arrosage"
       },
-      "next_watering_end_datetime": {
-        "name": "Prochain arrosage fin"
-      },
-      "next_watering_source": {
-        "name": "Prochain arrosage source",
+      "next_watering_status": {
+        "name": "Statut du prochain arrosage",
         "state": {
-          "smart": "Intelligent",
-          "fix": "Programmé",
-          "manual": "Manuel",
-          "none": "Inconnu"
+          "executed": "Effectué",
+          "executing": "En cours",
+          "none": "Inconnu",
+          "valid": "Planifié"
         }
       },
       "status": {
         "name": "Statut",
         "state": {
-          "standby": "En veille",
-          "setup": "Initialisation",
-          "online": "En ligne",
-          "watering": "En arrosage",
           "offline": "Hors ligne",
+          "online": "En ligne",
+          "poweroff": "Éteint",
+          "setup": "Configuration",
           "sleeping": "Inactif",
-          "poweroff": "Eteint"
+          "standby": "En veille",
+          "watering": "Arrosage"
         }
+      },
+      "temperature": {
+        "name": "Température"
+      },
+      "token_remaining": {
+        "name": "Jeton restant"
       }
     },
     "switch": {
-      "watering": {
-        "name": "Démarrer/Arrêter arrosage"
-      },
       "enabled": {
         "name": "Activer/Désactiver"
-      }
-    },
-    "binary_sensor": {
-      "iswatering": {
-        "name": "Arrosage en cours ?",
-        "state": {
-          "on": "actif",
-          "off": "inactif"
-        }
-      }
-    },
-    "calendar": {
-      "schedules": {
-        "name": "Arrosage"
+      },
+      "watering": {
+        "name": "Démarrer/Arrêter l’arrosage"
       }
     }
   },
@@ -127,137 +132,160 @@
       "init": {
         "data": {
           "controller_refresh_interval": "Période de rafraichissement du contrôleur (en minutes)",
-          "months_before_schedules": "Visu planification à partir de (nombre de mois avant aujourd'hui)",
-          "months_after_schedules": "Visu planification jusqu'à (nombre de mois après aujourd'hui)",
           "sensor_refresh_interval": "Période de rafraichissement du capteur de sol (en minutes)",
-          "watering_duration": "Durée d'arrosage par défaut (en minutes)"
+          "watering_duration": "Durée d’arrosage par défaut (en minutes)"
         },
-        "title": "Option de Netro Arrosage"
+        "data_description": {
+          "controller_refresh_interval": "Intervalle de temps entre les mises à jour des données du contrôleur",
+          "sensor_refresh_interval": "Intervalle de temps entre les mises à jour des données du capteur de sol",
+          "watering_duration": "Durée d'arrosage proposée par défaut lors du démarrage manuel de l'arrosage"
+        },
+        "sections": {
+          "advanced": {
+            "data": {
+              "default_watering_delay": "Délai avant le début de l’arrosage (en secondes)",
+              "delay_before_refresh": "Temps d’attente avant l’actualisation des données (en secondes)",
+              "months_after_schedules": "Nombre de mois après aujourd’hui pour obtenir les plannings",
+              "months_before_schedules": "Nombre de mois avant aujourd’hui pour obtenir les plannings",
+              "sensor_value_days_before_today": "Nombre de jours passés pour récupérer la valeur du capteur"
+            },
+            "data_description": {
+              "default_watering_delay": "Délai défini par l’utilisateur avant le début de l’arrosage",
+              "delay_before_refresh": "Temps d’attente avant de récupérer l’état depuis le cloud après une action (ex. : démarrage de l’arrosage)",
+              "months_after_schedules": "Nombre de mois à venir à inclure dans les plannings",
+              "months_before_schedules": "Nombre de mois passés à inclure dans les plannings",
+              "sensor_value_days_before_today": "Utiliser les données des jours précédents si le capteur de sol n’est pas mis à jour quotidiennement"
+            },
+            "description": "Consultez la documentation avant de modifier ces options",
+            "name": "Options avancées"
+          }
+        },
+        "title": "Options Netro Watering"
       }
     }
   },
   "services": {
-    "no_water": {
-      "name": "Sans arrosage",
-      "description": "Suspend l'arrosage pendant un nombre de jours sur le contrôleur spécifié.",
-      "fields": {
-        "config_entry_id": {
-          "name": "Entrée de configuration",
-          "description": "Identifiant de l'entrée dont le contrôleur sera mis en mode sans arrosage."
-        },
-        "days": {
-          "name": "Nombre de jours",
-          "description": "Nombre de jours consécutifs sans arrosage (1–30)."
-        }
-      }
-    },
-    "refresh_data": {
-      "name": "Actualiser les données",
-      "description": "Mets à jour les données des appareils Netro (contrôleur, zone, capteur) à partir du cloud",
-      "fields": {
-        "config_entry_id": {
-          "name": "Entrée de configuration",
-          "description": "L'entrée de configuration auquel se réfère l'appareil dont les données seront mises à jour"
-        }
-      }
-    },
-    "report_weather": {
-      "name": "Publier la météo",
-      "description": "Fournit des données météo qui remplaceront celles utilisées par défaut par Nétro",
-      "fields": {
-        "config_entry_id": {
-          "name": "Entrée de configuration",
-          "description": "L'entrée de configuration dont les données météorologiques sont publiées"
-        },
-        "date": {
-          "name": "Date",
-          "description": "Date des données météo, ne peut pas être antérieure à hier"
-        },
-        "condition": {
-          "name": "Conditions",
-          "description": "Conditions météo"
-        },
-        "rain": {
-          "name": "Pluie",
-          "description": "Quantité de précipitations (valeur flottante en mm)"
-        },
-        "rain_prob": {
-          "name": "Risques de pluie",
-          "description": "Probabilité de précipitations, en pourcentage"
-        },
-        "temp": {
-          "name": "Température",
-          "description": "Température moyenne, en degrés Celsius"
-        },
-        "t_min": {
-          "name": "Température minimale",
-          "description": "Température minimale, en degrés Celsius"
-        },
-        "t_max": {
-          "name": "Température maximale",
-          "description": "Température maximale, en degrés Celsius"
-        },
-        "t_dew": {
-          "name": "Température de rosée",
-          "description": "Température de rosée, en degrés Celsius"
-        },
-        "wind_speed": {
-          "name": "Vitesse du vent",
-          "description": "Vitesse du vent, en m/s"
-        },
-        "humidity": {
-          "name": "Humidité",
-          "description": "Humidité, en pourcentage"
-        },
-        "pressure": {
-          "name": "Pression atmosphérique",
-          "description": "Pression de l'air, en hectopascal (hpa)"
-        }
-      }
-    },
-    "set_moisture": {
-      "name": "Définir l'humidité",
-      "description": "Réglez la valeur d'humidité sur une zone donnée, un moyen de fournir à Netro la valeur d'un capteur externe",
-      "fields": {
-        "zone_id": {
-          "name": "Zone",
-          "description": "La zone dont l'humidité est indiquée"
-        },
-        "moisture": {
-          "name": "Humidité",
-          "description": "La valeur d'humidité de la zone, en pourcentage"
-        }
-      }
-    },
-    "start_watering": {
-      "name": "Démarrer l'arrosage",
-      "description": "Démarrer l'arrosage pendant une durée spécifiée, un indiquant optionnellement un délai avant le démarrage ou une date/heure de démarrage",
-      "fields": {
-        "duration": {
-          "name": "Durée",
-          "description": "Durée d'activation de cet arroseur"
-        },
-        "delay": {
-          "name": "Retard",
-          "description": "Retard au démarrage"
-        },
-        "start_time": {
-          "name": "Heure de début",
-          "description": "Date/heure de début d'arrosage"
-        }
-      }
-    },
-    "stop_watering": {
-      "name": "Arrêter l'arrosage",
-      "description": "Arrêter d'arroser toutes les zones à la fois ou une zone spécifique"
+    "disable": {
+      "description": "Désactiver le contrôleur sélectionné",
+      "name": "Désactiver"
     },
     "enable": {
-      "name": "Activer",
-      "description": "Activer le contrôleur sélectionné"
+      "description": "Activer le contrôleur sélectionné",
+      "name": "Activer"
     },
-    "disable": {
-      "name": "Désactiver",
-      "description": "Désactiver le contrôleur sélectionné"
+    "no_water": {
+      "description": "Suspendre l’arrosage pendant un nombre de jours donné sur le contrôleur spécifié",
+      "fields": {
+        "config_entry_id": {
+          "description": "Identifiant de configuration du contrôleur dont on souhaite arrêter l’arrosage",
+          "name": "Entrée de configuration"
+        },
+        "days": {
+          "description": "Nombre de jours consécutifs sans arrosage",
+          "name": "Nombre de jours"
+        }
+      },
+      "name": "Pas d’arrosage"
+    },
+    "refresh_data": {
+      "description": "Actualiser les données des appareils Netro (contrôleur, zones, capteurs) depuis le cloud",
+      "fields": {
+        "config_entry_id": {
+          "description": "L’entrée de configuration dont les appareils doivent être actualisés",
+          "name": "Entrée de configuration"
+        }
+      },
+      "name": "Actualiser les données"
+    },
+    "report_weather": {
+      "description": "Fournit des données météo qui remplaceront celles utilisées par défaut par Nétro",
+      "fields": {
+        "condition": {
+          "description": "Conditions météo",
+          "name": "Conditions"
+        },
+        "config_entry_id": {
+          "description": "L'entrée de configuration dont les données météorologiques sont publiées",
+          "name": "Entrée de configuration"
+        },
+        "date": {
+          "description": "Date des données météo, ne peut pas être antérieure à hier",
+          "name": "Date"
+        },
+        "humidity": {
+          "description": "Humidité, en pourcentage",
+          "name": "Humidité"
+        },
+        "pressure": {
+          "description": "Pression de l'air, en hectopascal (hpa)",
+          "name": "Pression atmosphérique"
+        },
+        "rain": {
+          "description": "Quantité de précipitations (valeur flottante en mm)",
+          "name": "Pluie"
+        },
+        "rain_prob": {
+          "description": "Probabilité de précipitations, en pourcentage",
+          "name": "Risques de pluie"
+        },
+        "t_dew": {
+          "description": "Température de rosée, en degrés Celsius",
+          "name": "Température de rosée"
+        },
+        "t_max": {
+          "description": "Température maximale, en degrés Celsius",
+          "name": "Température maximale"
+        },
+        "t_min": {
+          "description": "Température minimale, en degrés Celsius",
+          "name": "Température minimale"
+        },
+        "temp": {
+          "description": "Température moyenne, en degrés Celsius",
+          "name": "Température"
+        },
+        "wind_speed": {
+          "description": "Vitesse du vent, en m/s",
+          "name": "Vitesse du vent"
+        }
+      },
+    "name": "Publier la météo"
+    },
+    "set_moisture": {
+      "description": "Définir une valeur d’humidité sur une zone, pour fournir à Netro la valeur d’un capteur externe",
+      "fields": {
+        "moisture": {
+          "description": "Valeur d’humidité à appliquer à la zone (en %)",
+          "name": "Humidité"
+        },
+        "zone_id": {
+          "description": "Zone dont l’humidité doit être définie",
+          "name": "Zone"
+        }
+      },
+      "name": "Définir l’humidité"
+    },
+    "start_watering": {
+      "description": "Démarrer l’arrosage pour une durée spécifiée, avec un délai optionnel ou une date/heure précise",
+      "fields": {
+        "delay": {
+          "description": "Temps d’attente avant de commencer l’arrosage",
+          "name": "Délai"
+        },
+        "duration": {
+          "description": "Durée d’activation de cet arroseur",
+          "name": "Durée"
+        },
+        "start_time": {
+          "description": "Date et heure de début d’arrosage",
+          "name": "Heure de début"
+        }
+      },
+      "name": "Démarrer l’arrosage"
+    },
+    "stop_watering": {
+      "description": "Arrêter l’arrosage de toutes les zones à la fois ou d’une zone spécifique",
+      "name": "Arrêter l’arrosage"
     }
   }
 }

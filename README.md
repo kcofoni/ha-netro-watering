@@ -66,6 +66,7 @@ The Netro Watering entities may be integrated into automations. The following in
 - **Enable** and **Disable** services - to be applied to any controller.
 - **Refresh data** - allows to update the data of the devices (controller, zones, sensors) when desired
 - **Report weather** - for reporting weather data, overriding system default weather data
+- **No water** - suspend watering for a given number of days on the specified controller
 
 ![call service](https://kcofoni.github.io/ha-netro-watering/images/service_call.png "Developer Tools")
 

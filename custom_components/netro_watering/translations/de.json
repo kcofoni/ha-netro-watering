@@ -1,0 +1,291 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Das Gerät ist bereits konfiguriert"
+    },
+    "error": {
+      "invalid_serial_number": "Ungültige Seriennummer",
+      "netro_error_occurred": "Netro (NPA) hat für diese Seriennummer einen Fehler zurückgegeben",
+      "unknown": "Unerwarteter Fehler",
+      "unknown_device_type": "Unbekannter Gerätetyp"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "device_name": "Gerätename",
+          "device_type": "Gerätetyp",
+          "serial_number": "Seriennummer des Geräts"
+        },
+        "data_description": {
+          "device_name": "Ein optionaler Name für Ihr Gerät",
+          "device_type": "Der Typ Ihres Geräts (z. B. 'Bewässerungssteuerung', 'Bodensensor')",
+          "serial_number": "Die Seriennummer finden Sie auf dem Gerät oder in der Netro-App"
+        },
+        "description": "Bitte geben Sie die Seriennummer Ihres Geräts ein",
+        "title": "Netro konfigurieren"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "iswatering": {
+        "name": "Wird gerade bewässert?",
+        "state": {
+          "off": "aus",
+          "on": "ein"
+        }
+      }
+    },
+    "calendar": {
+      "schedules": {
+        "name": "Bewässerung"
+      }
+    },
+    "sensor": {
+      "battery_percent": {
+        "name": "Batterie"
+      },
+      "humidity": {
+        "name": "Luftfeuchtigkeit"
+      },
+      "illuminance": {
+        "name": "Beleuchtungsstärke"
+      },
+      "last_watering_end_datetime": {
+        "name": "Ende der letzten Bewässerung"
+      },
+      "last_watering_source": {
+        "name": "Quelle der letzten Bewässerung",
+        "state": {
+          "fix": "Geplant",
+          "manual": "Manuell",
+          "none": "Unbekannt",
+          "smart": "Intelligent"
+        }
+      },
+      "last_watering_start_datetime": {
+        "name": "Beginn der letzten Bewässerung"
+      },
+      "last_watering_status": {
+        "name": "Status der letzten Bewässerung",
+        "state": {
+          "executed": "Ausgeführt",
+          "executing": "Wird ausgeführt",
+          "none": "Unbekannt",
+          "valid": "Geplant"
+        }
+      },
+      "next_watering_end_datetime": {
+        "name": "Ende der nächsten Bewässerung"
+      },
+      "next_watering_source": {
+        "name": "Quelle der nächsten Bewässerung",
+        "state": {
+          "fix": "Geplant",
+          "manual": "Manuell",
+          "none": "Unbekannt",
+          "smart": "Intelligent"
+        }
+      },
+      "next_watering_start_datetime": {
+        "name": "Beginn der nächsten Bewässerung"
+      },
+      "next_watering_status": {
+        "name": "Status der nächsten Bewässerung",
+        "state": {
+          "executed": "Ausgeführt",
+          "executing": "Wird ausgeführt",
+          "none": "Unbekannt",
+          "valid": "Geplant"
+        }
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "offline": "Offline",
+          "online": "Online",
+          "poweroff": "Ausgeschaltet",
+          "setup": "Einrichtung",
+          "sleeping": "Schlafend",
+          "standby": "Standby",
+          "watering": "Bewässerung läuft"
+        }
+      },
+      "temperature": {
+        "name": "Temperatur"
+      },
+      "token_remaining": {
+        "name": "Verbleibendes Token"
+      }
+    },
+    "switch": {
+      "enabled": {
+        "name": "Aktivieren/Deaktivieren"
+      },
+      "watering": {
+        "name": "Bewässerung starten/stoppen"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "controller_refresh_interval": "Aktualisierungsintervall der Steuerung (in Minuten)",
+          "sensor_refresh_interval": "Aktualisierungsintervall des Sensors (in Minuten)",
+          "watering_duration": "Standard-Bewässerungsdauer (in Minuten)"
+        },
+        "data_description": {
+          "controller_refresh_interval": "Intervall zum Aktualisieren der Steuerungs- und Zonen-Daten aus der Cloud",
+          "sensor_refresh_interval": "Intervall zum Aktualisieren der Sensordaten aus der Cloud",
+          "watering_duration": "Standard-Bewässerungsdauer, vorgeschlagen bei manuellem Start"
+        },
+        "sections": {
+          "advanced": {
+            "data": {
+              "default_watering_delay": "Verzögerung vor Start der Bewässerung (in Sekunden)",
+              "delay_before_refresh": "Wartezeit vor Datenaktualisierung (in Sekunden)",
+              "months_after_schedules": "Monate nach heute, um Zeitpläne zu erhalten",
+              "months_before_schedules": "Monate vor heute, um Zeitpläne zu erhalten",
+              "sensor_value_days_before_today": "Vor wie vielen Tagen Sensorwert abrufen"
+            },
+            "data_description": {
+              "default_watering_delay": "Vom Benutzer definierte Verzögerung vor Beginn der Bewässerung.",
+              "delay_before_refresh": "Wartezeit, bevor nach einer Aktion (z. B. Bewässerung starten) eine Statusrückmeldung aus der Cloud abgerufen wird.",
+              "months_after_schedules": "Anzahl der zukünftigen Monate, die in die Zeitpläne aufgenommen werden.",
+              "months_before_schedules": "Anzahl der vergangenen Monate, die in die Zeitpläne aufgenommen werden.",
+              "sensor_value_days_before_today": "Daten der Vortage verwenden, wenn der Bodensensor nicht täglich aktualisiert wird."
+            },
+            "description": "Bitte sehen Sie in die Dokumentation, bevor Sie diese Optionen ändern.",
+            "name": "Erweiterte Optionen"
+          }
+        },
+        "title": "Netro-Bewässerungsoptionen"
+      }
+    }
+  },
+  "services": {
+    "disable": {
+      "description": "Ausgewählte Steuerung deaktivieren",
+      "name": "Deaktivieren"
+    },
+    "enable": {
+      "description": "Ausgewählte Steuerung aktivieren",
+      "name": "Aktivieren"
+    },
+    "no_water": {
+      "description": "Bewässerung für eine bestimmte Anzahl von Tagen auf der angegebenen Steuerung aussetzen.",
+      "fields": {
+        "config_entry_id": {
+          "description": "Der Konfigurationseintrag, dessen Steuerung in den Modus ohne Bewässerung versetzt wird.",
+          "name": "Konfigurationseintrag"
+        },
+        "days": {
+          "description": "Anzahl aufeinanderfolgender Tage ohne Bewässerung (1–30).",
+          "name": "Tage"
+        }
+      },
+      "name": "Kein Wasser"
+    },
+    "refresh_data": {
+      "description": "Daten der Netro-Geräte (Steuerung, Zone, Sensoren) aus der Cloud aktualisieren",
+      "fields": {
+        "config_entry_id": {
+          "description": "Der Konfigurationseintrag, auf den sich die zu aktualisierenden Geräte beziehen",
+          "name": "Konfigurationseintrag"
+        }
+      },
+      "name": "Daten aktualisieren"
+    },
+    "report_weather": {
+      "description": "Dies dient zur Meldung von Wetterdaten, wodurch die Standard-Wetterdaten des Systems überschrieben werden",
+      "fields": {
+        "condition": {
+          "description": "Wetterzustand",
+          "name": "Bedingung"
+        },
+        "config_entry_id": {
+          "description": "Der Konfigurationseintrag, dessen Wetterdaten gemeldet werden sollen",
+          "name": "Konfigurationseintrag"
+        },
+        "date": {
+          "description": "Wetterdatum, darf nicht früher als gestern sein",
+          "name": "Datum"
+        },
+        "humidity": {
+          "description": "Luftfeuchtigkeit, im Bereich von [0,100]",
+          "name": "Luftfeuchtigkeit"
+        },
+        "pressure": {
+          "description": "Luftdruck, in der Einheit hPa",
+          "name": "Luftdruck"
+        },
+        "rain": {
+          "description": "Niederschlagsmenge (Fließwert in mm)",
+          "name": "Regen"
+        },
+        "rain_prob": {
+          "description": "Regenwahrscheinlichkeit, im Bereich von [0,100]",
+          "name": "Regenwahrscheinlichkeit"
+        },
+        "t_dew": {
+          "description": "Taupunkttemperatur, in Grad Celsius",
+          "name": "Taupunkttemperatur"
+        },
+        "t_max": {
+          "description": "Maximale Temperatur, in Grad Celsius",
+          "name": "Maximale Temperatur"
+        },
+        "t_min": {
+          "description": "Minimale Temperatur, in Grad Celsius",
+          "name": "Minimale Temperatur"
+        },
+        "temp": {
+          "description": "Durchschnittstemperatur, in Grad Celsius",
+          "name": "Durchschnittstemperatur"
+        },
+        "wind_speed": {
+          "description": "Windgeschwindigkeit, Einheit m/s",
+          "name": "Windgeschwindigkeit"
+        }
+      },
+      "name": "Wetter melden"
+    },
+    "set_moisture": {
+      "description": "Feuchtigkeitswert für eine Zone festlegen, um Netro den Wert eines externen Sensors bereitzustellen",
+      "fields": {
+        "moisture": {
+          "description": "Der Feuchtigkeitswert, der für die Zone festgelegt werden soll (in %)",
+          "name": "Feuchtigkeit"
+        },
+        "zone_id": {
+          "description": "Die Zone, deren Feuchtigkeit festgelegt werden soll",
+          "name": "Zone"
+        }
+      },
+      "name": "Feuchtigkeit festlegen"
+    },
+    "start_watering": {
+      "description": "Bewässerung für eine bestimmte Dauer starten, mit optionaler Verzögerung oder einem bestimmten Startdatum/-zeit",
+      "fields": {
+        "delay": {
+          "description": "Wartezeit vor Beginn der Bewässerung",
+          "name": "Verzögerung"
+        },
+        "duration": {
+          "description": "Aktivierungsdauer für diesen Sprinkler",
+          "name": "Dauer"
+        },
+        "start_time": {
+          "description": "Startdatum und -uhrzeit der Bewässerung",
+          "name": "Startzeit"
+        }
+      },
+      "name": "Bewässerung starten"
+    },
+    "stop_watering": {
+      "description": "Bewässerung aller Zonen gleichzeitig oder einer bestimmten Zone stoppen",
+      "name": "Bewässerung stoppen"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 """Config flow for Netro Watering integration."""
+
 from __future__ import annotations
 
 import logging
@@ -8,12 +9,14 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowResult, section
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 
 from .const import (
     CONF_CTRL_REFRESH_INTERVAL,
+    CONF_DEFAULT_WATERING_DELAY,
+    CONF_DELAY_BEFORE_REFRESH,
     CONF_DEVICE_HW_VERSION,
     CONF_DEVICE_NAME,
     CONF_DEVICE_SW_VERSION,
@@ -22,11 +25,16 @@ from .const import (
     CONF_MONTHS_AFTER_SCHEDULES,
     CONF_MONTHS_BEFORE_SCHEDULES,
     CONF_SENS_REFRESH_INTERVAL,
+    CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     CONF_SERIAL_NUMBER,
     CONTROLLER_DEVICE_TYPE,
     CTRL_REFRESH_INTERVAL_MN,
+    DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+    DEFAULT_WATERING_DELAY,
     DEFAULT_WATERING_DURATION,
+    DELAY_BEFORE_REFRESH,
     DOMAIN,
+    GLOBAL_PARAMETERS,
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
     SENS_REFRESH_INTERVAL_MN,
@@ -154,7 +162,7 @@ class NetroConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> OptionsFlowHandler:
         """Get the options flow for this handler."""
-        return OptionsFlowHandler(config_entry)
+        return OptionsFlowHandler()
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -196,73 +204,146 @@ class NetroDeviceError(HomeAssistantError):
     """Error to indicate a netro error."""
 
 
-class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle a Netro Watering options flow."""
+class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
+    """Netro Watering options flow with automatic reload."""
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
-        self.options = dict(config_entry.options)
+    def _gp(self) -> dict[str, Any]:
+        """Récupère les paramètres YAML déjà chargés (fallback des defaults)."""
+        return self.hass.data.get(DOMAIN, {}).get(GLOBAL_PARAMETERS, {})  # type: ignore[return-value]
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage the options."""
+        """Handle the initial step of the options flow.
+
+        Presents the options form to the user and processes input to update config entry options.
+        """
         if user_input is not None:
-            self.options.update(user_input)
-            return await self._update_options()
+            # Extract and flatten the section
+            advanced = user_input.pop("advanced", {})
+            if isinstance(advanced, dict):
+                user_input.update(advanced)
+
+            # No manual reload needed: OptionsFlowWithReload will do it.
+            new_options = {**self.config_entry.options, **user_input}
+            return self.async_create_entry(title="", data=new_options)
+
+        num_1_120 = selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=1, max=120, step=1, mode=selector.NumberSelectorMode.BOX
+            )
+        )
+        months_1_6 = selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=1, max=6, step=1, mode=selector.NumberSelectorMode.BOX
+            )
+        )
+
+        # Fallbacks from options or YAML (backward compatibility)
+        gp = self._gp()
+        opt = self.config_entry.options
 
         if self.config_entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
-            return self.async_show_form(
-                step_id="init",
-                data_schema=vol.Schema(
-                    {
-                        vol.Optional(
-                            CONF_DURATION,
-                            default=self.config_entry.options.get(
-                                CONF_DURATION, DEFAULT_WATERING_DURATION
-                            ),
-                        ): vol.All(int, vol.Range(min=1, max=120)),
-                        vol.Optional(
-                            CONF_CTRL_REFRESH_INTERVAL,
-                            default=self.config_entry.options.get(
-                                CONF_CTRL_REFRESH_INTERVAL, CTRL_REFRESH_INTERVAL_MN
-                            ),
-                        ): vol.All(int, vol.Range(min=1, max=120)),
-                        vol.Optional(
-                            CONF_MONTHS_BEFORE_SCHEDULES,
-                            default=self.config_entry.options.get(
-                                CONF_MONTHS_BEFORE_SCHEDULES, MONTHS_BEFORE_SCHEDULES
-                            ),
-                        ): vol.All(int, vol.Range(min=1, max=6)),
-                        vol.Optional(
-                            CONF_MONTHS_AFTER_SCHEDULES,
-                            default=self.config_entry.options.get(
-                                CONF_MONTHS_AFTER_SCHEDULES, MONTHS_AFTER_SCHEDULES
-                            ),
-                        ): vol.All(int, vol.Range(min=1, max=6)),
-                    }
-                ),
+            advanced_schema = vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_DELAY_BEFORE_REFRESH,
+                        default=opt.get(
+                            CONF_DELAY_BEFORE_REFRESH,
+                            gp.get(CONF_DELAY_BEFORE_REFRESH, DELAY_BEFORE_REFRESH),
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0,
+                            max=3600,
+                            step=1,
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
+                    vol.Optional(
+                        CONF_DEFAULT_WATERING_DELAY,
+                        default=opt.get(
+                            CONF_DEFAULT_WATERING_DELAY,
+                            gp.get(CONF_DEFAULT_WATERING_DELAY, DEFAULT_WATERING_DELAY),
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0,
+                            max=1440,
+                            step=1,
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
+                    vol.Optional(
+                        CONF_MONTHS_BEFORE_SCHEDULES,
+                        default=self.config_entry.options.get(
+                            CONF_MONTHS_BEFORE_SCHEDULES, MONTHS_BEFORE_SCHEDULES
+                        ),
+                    ): months_1_6,
+                    vol.Optional(
+                        CONF_MONTHS_AFTER_SCHEDULES,
+                        default=self.config_entry.options.get(
+                            CONF_MONTHS_AFTER_SCHEDULES, MONTHS_AFTER_SCHEDULES
+                        ),
+                    ): months_1_6,
+                }
             )
+            schema = vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_CTRL_REFRESH_INTERVAL,
+                        default=self.config_entry.options.get(
+                            CONF_CTRL_REFRESH_INTERVAL, CTRL_REFRESH_INTERVAL_MN
+                        ),
+                    ): num_1_120,
+                    vol.Optional(
+                        CONF_DURATION,
+                        default=self.config_entry.options.get(
+                            CONF_DURATION, DEFAULT_WATERING_DURATION
+                        ),
+                    ): num_1_120,
+                    vol.Required("advanced"): section(
+                        advanced_schema,
+                        {"collapsed": True},
+                    ),
+                }
+            )
+            return self.async_show_form(step_id="init", data_schema=schema)
 
         if self.config_entry.data[CONF_DEVICE_TYPE] == SENSOR_DEVICE_TYPE:
-            return self.async_show_form(
-                step_id="init",
-                data_schema=vol.Schema(
-                    {
-                        vol.Optional(
-                            CONF_SENS_REFRESH_INTERVAL,
-                            default=self.config_entry.options.get(
-                                CONF_SENS_REFRESH_INTERVAL, SENS_REFRESH_INTERVAL_MN
+            # For a sensor device, only certain advanced fields are relevant
+            advanced_schema = vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                        default=opt.get(
+                            CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                            gp.get(
+                                CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                                DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
                             ),
-                        ): vol.All(int, vol.Range(min=1, max=120)),
-                    }
-                ),
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0, max=365, step=1, mode=selector.NumberSelectorMode.BOX
+                        )
+                    ),
+                }
             )
+            schema = vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_SENS_REFRESH_INTERVAL,
+                        default=opt.get(
+                            CONF_SENS_REFRESH_INTERVAL, SENS_REFRESH_INTERVAL_MN
+                        ),
+                    ): num_1_120,
+                    vol.Required("advanced"): section(
+                        advanced_schema,
+                        {"collapsed": False},
+                    ),
+                }
+            )
+            return self.async_show_form(step_id="init", data_schema=schema)
 
-        # Ensure a return value in case no conditions are met
         return self.async_abort(reason="unknown_device_type")
-
-    async def _update_options(self) -> FlowResult:
-        """Update config entry options."""
-        return self.async_create_entry(title="", data=self.options)

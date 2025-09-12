@@ -49,6 +49,7 @@ from .const import (
     DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     DOMAIN,
     GLOBAL_PARAMETERS,
+    MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
     NETRO_DEFAULT_ZONE_MODEL,
@@ -205,35 +206,64 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         entry.data[CONF_DEVICE_NAME],
     )
 
+    # access to global parameters
+    gp = hass.data.get(DOMAIN, {}).get(GLOBAL_PARAMETERS, {})
+
     # get global parameters any type of device could be interested in
     slowdown_factors = None
-    if hass.data[DOMAIN].get(GLOBAL_PARAMETERS) is not None:
-        if hass.data[DOMAIN][GLOBAL_PARAMETERS].get(CONF_SLOWDOWN_FACTOR) is not None:
-            slowdown_factors = hass.data[DOMAIN][GLOBAL_PARAMETERS][
-                CONF_SLOWDOWN_FACTOR
-            ]
+    if gp.get(CONF_SLOWDOWN_FACTOR) is not None:
+        slowdown_factors = gp[CONF_SLOWDOWN_FACTOR]
 
     if entry.data[CONF_DEVICE_TYPE] == SENSOR_DEVICE_TYPE:
-        # get global parameters we are interested in
-        sensor_value_days_before_today = DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY
-        if hass.data[DOMAIN].get(GLOBAL_PARAMETERS) is not None:
-            if (
-                hass.data[DOMAIN][GLOBAL_PARAMETERS].get(
-                    CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY
-                )
-                is not None
-            ):
-                sensor_value_days_before_today = hass.data[DOMAIN][GLOBAL_PARAMETERS][
-                    CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY
-                ]
+        # get sensor specific parameters, look first in the options, next in the global parameters, otherwise use the default value
+        val = next(
+            v
+            for v in (
+                entry.options.get(CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY),
+                gp.get(CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY),
+                DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+            )
+            if v is not None
+        )
+
+        try:
+            sensor_value_days_before_today = int(val)
+        except (TypeError, ValueError):
+            sensor_value_days_before_today = DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY
+            _LOGGER.warning(
+                "The value provided for '%s' is invalid, defaulting to %d",
+                CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+            )
+
+        if (
+            not 0
+            <= sensor_value_days_before_today
+            <= MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY
+        ):
+            sensor_value_days_before_today = DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY
+            _LOGGER.warning(
+                "The value provided for '%s' is out of range [0..%d], defaulting to %d",
+                CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+            )
+
+        refresh_interval = (
+            entry.options.get(CONF_SENS_REFRESH_INTERVAL)
+            if entry.options.get(CONF_SENS_REFRESH_INTERVAL) is not None
+            else SENS_REFRESH_INTERVAL_MN
+        )
+        _LOGGER.debug(
+            "creating sensor coordinator: device_name = %s, refresh_interval = %s, sensor_value_days_before_today = %s",
+            entry.data[CONF_DEVICE_NAME],
+            refresh_interval,
+            sensor_value_days_before_today,
+        )
 
         sensor_coordinator = NetroSensorUpdateCoordinator(
             hass,
-            refresh_interval=(
-                entry.options.get(CONF_SENS_REFRESH_INTERVAL)
-                if entry.options.get(CONF_SENS_REFRESH_INTERVAL) is not None
-                else SENS_REFRESH_INTERVAL_MN
-            ),
+            refresh_interval=refresh_interval,
             sensor_value_days_before_today=sensor_value_days_before_today,
             serial_number=entry.data[CONF_SERIAL_NUMBER],
             device_type=entry.data[CONF_DEVICE_TYPE],
@@ -245,24 +275,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         hass.data[DOMAIN][entry.entry_id] = sensor_coordinator
         _LOGGER.info("Just created : %s", sensor_coordinator)
     elif entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
+        refresh_interval = (
+            entry.options.get(CONF_CTRL_REFRESH_INTERVAL)
+            if entry.options.get(CONF_CTRL_REFRESH_INTERVAL) is not None
+            else CTRL_REFRESH_INTERVAL_MN
+        )
+        schedules_months_before = (
+            entry.options.get(CONF_MONTHS_BEFORE_SCHEDULES)
+            if entry.options.get(CONF_MONTHS_BEFORE_SCHEDULES) is not None
+            else MONTHS_BEFORE_SCHEDULES
+        )
+        schedules_months_after = (
+            entry.options.get(CONF_MONTHS_AFTER_SCHEDULES)
+            if entry.options.get(CONF_MONTHS_AFTER_SCHEDULES) is not None
+            else MONTHS_AFTER_SCHEDULES
+        )
+        _LOGGER.debug(
+            "creating controller: device_name = %s, refresh_interval = %s, schedules_months_before = %s, schedules_months_after = %s",
+            entry.data[CONF_DEVICE_NAME],
+            refresh_interval,
+            schedules_months_before,
+            schedules_months_after,
+        )
+
         controller_coordinator = NetroControllerUpdateCoordinator(
             hass,
-            refresh_interval=(
-                entry.options.get(CONF_CTRL_REFRESH_INTERVAL)
-                if entry.options.get(CONF_CTRL_REFRESH_INTERVAL) is not None
-                else CTRL_REFRESH_INTERVAL_MN
-            ),
+            refresh_interval=refresh_interval,
             slowdown_factors=slowdown_factors,
-            schedules_months_before=(
-                entry.options.get(CONF_MONTHS_BEFORE_SCHEDULES)
-                if entry.options.get(CONF_MONTHS_BEFORE_SCHEDULES) is not None
-                else MONTHS_BEFORE_SCHEDULES
-            ),
-            schedules_months_after=(
-                entry.options.get(CONF_MONTHS_AFTER_SCHEDULES)
-                if entry.options.get(CONF_MONTHS_AFTER_SCHEDULES) is not None
-                else MONTHS_AFTER_SCHEDULES
-            ),
+            schedules_months_before=schedules_months_before,
+            schedules_months_after=schedules_months_after,
             serial_number=entry.data[CONF_SERIAL_NUMBER],
             device_type=entry.data[CONF_DEVICE_TYPE],
             device_name=entry.data[CONF_DEVICE_NAME],
@@ -520,7 +561,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _entry
             for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
             if _entry.entry_id != entry.entry_id
-            and entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE
+            and _entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE
         ]
 
         if not other_loaded_entries:
