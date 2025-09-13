@@ -35,6 +35,20 @@ from .const import (
     DELAY_BEFORE_REFRESH,
     DOMAIN,
     GLOBAL_PARAMETERS,
+    MAX_DELAY_BEFORE_REFRESH,
+    MAX_MONTHS_AFTER_SCHEDULES,
+    MAX_MONTHS_BEFORE_SCHEDULES,
+    MAX_REFRESH_INTERVAL_MN,
+    MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+    MAX_WATERING_DELAY,
+    MAX_WATERING_DURATION,
+    MIN_DELAY_BEFORE_REFRESH,
+    MIN_MONTHS_AFTER_SCHEDULES,
+    MIN_MONTHS_BEFORE_SCHEDULES,
+    MIN_REFRESH_INTERVAL_MN,
+    MIN_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+    MIN_WATERING_DELAY,
+    MIN_WATERING_DURATION,
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
     SENS_REFRESH_INTERVAL_MN,
@@ -228,17 +242,6 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
             new_options = {**self.config_entry.options, **user_input}
             return self.async_create_entry(title="", data=new_options)
 
-        num_1_120 = selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=1, max=120, step=1, mode=selector.NumberSelectorMode.BOX
-            )
-        )
-        months_1_6 = selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=1, max=6, step=1, mode=selector.NumberSelectorMode.BOX
-            )
-        )
-
         # Fallbacks from options or YAML (backward compatibility)
         gp = self._gp()
         opt = self.config_entry.options
@@ -254,8 +257,8 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
                         ),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
-                            min=0,
-                            max=3600,
+                            min=MIN_DELAY_BEFORE_REFRESH,
+                            max=MAX_DELAY_BEFORE_REFRESH,
                             step=1,
                             mode=selector.NumberSelectorMode.BOX,
                         )
@@ -268,8 +271,8 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
                         ),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
-                            min=0,
-                            max=1440,
+                            min=MIN_WATERING_DELAY,
+                            max=MAX_WATERING_DELAY,
                             step=1,
                             mode=selector.NumberSelectorMode.BOX,
                         )
@@ -279,13 +282,27 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
                         default=self.config_entry.options.get(
                             CONF_MONTHS_BEFORE_SCHEDULES, MONTHS_BEFORE_SCHEDULES
                         ),
-                    ): months_1_6,
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=MIN_MONTHS_BEFORE_SCHEDULES,
+                            max=MAX_MONTHS_BEFORE_SCHEDULES,
+                            step=1,
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
                     vol.Optional(
                         CONF_MONTHS_AFTER_SCHEDULES,
                         default=self.config_entry.options.get(
                             CONF_MONTHS_AFTER_SCHEDULES, MONTHS_AFTER_SCHEDULES
                         ),
-                    ): months_1_6,
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=MIN_MONTHS_AFTER_SCHEDULES,
+                            max=MAX_MONTHS_AFTER_SCHEDULES,
+                            step=1,
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
                 }
             )
             schema = vol.Schema(
@@ -295,13 +312,27 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
                         default=self.config_entry.options.get(
                             CONF_CTRL_REFRESH_INTERVAL, CTRL_REFRESH_INTERVAL_MN
                         ),
-                    ): num_1_120,
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=MIN_REFRESH_INTERVAL_MN,
+                            max=MAX_REFRESH_INTERVAL_MN,
+                            step=1,
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
                     vol.Optional(
                         CONF_DURATION,
                         default=self.config_entry.options.get(
                             CONF_DURATION, DEFAULT_WATERING_DURATION
                         ),
-                    ): num_1_120,
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=MIN_WATERING_DURATION,
+                            max=MAX_WATERING_DURATION,
+                            step=1,
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
                     vol.Required("advanced"): section(
                         advanced_schema,
                         {"collapsed": True},
@@ -325,7 +356,10 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
                         ),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
-                            min=0, max=365, step=1, mode=selector.NumberSelectorMode.BOX
+                            min=MIN_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                            max=MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                            step=1,
+                            mode=selector.NumberSelectorMode.BOX,
                         )
                     ),
                 }
@@ -337,7 +371,14 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
                         default=opt.get(
                             CONF_SENS_REFRESH_INTERVAL, SENS_REFRESH_INTERVAL_MN
                         ),
-                    ): num_1_120,
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=MIN_REFRESH_INTERVAL_MN,
+                            max=MAX_REFRESH_INTERVAL_MN,
+                            step=1,
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
                     vol.Required("advanced"): section(
                         advanced_schema,
                         {"collapsed": False},

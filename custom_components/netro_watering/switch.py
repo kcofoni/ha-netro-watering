@@ -36,6 +36,8 @@ from .const import (
     DELAY_BEFORE_REFRESH,
     DOMAIN,
     GLOBAL_PARAMETERS,
+    MAX_WATERING_DURATION,
+    MIN_WATERING_DURATION,
 )
 from .coordinator import NetroControllerUpdateCoordinator
 
@@ -107,11 +109,33 @@ async def async_setup_entry(
         gp = hass.data.get(DOMAIN, {}).get(GLOBAL_PARAMETERS, {})
 
         # get the configuration options we are interested in
-        default_watering_duration = (
-            (entry.options.get(CONF_DURATION))
-            if (entry.options.get(CONF_DURATION) is not None)
-            else DEFAULT_WATERING_DURATION
+        # default_watering_duration (minutes, 1..120) ---
+        val = next(
+            v
+            for v in (entry.options.get(CONF_DURATION), DEFAULT_WATERING_DURATION)
+            if v is not None
         )
+        try:
+            default_watering_duration = int(val)
+        except (TypeError, ValueError):
+            default_watering_duration = DEFAULT_WATERING_DURATION
+            _LOGGER.warning(
+                "The value provided for '%s' is invalid, defaulting to %d",
+                CONF_DURATION,
+                DEFAULT_WATERING_DURATION,
+            )
+
+        if (
+            not MIN_WATERING_DURATION
+            <= default_watering_duration
+            <= MAX_WATERING_DURATION
+        ):
+            default_watering_duration = DEFAULT_WATERING_DURATION
+            _LOGGER.warning(
+                "The value provided for '%s' should not be negative, defaulting to %d",
+                CONF_DURATION,
+                DEFAULT_WATERING_DURATION,
+            )
 
         # default_watering_delay
         val = next(
@@ -288,7 +312,6 @@ class ControllerEnablingSwitch(
         return self.coordinator.enabled
 
 
-# ruff: noqa
 class ZoneWateringSwitch(
     CoordinatorEntity[NetroControllerUpdateCoordinator], SwitchEntity
 ):
@@ -328,7 +351,7 @@ class ZoneWateringSwitch(
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
-        start_time = kwargs.get(ATTR_WATERING_START_TIME, None)
+        start_time = kwargs.get(ATTR_WATERING_START_TIME)
         await getattr(
             self.coordinator.active_zones[self._zone_id],
             self.entity_description.netro_on_name,
@@ -343,23 +366,22 @@ class ZoneWateringSwitch(
                 self.coordinator.active_zones[self._zone_id].name,
                 self._duration_minutes,
             )
-        else:
-            if (
-                start_time is not None
-            ):  # start_time is higher priority than delay if both provided
-                _LOGGER.info(
-                    "Watering of zone %s will start on %s and will last %s minutes",
-                    self.coordinator.active_zones[self._zone_id].name,
-                    start_time,
-                    duration,
-                )
-            else:  # delay is necessarily not 0
-                _LOGGER.info(
-                    "Watering of zone %s will start in %s minutes and will last %s minutes",
-                    self.coordinator.active_zones[self._zone_id].name,
-                    delay,
-                    duration,
-                )
+        elif (
+            start_time is not None
+        ):  # start_time is higher priority than delay if both provided
+            _LOGGER.info(
+                "Watering of zone %s will start on %s and will last %s minutes",
+                self.coordinator.active_zones[self._zone_id].name,
+                start_time,
+                duration,
+            )
+        else:  # delay is necessarily not 0
+            _LOGGER.info(
+                "Watering of zone %s will start in %s minutes and will last %s minutes",
+                self.coordinator.active_zones[self._zone_id].name,
+                delay,
+                duration,
+            )
 
         _LOGGER.info(
             "Waiting for %s seconds before refreshing info (time it takes for Netro to return the status)",
@@ -418,7 +440,7 @@ class ControllerWateringSwitch(
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
-        start_time = kwargs.get(ATTR_WATERING_START_TIME, None)
+        start_time = kwargs.get(ATTR_WATERING_START_TIME)
         await getattr(
             self.coordinator,
             self.entity_description.netro_on_name,
@@ -432,21 +454,20 @@ class ControllerWateringSwitch(
                 "Watering of all zones has been started right now for %s minutes for each zone",
                 duration,
             )
-        else:
-            if (
-                start_time is not None
-            ):  # start_time is higher priority than delay if both provided
-                _LOGGER.info(
-                    "Watering of all zones will start on %s and will last %s minutes for each zone",
-                    start_time,
-                    duration,
-                )
-            else:  # delay is necessarily not 0
-                _LOGGER.info(
-                    "Watering of all zones will start in %s minutes and will last %s minutes for each zone",
-                    delay,
-                    duration,
-                )
+        elif (
+            start_time is not None
+        ):  # start_time is higher priority than delay if both provided
+            _LOGGER.info(
+                "Watering of all zones will start on %s and will last %s minutes for each zone",
+                start_time,
+                duration,
+            )
+        else:  # delay is necessarily not 0
+            _LOGGER.info(
+                "Watering of all zones will start in %s minutes and will last %s minutes for each zone",
+                delay,
+                duration,
+            )
 
         _LOGGER.info(
             "Waiting for %s seconds before refreshing info (time it takes for Netro to return the status)",

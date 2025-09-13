@@ -11,8 +11,8 @@ from typing import Any
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import async_get as async_get_device_registry
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
+import homeassistant.helpers.device_registry as dr
+import homeassistant.helpers.entity_registry as er
 
 from .const import CONF_SERIAL_NUMBER, DOMAIN
 
@@ -105,8 +105,8 @@ async def async_get_config_entry_diagnostics(
         pass
 
     # From device registry identifiers (DOMAIN, serial-like identifiers)
-    dr = async_get_device_registry(hass)
-    for dev in dr.devices.values():
+    device_registry = dr.async_get(hass)
+    for dev in device_registry.devices.values():
         if entry.entry_id not in dev.config_entries:
             continue
         for dom, ident in dev.identifiers:
@@ -133,9 +133,9 @@ async def async_get_config_entry_diagnostics(
         coordinator_data = _safe(getattr(coordinator, "data", None))
 
     # --- Entities & devices attached to this entry ---
-    er = async_get_entity_registry(hass)
+    entity_registry = er.async_get(hass)
     entities = []
-    for ent in er.entities.values():
+    for ent in entity_registry.entities.values():
         if ent.config_entry_id != entry.entry_id or ent.platform != DOMAIN:
             continue
         state = hass.states.get(ent.entity_id)
@@ -155,7 +155,7 @@ async def async_get_config_entry_diagnostics(
         )
 
     devices = []
-    for dev in dr.devices.values():
+    for dev in device_registry.devices.values():
         if entry.entry_id not in dev.config_entries:
             continue
         # Keep only devices owned by this domain for a compact report

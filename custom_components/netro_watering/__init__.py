@@ -49,7 +49,14 @@ from .const import (
     DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     DOMAIN,
     GLOBAL_PARAMETERS,
+    MAX_MONTHS_AFTER_SCHEDULES,
+    MAX_MONTHS_BEFORE_SCHEDULES,
+    MAX_REFRESH_INTERVAL_MN,
     MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+    MIN_MONTHS_AFTER_SCHEDULES,
+    MIN_MONTHS_BEFORE_SCHEDULES,
+    MIN_REFRESH_INTERVAL_MN,
+    MIN_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
     NETRO_DEFAULT_ZONE_MODEL,
@@ -237,23 +244,49 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             )
 
         if (
-            not 0
+            not MIN_SENSOR_VALUE_DAYS_BEFORE_TODAY
             <= sensor_value_days_before_today
             <= MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY
         ):
             sensor_value_days_before_today = DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY
             _LOGGER.warning(
-                "The value provided for '%s' is out of range [0..%d], defaulting to %d",
+                "The value provided for '%s' is out of range [%d..%d], defaulting to %d",
                 CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                MIN_SENSOR_VALUE_DAYS_BEFORE_TODAY,
                 MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY,
                 DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
             )
 
-        refresh_interval = (
-            entry.options.get(CONF_SENS_REFRESH_INTERVAL)
-            if entry.options.get(CONF_SENS_REFRESH_INTERVAL) is not None
-            else SENS_REFRESH_INTERVAL_MN
+        # --- Sensor refresh_interval (minutes, 1..120) ---
+        val = next(
+            v
+            for v in (
+                entry.options.get(CONF_SENS_REFRESH_INTERVAL),
+                SENS_REFRESH_INTERVAL_MN,
+            )
+            if v is not None
         )
+
+        try:
+            refresh_interval = int(val)
+        except (TypeError, ValueError):
+            refresh_interval = SENS_REFRESH_INTERVAL_MN
+            _LOGGER.warning(
+                "The value provided for '%s' is invalid, defaulting to %d",
+                CONF_SENS_REFRESH_INTERVAL,
+                SENS_REFRESH_INTERVAL_MN,
+            )
+
+        if not MIN_REFRESH_INTERVAL_MN <= refresh_interval <= MAX_REFRESH_INTERVAL_MN:
+            refresh_interval = SENS_REFRESH_INTERVAL_MN
+            _LOGGER.warning(
+                "The value provided for '%s' is out of range [%d..%d], defaulting to %d",
+                CONF_SENS_REFRESH_INTERVAL,
+                MIN_REFRESH_INTERVAL_MN,
+                MAX_REFRESH_INTERVAL_MN,
+                SENS_REFRESH_INTERVAL_MN,
+            )
+
         _LOGGER.debug(
             "creating sensor coordinator: device_name = %s, refresh_interval = %s, sensor_value_days_before_today = %s",
             entry.data[CONF_DEVICE_NAME],
@@ -275,21 +308,94 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         hass.data[DOMAIN][entry.entry_id] = sensor_coordinator
         _LOGGER.info("Just created : %s", sensor_coordinator)
     elif entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
-        refresh_interval = (
-            entry.options.get(CONF_CTRL_REFRESH_INTERVAL)
-            if entry.options.get(CONF_CTRL_REFRESH_INTERVAL) is not None
-            else CTRL_REFRESH_INTERVAL_MN
+        opt = entry.options
+
+        # --- refresh_interval (minutes, 1..120) ---
+        val = next(
+            v
+            for v in (opt.get(CONF_CTRL_REFRESH_INTERVAL), CTRL_REFRESH_INTERVAL_MN)
+            if v is not None
         )
-        schedules_months_before = (
-            entry.options.get(CONF_MONTHS_BEFORE_SCHEDULES)
-            if entry.options.get(CONF_MONTHS_BEFORE_SCHEDULES) is not None
-            else MONTHS_BEFORE_SCHEDULES
+        try:
+            refresh_interval = int(val)
+        except (TypeError, ValueError):
+            refresh_interval = CTRL_REFRESH_INTERVAL_MN
+            _LOGGER.warning(
+                "The value provided for '%s' is invalid, defaulting to %d",
+                CONF_CTRL_REFRESH_INTERVAL,
+                CTRL_REFRESH_INTERVAL_MN,
+            )
+
+        if not MIN_REFRESH_INTERVAL_MN <= refresh_interval <= MAX_REFRESH_INTERVAL_MN:
+            refresh_interval = CTRL_REFRESH_INTERVAL_MN
+            _LOGGER.warning(
+                "The value provided for '%s' is out of range [%d..%d], defaulting to %d",
+                CONF_CTRL_REFRESH_INTERVAL,
+                MIN_REFRESH_INTERVAL_MN,
+                MAX_REFRESH_INTERVAL_MN,
+                CTRL_REFRESH_INTERVAL_MN,
+            )
+
+        # --- schedules_months_before ---
+        val = next(
+            v
+            for v in (opt.get(CONF_MONTHS_BEFORE_SCHEDULES), MONTHS_BEFORE_SCHEDULES)
+            if v is not None
         )
-        schedules_months_after = (
-            entry.options.get(CONF_MONTHS_AFTER_SCHEDULES)
-            if entry.options.get(CONF_MONTHS_AFTER_SCHEDULES) is not None
-            else MONTHS_AFTER_SCHEDULES
+        try:
+            schedules_months_before = int(val)
+        except (TypeError, ValueError):
+            schedules_months_before = MONTHS_BEFORE_SCHEDULES
+            _LOGGER.warning(
+                "The value provided for '%s' is invalid, defaulting to %d",
+                CONF_MONTHS_BEFORE_SCHEDULES,
+                MONTHS_BEFORE_SCHEDULES,
+            )
+
+        if (
+            not MIN_MONTHS_BEFORE_SCHEDULES
+            <= schedules_months_before
+            <= MAX_MONTHS_BEFORE_SCHEDULES
+        ):
+            schedules_months_before = MONTHS_BEFORE_SCHEDULES
+            _LOGGER.warning(
+                "The value provided for '%s' is out of range [%d..%d], defaulting to %d",
+                CONF_MONTHS_BEFORE_SCHEDULES,
+                MIN_MONTHS_BEFORE_SCHEDULES,
+                MAX_MONTHS_BEFORE_SCHEDULES,
+                MONTHS_BEFORE_SCHEDULES,
+            )
+
+        # --- schedules_months_after ---
+        val = next(
+            v
+            for v in (opt.get(CONF_MONTHS_AFTER_SCHEDULES), MONTHS_AFTER_SCHEDULES)
+            if v is not None
         )
+        try:
+            schedules_months_after = int(val)
+        except (TypeError, ValueError):
+            schedules_months_after = MONTHS_AFTER_SCHEDULES
+            _LOGGER.warning(
+                "The value provided for '%s' is invalid, defaulting to %d",
+                CONF_MONTHS_AFTER_SCHEDULES,
+                MONTHS_AFTER_SCHEDULES,
+            )
+
+        if (
+            not MIN_MONTHS_AFTER_SCHEDULES
+            <= schedules_months_after
+            <= MAX_MONTHS_AFTER_SCHEDULES
+        ):
+            schedules_months_after = MONTHS_AFTER_SCHEDULES
+            _LOGGER.warning(
+                "The value provided for '%s' is out of range [%d..%d], defaulting to %d",
+                CONF_MONTHS_AFTER_SCHEDULES,
+                MIN_MONTHS_AFTER_SCHEDULES,
+                MAX_MONTHS_AFTER_SCHEDULES,
+                MONTHS_AFTER_SCHEDULES,
+            )
+
         _LOGGER.debug(
             "creating controller: device_name = %s, refresh_interval = %s, schedules_months_before = %s, schedules_months_after = %s",
             entry.data[CONF_DEVICE_NAME],
