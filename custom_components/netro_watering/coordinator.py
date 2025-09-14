@@ -481,14 +481,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
     def device_info(self) -> DeviceInfo:
         """Return information about the controller as a device. To be used when creating related entities."""
         return DeviceInfo(
-            name=f"{self.device_name}",
             identifiers={(DOMAIN, self.serial_number)},
-            manufacturer=MANUFACTURER,
-            hw_version=self.hw_version,
-            sw_version=self.sw_version,
-            model=NETRO_PIXIE_CONTROLLER_MODEL
-            if hasattr(self, NETRO_CONTROLLER_BATTERY_LEVEL)
-            else NETRO_SPRITE_CONTROLLER_MODEL,
         )
 
     def _update_from_schedules(

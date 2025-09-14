@@ -49,6 +49,7 @@ from .const import (
     DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     DOMAIN,
     GLOBAL_PARAMETERS,
+    MANUFACTURER,
     MAX_MONTHS_AFTER_SCHEDULES,
     MAX_MONTHS_BEFORE_SCHEDULES,
     MAX_REFRESH_INTERVAL_MN,
@@ -59,7 +60,10 @@ from .const import (
     MIN_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
+    NETRO_CONTROLLER_BATTERY_LEVEL,
     NETRO_DEFAULT_ZONE_MODEL,
+    NETRO_PIXIE_CONTROLLER_MODEL,
+    NETRO_SPRITE_CONTROLLER_MODEL,
     SENS_REFRESH_INTERVAL_MN,
     SENSOR_DEVICE_TYPE,
 )
@@ -418,6 +422,41 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         )
         await controller_coordinator.async_config_entry_first_refresh()
         hass.data[DOMAIN][entry.entry_id] = controller_coordinator
+
+        # create device in the device registry
+        # in order to be able to link the zones to the controller
+        # and to have a nice representation of the devices in HA
+        # even if the controller does not have any sensor itself
+        # use serial number as unique identifier
+        serial = controller_coordinator.serial_number
+        name = (
+            controller_coordinator.device_name
+            or entry.data.get(CONF_DEVICE_NAME)
+            or serial
+        )
+        model = (
+            NETRO_PIXIE_CONTROLLER_MODEL
+            if hasattr(controller_coordinator, NETRO_CONTROLLER_BATTERY_LEVEL)
+            else NETRO_SPRITE_CONTROLLER_MODEL
+        )
+
+        dev_reg = dr.async_get(hass)
+        dev_reg.async_get_or_create(
+            config_entry_id=entry.entry_id,
+            identifiers={(DOMAIN, serial)},
+            manufacturer=MANUFACTURER,
+            name=name,
+            model=model,
+            sw_version=controller_coordinator.sw_version,
+            hw_version=controller_coordinator.hw_version,
+        )
+        _LOGGER.debug(
+            "device explicitely created into the registry: name = %s, serial = %s, model = %s, manufacturer = %s",
+            name,
+            serial,
+            model,
+            MANUFACTURER,
+        )
         _LOGGER.info("Just created : %s", controller_coordinator)
     else:
         raise HomeAssistantError(

@@ -27,6 +27,7 @@ from .const import (
     CONF_SENS_REFRESH_INTERVAL,
     CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     CONF_SERIAL_NUMBER,
+    CONTROLLER_ADVANCED_OPTIONS_COLLAPSED,
     CONTROLLER_DEVICE_TYPE,
     CTRL_REFRESH_INTERVAL_MN,
     DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
@@ -52,6 +53,7 @@ from .const import (
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
     SENS_REFRESH_INTERVAL_MN,
+    SENSOR_ADVANCED_OPTIONS_COLLAPSED,
     SENSOR_DEVICE_TYPE,
 )
 from .netrofunction import (
@@ -335,7 +337,7 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
                     ),
                     vol.Required("advanced"): section(
                         advanced_schema,
-                        {"collapsed": True},
+                        {"collapsed": CONTROLLER_ADVANCED_OPTIONS_COLLAPSED},
                     ),
                 }
             )
@@ -381,7 +383,7 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
                     ),
                     vol.Required("advanced"): section(
                         advanced_schema,
-                        {"collapsed": False},
+                        {"collapsed": SENSOR_ADVANCED_OPTIONS_COLLAPSED},
                     ),
                 }
             )
