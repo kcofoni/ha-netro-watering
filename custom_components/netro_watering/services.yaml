@@ -1,3 +1,18 @@
+no_water:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: netro_watering
+    days:
+      required: true
+      default: 2
+      selector:
+        number:
+          min: 1
+          max: 30
+          mode: box
 refresh_data:
   fields:
     config_entry_id:

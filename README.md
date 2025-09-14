@@ -3,55 +3,75 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs) ![GitHub repo size](https://img.shields.io/github/repo-size/kcofoni/ha-netro-watering) ![GitHub](https://img.shields.io/github/license/kcofoni/ha-netro-watering)
 
 ## About
-This is a Home Assistant integration for Netro Smart Garden devices.
+This is a Home Assistant custom integration for **Netro Smart Garden** devices.
 
-This custom component allows you to manage the [*Netro*](https://Netrohome.com/) ecosystem, ensuring the automatic watering of the garden, thanks to the controllers and sensors of the brand. It relies on *Netro*'s [Public API](http://www.Netrohome.com/en/shop/articles/10).
+It lets you manage the [Netro](https://netrohome.com) ecosystem —controllers and sensors —to **automate garden watering** in Home Assistant. The integration uses Netro’s [Public API](http://www.netrohome.com/en/shop/articles/10).
 
-It has been developed from Home Assistant 2023.4.0 version.
+**Compatibility:** developed and tested with Home Assistant **2023.4.0** and later.
+
+*This project is community-maintained and not affiliated with Netro, Inc.*
 
 ## Description
-The *Netro* controller is connected to the solenoid valves which will each water a particular area of your garden. The maximum number of zones that can be managed depends on the controller model you have. Only the zones actually connected to the solenoid valves can be managed by the *Netro* system and therefore by the integration.
+Netro controllers drive the solenoid valves that irrigate your garden’s **zones** (individual watering circuits). The number of zones available depends on your controller model. Only zones that are physically connected to a solenoid valve are exposed and can be controlled by the integration.
 
-The integration defines three types of devices:
+The integration exposes three device types:
+- **Controllers**
+- **Zones** (controlled by the controllers)
+- **Soil sensors** that measure soil moisture, temperature, and light level
 
-* controllers
-* zones controlled by the controllers
-* soil sensors that measure the humidity and temperature of the soil as well as the amount of light received
+With this integration, you can monitor and control your controllers, zones, and sensors in Home Assistant.
 
-The integration allows you to manage the controllers and all the zones and sensors that are part of your system.
-Netro products *Sprite*, *Spark*, *Pixie* and *Whisperer* are actually supported.
+**Supported models:** Netro **Sprite**, **Spark**, **Pixie**, and **Whisperer** (currently supported).
 
 ## Installation
 
 ### From HACS
 
-1. Install HACS if you haven't already (see [installation guide](https://www.hacs.xyz/docs/use/download/download/#to-download-hacs-container)).
-2. Find and install "Netro Watering" integration in HACS's "Integrations" tab.
-3. Restart your Home Assistant.
-4. Add "Netro Watering" integration in Home Assistant's "Configuration -> Integrations" tab.
+1. Install HACS if you haven't already (see the [installation guide](https://www.hacs.xyz/docs/use/download/download/#to-download-hacs-container)).
+2. In Home Assistant, open **HACS → Integrations**, search for **Netro Watering**, and install it.
+3. **Restart** Home Assistant.
+4. Go to **Settings → Devices & Services → Add Integration**, search for **Netro Watering**, and add it.
+
+---
 
 ### Manual
 
-1. Download and unzip the [repo archive](https://github.com/kcofoni/ha-netro-watering/archive/refs/heads/main.zip). (You could also click "Download ZIP" after pressing the green button in the repo, alternatively, you could clone the repo from SSH add-on).
-2. Copy contents of the archive/repo into your `/config` directory.
-3. Restart your Home Assistant.
-4. Add "Netro Watering" integration in Home Assistant's "Configuration -> Integrations" tab.
+1. Download and unzip the [repo archive](https://github.com/kcofoni/ha-netro-watering/archive/refs/heads/main.zip).  
+   *(Alternatively, click **Code → Download ZIP**, or clone the repo.)*
+2. Copy the integration into your config so that this path exists:
+   ```
+   /config/custom_components/netro_watering/
+   ```
+   If the archive contains `custom_components/netro_watering/`, copy that folder as-is.
+3. **Restart** Home Assistant.
+4. Go to **Settings → Devices & Services → Add Integration**, search for **Netro Watering**, and add it.
+
+---
 
 ## Configuration
 
-Please repeat step 4. as mentioned above for each device you want to include, whatever it is a ground sensor, a multi-zone controller (Sprite or Spark) or a single-zone controler (Pixie). Each zone of a controller will be represented by separate device related to the controller it depends on.
+Repeat step **4** for **each device** you want to include—whether a **soil sensor**, a **multi-zone controller** (*Sprite* or *Spark*), or a **single-zone controller** (*Pixie*).  
+Each **zone** managed by a controller is created as a **separate device** linked to that controller.
 
-![add a config entry](https://kcofoni.github.io/ha-netro-watering/images/add_config_entry.png "Setup of a *Netro* device")
-![device is created](https://kcofoni.github.io/ha-netro-watering/images/device_created.png "Sucess of a *Netro* device setup")
+![add a config entry](https://kcofoni.github.io/ha-netro-watering/images/add_config_entry.png "Setup of a Netro device")
+![device is created](https://kcofoni.github.io/ha-netro-watering/images/device_created.png "Success: Netro device added")
 
-At this point, several devices may have been created related to ten's of entity. This latter are representing the humidity, temperature, illuminance of the sensors as well as the current/last/next status of each zone. Switches have been created allowing to start/stop watering and enable/disable controllers. A calendar is available for each controller which displays the watering schedules planned by Netro.
+After setup, you may see multiple devices and **dozens of entities**, including:
+- **Soil sensors:** moisture, temperature, and illuminance.
+- **Zones:** current/last/next watering status; switches to start/stop watering.
+- **Controllers:** switches to enable/disable controllers; a **calendar** per controller showing watering schedules planned by Netro.
 
-Options may be changed related to polling refresh interval of sensors and controllers independently. Default watering duration and schedules options may also be changed specifically for the controllers. 
+Polling intervals can be configured separately for sensors and controllers. A default watering duration can be set per controller. Advanced settings are available for both sensors and controllers. 
 
 ![change controller options](https://kcofoni.github.io/ha-netro-watering/images/controller_options.png "Controller options")
 ![change sensor options](https://kcofoni.github.io/ha-netro-watering/images/sensor_options.png "Sensor options")
 
-**IMPORTANT: to be effective, each time options have been changed, the related device must be reloaded.**
+> **Note**
+> You no longer need to reload the device after changing options. Changes are applied automatically.
+> - Most updates take effect on the **next polling cycle**.
+> - `default_watering_delay` and `delay_before_refresh` apply to **subsequent commands**.
+> - `sensor_value_days_before_today` is used on the **next sensor update**.
+> - No manual reload or restart is required (except for internal fields like `netro_api_url`, if instructed).
 
 ## Lovelace cards
 Here are some lovelace cards I am presently using to control my watering system with the help of this integration.
@@ -66,6 +86,7 @@ The Netro Watering entities may be integrated into automations. The following in
 - **Enable** and **Disable** services - to be applied to any controller.
 - **Refresh data** - allows to update the data of the devices (controller, zones, sensors) when desired
 - **Report weather** - for reporting weather data, overriding system default weather data
+- **No water** - suspend watering for a given number of days on the specified controller
 
 ![call service](https://kcofoni.github.io/ha-netro-watering/images/service_call.png "Developer Tools")
 
@@ -80,13 +101,18 @@ The **Set moisture** service provided by the integration and applicable to a par
 Netro offers to obtain weather data, very useful for establishing automatic watering schedules, from a number of weather providers. In some cases, national services may be more relevant and more precise so that we will want to feed Netro with data from these services instead of the listed providers. The **Report weather** service is offered for this purpose. Each user will be able to establish his own Home Assistant script which will call on this service after having collected custom weather information.
 
 ## Advanced configuration
-Some general settings can be set for the Netro Watering integration in the Home Assistant configuration file (*configuration.yaml*). They correspond to both optional and non-device specific parameters. The integration works well without its parameters which can nevertheless provide optimizations and respond to specific situations. If not set, the default values are applied.
+You can configure a few general settings for the Netro Watering integration in Home Assistant’s *configuration.yaml*. These settings are optional and not tied to a specific device. The integration works well without them, but they can optimize behavior or cover specific use cases. If omitted, default values are used.
 
-  - **delay_before_refresh** [default value = 5]: This is the **time to wait, in seconds, before getting a status feedback** from [NPA](http://www.Netrohome.com/en/shop/articles/10) after executing a given action (i.e. start watering). My experience shows that at least 4 secondes are needed, so I personally put 5 to be comfortable.
-  - **default_watering_delay** [default value = 0]: This is the **time to wait before actually proceeding when starting the irrigation**. I don't see much point in setting this parameter in production. I use it to test start/stop irrigation switches without having to actually run my solenoid valves each time.
-  - **sensor_value_days_before_today** [default value = 1, must be greater than or equal to 1]: This is the depth of the history of the values ​​reported by the sensors, used by the integration. Useful when a sensor is inoperative for a while and you still want to retrieve its last values.
-  - **slowdown_factors** [default value = None]: It is a dictionary that defines time slots during which the polling process of controllers (not applicable for sensors) will be slowed down by applying a multiplier coefficient to the refresh period (see explanations below).
-  - **netro_api_url**: internal use
+- **`slowdown_factors`** (default: null) — A mapping of time windows to a multiplier applied to the controllers’ polling interval (sensors are not affected). During matching windows, the effective polling interval becomes: base_interval × multiplier (typically > 1 to slow down).
+- **`netro_api_url`** — For internal use only.
+
+The following parameters were previously defined in the configuration file, but the UI options now take precedence for both sensors and controllers. 
+
+- **`delay_before_refresh`** *(default: **5 s**)* — Wait time **before fetching status** from the [Netro Public API (NPA)](http://www.Netrohome.com/en/shop/articles/10) after sending a command (e.g., start watering). In practice, **≥ 4 s** is needed; **5 s** is a safe default. If set too low, you may read stale state.
+
+- **`default_watering_delay`** *(default: **0 s**)* — **Grace period** before actually starting irrigation after a start command. Useful for testing start/stop switches without opening valves. For production, keep **0 s**.
+
+- **`sensor_value_days_before_today`** *(default: **1**, min: **1**)* — **Look-back window (days)** for sensor history used by the integration. If a sensor is temporarily offline, the last value **within this window** can be reused. Larger values increase the risk of stale data.
 
 ### About the slowdown factor
 
@@ -94,28 +120,38 @@ As indicated in the documentation, the number of calls to the [Public API of Net
 
 The configuration of a device (controller or sensor) within UI makes it possible to define, as showed above, a specific polling frequency (refresh interval). One may wonder if this refresh period should be the same regardless of the time of day. There are indeed time slots on which there is no gain in polling the system very often (at night for example) and at the opposite times when watering is very likely and which requires close monitoring.
 
-The slowdown factor parameter (sdf) reduces the refresh rate at certain times. Let us take an example:
+The **slowdown factor** (`sdf`) temporarily **multiplies the controllers’ polling interval** during specified time windows (sensors are not affected).
 
-    slowdown_factors:
-    - from: '23:00' # everybody sleeps during the night, isn't it ?
-        to: '05:55'
-        sdf: 15     # the refresh period will be multiplied by 15 during the given time slot
-    - from: '10:30' # it is too hot and sunny to reasonably decide to water (or very ponctual watering)
-        to: '17:00'
-        sdf: 5      # that means that if the nominal refresh period is 2 mn for a given controller it becomes 10 mn between 10:30am and 5pm
+**Formula:** `effective_polling_interval = base_interval × sdf`
 
-**The rest of the time, the nominal refresh period is applied**. Thanks to this mechanism of slowing down at certain times of the day, **one can decide on a fairly short polling period**.
+> Times use 24-hour `HH:MM` format and can cross midnight (see first window below).
 
-### Example of Netro Configuration in *configuration.yaml*
+#### Example (`configuration.yaml`)
+```yaml
+slowdown_factors:
+  - from: '23:00'  # overnight: slow down while everyone sleeps
+    to:   '05:55'
+    sdf:  15       # polling interval ×15 in this window
 
-    netro_watering:
-        delay_before_refresh: 5 # in seconds
-        default_watering_delay: 0 # starting watering right now
-        sensor_value_days_before_today: 2 # getting values of the sensors until the day before yesterday
-        slowdown_factors:
-            - from: '23:00' # everybody sleeps during the night...
-            to: '05:55'
-            sdf: 15
-            - from: '10:30' # it is too hot and sunny to reasonably decide to water (or very ponctual watering)
-            to: '17:00'
-            sdf: 5
+  - from: '10:30'  # hottest/sunniest hours: fewer checks or only occasional watering
+    to:   '17:00'
+    sdf:  5        # e.g., if base is 2 min, becomes 10 min between 10:30 and 17:00
+```
+
+**Outside the defined windows, the nominal polling interval is used.** This approach allows a **short nominal interval** while selectively **slowing controller polling** at certain times of day.
+
+### Example of Netro configuration in *configuration.yaml*
+
+```yaml
+netro_watering:
+  delay_before_refresh: 5            # seconds
+  default_watering_delay: 0          # start watering immediately
+  sensor_value_days_before_today: 2  # use last readings up to "day before yesterday"
+  slowdown_factors:
+    - from: '23:00'  # overnight: slow down while everyone sleeps
+      to:   '05:55'
+      sdf:  15       # polling interval ×15 in this window
+    - from: '10:30'  # hottest/sunniest hours: fewer checks
+      to:   '17:00'
+      sdf:  5        # e.g., base 2 min -> 10 min in this window
+```

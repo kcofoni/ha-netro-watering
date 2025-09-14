@@ -58,10 +58,9 @@ NETRO_ERROR_CODE_INTERNAL_ERROR = 5
 NETRO_ERROR_CODE_PARAMETER_ERROR = 6
 
 
-# ruff: noqa
 def set_netro_base_url(url: str):
     """Change the Netro Public API url."""
-    global netro_base_url  # pylint: disable=global-statement
+    global netro_base_url  # pylint: disable=global-statement  # noqa: PLW0603
     netro_base_url = url
 
 
@@ -103,6 +102,7 @@ def get_info(key):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def set_status(key, status):
@@ -129,13 +129,14 @@ def set_status(key, status):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def get_schedules(key, zone_ids=None, start_date="", end_date=""):
     """Get schedules of the given zones (all zones if not specified). yyyy-mm-dd is the date format."""
     payload = {"key": key}
     if zone_ids is not None:
-        payload["zones"] = f'[{",".join(zone_ids)}]'
+        payload["zones"] = f"[{','.join(zone_ids)}]"
     if start_date:
         payload["start_date"] = start_date
     if end_date:
@@ -160,13 +161,14 @@ def get_schedules(key, zone_ids=None, start_date="", end_date=""):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def get_moistures(key, zone_ids=None, start_date="", end_date=""):
     """Get moisture data of the given zones (all zones if not specified). yyyy-mm-dd is the date format."""
     payload = {"key": key}
     if zone_ids is not None:
-        payload["zones"] = f'[{",".join(zone_ids)}]'
+        payload["zones"] = f"[{','.join(zone_ids)}]"
     if start_date:
         payload["start_date"] = start_date
     if end_date:
@@ -191,6 +193,7 @@ def get_moistures(key, zone_ids=None, start_date="", end_date=""):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def report_weather(
@@ -252,13 +255,14 @@ def report_weather(
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def set_moisture(key, moisture, zone_ids=None):
     """Set moisture to the given zones (all zones if not specified)."""
     payload = {"key": key, "moisture": moisture}
     if zone_ids is not None:
-        payload["zones"] = f'[{",".join(zone_ids)}]'
+        payload["zones"] = f"[{','.join(zone_ids)}]"
     res = requests.post(
         netro_base_url + NETRO_POST_MOISTURE, data=payload, timeout=REQUESTS_TIMEOUT
     )
@@ -280,13 +284,14 @@ def set_moisture(key, moisture, zone_ids=None):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def water(key, duration, zone_ids=None, delay=0, start_time=""):
     """Start watering of the given zones (all zones consecutively if not specified)."""
     payload = {"key": key, "duration": duration}
     if zone_ids is not None:
-        payload["zones"] = f'[{",".join(zone_ids)}]'
+        payload["zones"] = f"[{','.join(zone_ids)}]"
     if delay > 0:
         payload["delay"] = delay
     if start_time:
@@ -312,6 +317,7 @@ def water(key, duration, zone_ids=None, delay=0, start_time=""):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def stop_water(key):
@@ -338,6 +344,7 @@ def stop_water(key):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def no_water(key, days=None):
@@ -367,6 +374,7 @@ def no_water(key, days=None):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def get_sensor_data(key, start_date="", end_date=""):
@@ -396,6 +404,7 @@ def get_sensor_data(key, start_date="", end_date=""):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None
 
 
 def get_events(key, type_of_event=0, start_date="", end_date=""):
@@ -427,3 +436,4 @@ def get_events(key, type_of_event=0, start_date="", end_date=""):
     # so, it seems everything is ok !
     else:
         return res.json()
+    return None

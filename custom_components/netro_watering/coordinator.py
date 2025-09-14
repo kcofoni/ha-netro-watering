@@ -69,6 +69,7 @@ from .netrofunction import (
     get_moistures as netro_get_moistures,
     get_schedules as netro_get_schedules,
     get_sensor_data as netro_get_sensor_data,
+    no_water as netro_no_water,
     set_status as netro_set_status,
     stop_water as netro_stop_water,
     water as netro_water,
@@ -480,14 +481,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
     def device_info(self) -> DeviceInfo:
         """Return information about the controller as a device. To be used when creating related entities."""
         return DeviceInfo(
-            name=f"{self.device_name}",
             identifiers={(DOMAIN, self.serial_number)},
-            manufacturer=MANUFACTURER,
-            hw_version=self.hw_version,
-            sw_version=self.sw_version,
-            model=NETRO_PIXIE_CONTROLLER_MODEL
-            if hasattr(self, NETRO_CONTROLLER_BATTERY_LEVEL)
-            else NETRO_SPRITE_CONTROLLER_MODEL,
         )
 
     def _update_from_schedules(
@@ -858,6 +852,10 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             self.serial_number,
             NETRO_STATUS_DISABLE,
         )
+
+    async def no_water(self, days: int | None = None) -> None:
+        """Do not water for several days (1 if not specified)."""
+        await self.hass.async_add_executor_job(netro_no_water, self.serial_number, days)
 
     async def start_watering(
         self, duration: int, delay: int, start_time: datetime.time
