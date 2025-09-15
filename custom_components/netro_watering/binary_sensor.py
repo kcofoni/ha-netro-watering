@@ -1,4 +1,5 @@
 """Support for Netro watering system."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -63,6 +64,14 @@ async def async_setup_entry(
         controller: NetroControllerUpdateCoordinator = hass.data[DOMAIN][
             config_entry.entry_id
         ]
+
+        _LOGGER.info("Adding binary sensor entities for zones")
+        _LOGGER.debug(
+            "creating binary sensor entities: controller = %s, active_zones = %s",
+            controller.device_name,
+            controller.active_zones,
+        )
+
         # add zone binary sensors
         async_add_entities(
             [
@@ -117,18 +126,16 @@ class NetroZone(
             else None,
         }
         if self.coordinator.current_slowdown_factor > 1:
-            zone_attributes[
-                "slowdown factor"
-            ] = self.coordinator.current_slowdown_factor
+            zone_attributes["slowdown factor"] = (
+                self.coordinator.current_slowdown_factor
+            )
         meta_attributes = {
             EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
             "request time (UTC)": self.coordinator.metadata.time
             if self.coordinator.metadata is not None
             else None,
             "last active date": dt_util.as_local(
-                self.coordinator.metadata.last_active_date.replace(
-                    tzinfo=datetime.UTC
-                )
+                self.coordinator.metadata.last_active_date.replace(tzinfo=datetime.UTC)
             )
             if self.coordinator.metadata is not None
             else None,
@@ -142,9 +149,7 @@ class NetroZone(
             if self.coordinator.metadata is not None
             else None,
             "token reset": dt_util.as_local(
-                self.coordinator.metadata.token_reset_date.replace(
-                    tzinfo=datetime.UTC
-                )
+                self.coordinator.metadata.token_reset_date.replace(tzinfo=datetime.UTC)
             )
             if self.coordinator.metadata is not None
             else None,

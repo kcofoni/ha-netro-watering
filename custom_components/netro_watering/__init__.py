@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 import enum
 import logging
+import re
 
 import validators
 import voluptuous as vol
@@ -33,7 +34,10 @@ from .const import (
     ATTR_WEATHER_TEMP,
     ATTR_WEATHER_WIND_SPEED,
     ATTR_ZONE_ID,
+    CONF_API_URL,
     CONF_CTRL_REFRESH_INTERVAL,
+    CONF_DEFAULT_WATERING_DELAY,
+    CONF_DELAY_BEFORE_REFRESH,
     CONF_DEVICE_HW_VERSION,
     CONF_DEVICE_NAME,
     CONF_DEVICE_SW_VERSION,
@@ -43,21 +47,25 @@ from .const import (
     CONF_SENS_REFRESH_INTERVAL,
     CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     CONF_SERIAL_NUMBER,
-    CONF_SLOWDOWN_FACTOR,
+    CONF_SLOWDOWN_FACTORS,
     CONTROLLER_DEVICE_TYPE,
     CTRL_REFRESH_INTERVAL_MN,
     DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
     DOMAIN,
     GLOBAL_PARAMETERS,
     MANUFACTURER,
+    MAX_DELAY_BEFORE_REFRESH,
     MAX_MONTHS_AFTER_SCHEDULES,
     MAX_MONTHS_BEFORE_SCHEDULES,
     MAX_REFRESH_INTERVAL_MN,
     MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+    MAX_WATERING_DELAY,
+    MIN_DELAY_BEFORE_REFRESH,
     MIN_MONTHS_AFTER_SCHEDULES,
     MIN_MONTHS_BEFORE_SCHEDULES,
     MIN_REFRESH_INTERVAL_MN,
     MIN_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+    MIN_WATERING_DELAY,
     MONTHS_AFTER_SCHEDULES,
     MONTHS_BEFORE_SCHEDULES,
     NETRO_CONTROLLER_BATTERY_LEVEL,
@@ -87,6 +95,114 @@ PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.SWITCH,
 ]
+
+
+def _validate_slowdown_factors(value):
+    """Validate slowdown_factors without mutating the input.
+
+    - 'from' and 'to' are strings ("HH:MM" or "HH:MM:SS").
+    - Parse them temporarily to datetime.time for validation/comparisons.
+    - For intervals: equality is forbidden; crossing midnight is allowed.
+    - Return the original 'value' unchanged.
+    """
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise vol.Invalid("slowdown_factors must be a list")
+
+    def _parse_hms_to_time(raw: str):
+        """Return a datetime.time from a 'HH:MM' or 'HH:MM:SS' string.
+
+        Clean NBSP/ZWSP/whitespace on a COPY for validation but do not alter the original value.
+        """
+        s = raw.replace("\u00a0", " ").replace("\u200b", "").strip()
+        for fmt in ("%H:%M", "%H:%M:%S"):
+            try:
+                return datetime.strptime(s, fmt).time()
+            except ValueError:
+                pass
+        raise vol.Invalid(
+            "Expected time in HH:MM or HH:MM:SS (e.g., '23:05' or '23:05:30')"
+        ) from None
+
+    for idx, item in enumerate(value):
+        # Temporary parse for validation
+        frm_t = _parse_hms_to_time(item["from"])
+        to_t = _parse_hms_to_time(item["to"])
+
+        # sdf must be >= 1
+        if item.get("sdf") < 1:
+            raise vol.Invalid(f"slowdown_factors[{idx}].sdf must be >= 1")
+
+        # Only equality is forbidden; crossing midnight is allowed
+        if frm_t == to_t:
+            raise vol.Invalid(
+                f"slowdown_factors[{idx}]: 'from' and 'to' must not be identical"
+            )
+
+    # IMPORTANT: Always return the original input value unchanged
+    return value
+
+
+TIME_RE = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$")
+
+
+def hhmm_or_hhmmss(v: object) -> str:
+    """Validate with regex on a cleaned COPY but return the original string unchanged."""
+    if not isinstance(v, str):
+        raise vol.Invalid("Expected time as string in HH:MM or HH:MM:SS")
+    cleaned = v.replace("\u00a0", " ").replace("\u200b", "").strip()
+    if not TIME_RE.match(cleaned):
+        raise vol.Invalid("Expected time in HH:MM or HH:MM:SS")
+    return v  # return the original, unmodified value
+
+
+SLOWDOWN_ITEM_SCHEMA = vol.Schema(
+    {
+        vol.Required("from"): hhmm_or_hhmmss,  # preserves original string
+        vol.Required("to"): hhmm_or_hhmmss,  # preserves original string
+        vol.Required("sdf"): vol.Coerce(int),
+    },
+    extra=vol.PREVENT_EXTRA,
+)
+
+# The presence of CONFIG_SCHEMA indicates that this integration supports configuration via configuration.yaml.
+# The configuration provided in configuration.yaml will be validated using CONFIG_SCHEMA.
+CONFIG_SCHEMA = vol.Schema(
+    {
+        DOMAIN: vol.Schema(
+            {
+                # Optional: API URL if you want to allow overriding it
+                vol.Optional(CONF_API_URL): cv.url,
+                # Seconds (>=0)
+                vol.Optional(CONF_DELAY_BEFORE_REFRESH, default=4): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(
+                        min=MIN_DELAY_BEFORE_REFRESH, max=MAX_DELAY_BEFORE_REFRESH
+                    ),
+                ),
+                # Minutes (>=0)
+                vol.Optional(CONF_DEFAULT_WATERING_DELAY, default=0): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=MIN_WATERING_DELAY, max=MAX_WATERING_DELAY),
+                ),
+                # Days (>=0)
+                vol.Optional(CONF_SENSOR_VALUE_DAYS_BEFORE_TODAY, default=0): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(
+                        min=MIN_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                        max=MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+                    ),
+                ),
+                # List of objects {from, to, sdf}
+                vol.Optional(CONF_SLOWDOWN_FACTORS, default=[]): vol.All(
+                    cv.ensure_list, [SLOWDOWN_ITEM_SCHEMA], _validate_slowdown_factors
+                ),
+            }
+        )
+    },
+    extra=vol.ALLOW_EXTRA,
+)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -178,6 +294,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # reset configuration dictionary
     hass.data.setdefault(DOMAIN, {})
 
+    if config.get(DOMAIN) is not None:
+        _LOGGER.debug("Configuration %s validée: %s", DOMAIN, config.get(DOMAIN))
+    else:
+        _LOGGER.debug("No configuration section %s found", DOMAIN)
+
     # access to configuration.yaml
     if (netro_watering_config := config.get(DOMAIN)) is not None:
         if netro_watering_config.get("netro_api_url") is not None:
@@ -189,18 +310,22 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 )
             else:
                 _LOGGER.warning(
-                    "The URL provided for Netro Public API is ignored since it is not properly formed, please check '%s' section in the home assistant configuration file and correct the 'netrop_api_url' entry",
+                    "The URL provided for Netro Public API is ignored since it is not properly formed, please check '%s' section in the home assistant configuration file and correct the 'netro_api_url' entry",
                     DOMAIN,
                 )
 
     # set global config into the integration shared space
-    hass.data[DOMAIN][GLOBAL_PARAMETERS] = netro_watering_config
+    hass.data[DOMAIN][GLOBAL_PARAMETERS] = netro_watering_config or {}
 
     # prepare slow down factor
     if hass.data[DOMAIN].get(GLOBAL_PARAMETERS) is not None:
-        if hass.data[DOMAIN][GLOBAL_PARAMETERS].get(CONF_SLOWDOWN_FACTOR) is not None:
+        if hass.data[DOMAIN][GLOBAL_PARAMETERS].get(CONF_SLOWDOWN_FACTORS) is not None:
+            _LOGGER.debug(
+                "A slowdown factor has been set to %s, preparing it now for use in the integration",
+                hass.data[DOMAIN][GLOBAL_PARAMETERS][CONF_SLOWDOWN_FACTORS],
+            )
             prepare_slowdown_factors(
-                hass.data[DOMAIN][GLOBAL_PARAMETERS][CONF_SLOWDOWN_FACTOR]
+                hass.data[DOMAIN][GLOBAL_PARAMETERS][CONF_SLOWDOWN_FACTORS]
             )
 
     # Return boolean to indicate that initialization was successful.
@@ -222,8 +347,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
 
     # get global parameters any type of device could be interested in
     slowdown_factors = None
-    if gp.get(CONF_SLOWDOWN_FACTOR) is not None:
-        slowdown_factors = gp[CONF_SLOWDOWN_FACTOR]
+    if gp.get(CONF_SLOWDOWN_FACTORS) is not None:
+        slowdown_factors = gp[CONF_SLOWDOWN_FACTORS]
 
     if entry.data[CONF_DEVICE_TYPE] == SENSOR_DEVICE_TYPE:
         # get sensor specific parameters, look first in the options, next in the global parameters, otherwise use the default value
@@ -401,11 +526,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             )
 
         _LOGGER.debug(
-            "creating controller: device_name = %s, refresh_interval = %s, schedules_months_before = %s, schedules_months_after = %s",
+            "creating controller: device_name = %s, refresh_interval = %s, schedules_months_before = %s, schedules_months_after = %s, slowdown_factors = %s",
             entry.data[CONF_DEVICE_NAME],
             refresh_interval,
             schedules_months_before,
             schedules_months_after,
+            slowdown_factors,
         )
 
         controller_coordinator = NetroControllerUpdateCoordinator(

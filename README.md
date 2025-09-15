@@ -5,7 +5,7 @@
 ## About
 This is a Home Assistant custom integration for **Netro Smart Garden** devices.
 
-It lets you manage the [Netro](https://netrohome.com) ecosystem —controllers and sensors —to **automate garden watering** in Home Assistant. The integration uses Netro’s [Public API](http://www.netrohome.com/en/shop/articles/10).
+It lets you manage the [Netro](https://netrohome.com) ecosystem — controllers and sensors — to **automate garden watering** in Home Assistant. The integration uses Netro’s [Public API](http://www.netrohome.com/en/shop/articles/10).
 
 **Compatibility:** developed and tested with Home Assistant **2023.4.0** and later.
 

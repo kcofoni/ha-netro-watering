@@ -1,0 +1,21 @@
+{
+  "services": {
+    "no_water": "mdi:water-off",
+    "refresh_data": "mdi:refresh",
+    "report_weather": "mdi:weather-partly-cloudy",
+    "set_moisture": "mdi:water-percent",
+    "start_watering": "mdi:sprinkler-variant",
+    "stop_watering": "mdi:water-off-outline",
+    "enable": "mdi:toggle-switch",
+    "disable": "mdi:toggle-switch-off"
+  },
+  "options": {
+    "step": {
+      "init": {
+        "sections": {
+          "advanced": "mdi:tune"
+        }
+      }
+    }
+  }
+}

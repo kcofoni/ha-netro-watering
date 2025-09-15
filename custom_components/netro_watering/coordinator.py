@@ -751,7 +751,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             - stop watering (zone)
         """
 
-        # set update_interval according to current slowndown factor
+        # set update_interval according to current slowdown factor
         self.current_slowdown_factor = get_slowdown_factor(
             self.slowdown_factors, datetime.datetime.now()
         )
@@ -759,6 +759,12 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             minutes=self.refresh_interval * self.current_slowdown_factor
         )
 
+        _LOGGER.debug(
+            "Current time is %s, current slowdown factor is %d, next update in %d minutes",
+            datetime.datetime.now().time().strftime("%H:%M:%S"),
+            self.current_slowdown_factor,
+            self.update_interval.total_seconds() / 60,
+        )
         _LOGGER.info(
             "Polling info for %s controller (repeated every %d minutes%s)",
             self.name,
