@@ -131,6 +131,11 @@ class PlaceholderHub:
         return sw_version
 
 
+def _normalize_serial(value: str) -> str:
+    """Normalise le numéro de série pour les comparaisons."""
+    return str(value).strip().replace(" ", "").upper()
+
+
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect.
 
@@ -147,12 +152,13 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     # )
 
     config_item = {}
-    hub = PlaceholderHub(data[CONF_SERIAL_NUMBER])
+    serial = _normalize_serial(data[CONF_SERIAL_NUMBER])
+    hub = PlaceholderHub(serial)
     try:
         await hub.check(hass)
         if hub.get_device_type() is not None:
             config_item[CONF_DEVICE_TYPE] = hub.get_device_type()
-            config_item[CONF_SERIAL_NUMBER] = data[CONF_SERIAL_NUMBER]
+            config_item[CONF_SERIAL_NUMBER] = serial
             config_item[CONF_DEVICE_NAME] = f"{hub.get_name()}"
             config_item[CONF_DEVICE_HW_VERSION] = hub.get_hw_version()
             config_item[CONF_DEVICE_SW_VERSION] = hub.get_sw_version()
@@ -186,6 +192,13 @@ class NetroConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is not None:
+            serial = _normalize_serial(user_input[CONF_SERIAL_NUMBER])
+
+            # 1) Prevent duplicates across device types: compare to the serial stored in data
+            for entry in self._async_current_entries():
+                if _normalize_serial(entry.data.get(CONF_SERIAL_NUMBER, "")) == serial:
+                    return self.async_abort(reason="already_configured")
+
             try:
                 config_item = await validate_input(self.hass, user_input)
             except InvalidSerialNumber:
