@@ -91,6 +91,7 @@ from .netrofunction import (
 # PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH]
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
+    Platform.BUTTON,
     Platform.CALENDAR,
     Platform.SENSOR,
     Platform.SWITCH,

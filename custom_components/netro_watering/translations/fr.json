@@ -36,6 +36,11 @@
         }
       }
     },
+    "button": {
+        "refresh": {
+            "name": "Actualiser"
+        }
+    },
     "calendar": {
       "schedules": {
         "name": "Arrosage"

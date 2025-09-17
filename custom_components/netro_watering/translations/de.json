@@ -36,6 +36,11 @@
         }
       }
     },
+    "button": {
+        "refresh": {
+            "name": "Aktualisieren"
+        }
+    },
     "calendar": {
       "schedules": {
         "name": "Bewässerung"
