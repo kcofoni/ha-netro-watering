@@ -36,6 +36,11 @@
                 }
             }
         },
+        "button": {
+            "refresh": {
+                "name": "Refresh"
+            }
+        },
         "calendar": {
             "schedules": {
                 "name": "Irrigation"

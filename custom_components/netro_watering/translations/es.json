@@ -36,6 +36,11 @@
         }
       }
     },
+    "button": {
+        "refresh": {
+            "name": "Actualizar"
+        }
+    },
     "calendar": {
       "schedules": {
         "name": "Riego"

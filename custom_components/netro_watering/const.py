@@ -91,7 +91,7 @@ EXTRA_STATE_ATTRIBUTE_SEP_RIGHT = "-------------------------"
 GLOBAL_PARAMETERS = "parameters"
 
 # the following const should be replaced by a configuration entry
-CTRL_REFRESH_INTERVAL_MN = 15  # minutes
+CTRL_REFRESH_INTERVAL_MN = 5  # minutes
 DELAY_BEFORE_REFRESH = 5  # seconds
 DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY = 1
 DEFAULT_WATERING_DELAY = 0  # seconds, should be 0, if not null this parameter is a good way for testing and then be able to cancel the watering manually
@@ -99,7 +99,7 @@ DEFAULT_WATERING_DURATION = 30  # minutes
 MAX_DELAY_BEFORE_REFRESH = 20  # seconds
 MAX_MONTHS_AFTER_SCHEDULES = 6
 MAX_MONTHS_BEFORE_SCHEDULES = 6
-MAX_REFRESH_INTERVAL_MN = 120  # minutes
+MAX_REFRESH_INTERVAL_MN = 180  # minutes
 MAX_SENSOR_VALUE_DAYS_BEFORE_TODAY = 365
 MAX_WATERING_DELAY = 3600  # seconds
 MAX_WATERING_DURATION = 120  # minutes
