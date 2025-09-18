@@ -1,4 +1,4 @@
-"""Support du bouton Refresh pour Netro Watering."""
+"""Support for Netro Watering system."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the button platform."""
     controller: NetroControllerUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    _LOGGER.info("Adding button entity for controller = %s", controller.device_name)
+    _LOGGER.info("Adding button entity for device = %s", controller.device_name)
 
     async_add_entities(
         [NetroRefreshButton(controller, NETRO_CONTROLLER_BUTTON_DESCRIPTION)]
@@ -39,7 +39,7 @@ async def async_setup_entry(
 class NetroRefreshButton(
     CoordinatorEntity[NetroControllerUpdateCoordinator], ButtonEntity
 ):
-    """Bouton qui force un refresh du contrôleur Netro."""
+    """Button that forces a refresh of the Netro controller."""
 
     entity_description: ButtonEntityDescription
     _attr_has_entity_name = True
@@ -66,9 +66,5 @@ class NetroRefreshButton(
             "Netro: refresh button pressed for %s", self.coordinator.serial_number
         )
 
-        # Si ton coordinator expose une méthode spécifique (ex: refresh_controller()),
-        # tu peux l'appeler ici avant/à la place du request_refresh.
-        # await self.coordinator.refresh_controller()
-
-        # Dans tous les cas, on (re)planifie une mise à jour via le DataUpdateCoordinator
+        # Rescheduling an update via the DataUpdateCoordinator
         await self.coordinator.async_request_refresh()

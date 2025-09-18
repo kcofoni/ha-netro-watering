@@ -75,7 +75,10 @@ DEVICE_SCHEMA = vol.Schema(
 
 
 class PlaceholderHub:
-    """Placeholder class to make tests pass."""
+    """Temporary class used for testing Netro device information retrieval.
+
+    Simulates device API calls and provides access to device attributes.
+    """
 
     def __init__(self, serial: str) -> None:
         """Initialize."""
@@ -132,7 +135,7 @@ class PlaceholderHub:
 
 
 def _normalize_serial(value: str) -> str:
-    """Normalise le numéro de série pour les comparaisons."""
+    """Normalize the serial number for comparisons."""
     return str(value).strip().replace(" ", "").upper()
 
 
@@ -237,7 +240,7 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
     """Netro Watering options flow with automatic reload."""
 
     def _gp(self) -> dict[str, Any]:
-        """Récupère les paramètres YAML déjà chargés (fallback des defaults)."""
+        """Retrieve already loaded YAML parameters (fallback for defaults)."""
         return self.hass.data.get(DOMAIN, {}).get(GLOBAL_PARAMETERS, {})  # type: ignore[return-value]
 
     async def async_step_init(
