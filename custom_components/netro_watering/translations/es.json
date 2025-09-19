@@ -37,9 +37,9 @@
       }
     },
     "button": {
-        "refresh": {
-            "name": "Actualizar"
-        }
+      "refresh": {
+        "name": "Actualizar"
+      }
     },
     "calendar": {
       "schedules": {

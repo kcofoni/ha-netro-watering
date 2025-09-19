@@ -578,7 +578,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             hw_version=controller_coordinator.hw_version,
         )
         _LOGGER.debug(
-            "device explicitely created into the registry: name = %s, serial = %s, model = %s, manufacturer = %s",
+            "device explicitly created into the registry: name = %s, serial = %s, model = %s, manufacturer = %s",
             name,
             serial,
             model,

@@ -37,9 +37,9 @@
       }
     },
     "button": {
-        "refresh": {
-            "name": "Actualiser"
-        }
+      "refresh": {
+        "name": "Actualiser"
+      }
     },
     "calendar": {
       "schedules": {
@@ -254,7 +254,7 @@
           "name": "Vitesse du vent"
         }
       },
-    "name": "Publier la météo"
+      "name": "Publier la météo"
     },
     "set_moisture": {
       "description": "Définir une valeur d’humidité sur une zone, pour fournir à Netro la valeur d’un capteur externe",
