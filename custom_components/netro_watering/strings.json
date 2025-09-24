@@ -7,7 +7,8 @@
       "invalid_serial_number": "Invalid serial number",
       "netro_error_occurred": "Netro (NPA) returned an error for this serial number",
       "unknown": "[%key:common::config_flow::error::unknown%]",
-      "unknown_device_type": "Unknown device type"
+      "unknown_device_type": "Unknown device type",
+      "cannot_connect": "Cannot connect to the device"
     },
     "step": {
       "user": {

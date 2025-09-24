@@ -81,6 +81,7 @@ from .coordinator import (
     prepare_slowdown_factors,
 )
 from .netrofunction import (
+    mask,
     report_weather as netro_report_weather,
     set_moisture as netro_set_moisture,
     set_netro_base_url,
@@ -339,7 +340,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
     _LOGGER.debug(
         "setting up config entry: device_type = %s, serial_number = %s, config_name = %s",
         entry.data[CONF_DEVICE_TYPE],
-        entry.data[CONF_SERIAL_NUMBER],
+        mask(entry.data[CONF_SERIAL_NUMBER]),
         entry.data[CONF_DEVICE_NAME],
     )
 
@@ -580,7 +581,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         _LOGGER.debug(
             "device explicitly created into the registry: name = %s, serial = %s, model = %s, manufacturer = %s",
             name,
-            serial,
+            mask(serial),
             model,
             MANUFACTURER,
         )

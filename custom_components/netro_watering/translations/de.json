@@ -4,6 +4,7 @@
       "already_configured": "Das Gerät ist bereits konfiguriert"
     },
     "error": {
+      "cannot_connect": "Kann keine Verbindung zum Gerät herstellen",
       "invalid_serial_number": "Ungültige Seriennummer",
       "netro_error_occurred": "Netro (NPA) hat für diese Seriennummer einen Fehler zurückgegeben",
       "unknown": "Unerwarteter Fehler",
