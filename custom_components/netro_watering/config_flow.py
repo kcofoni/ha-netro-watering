@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import Any
 
-from aiohttp import ClientError
+from pynetro import NetroClient, NetroConfig, NetroException, NetroInvalidKey
+from pynetro.client import mask
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -14,6 +14,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult, section
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
     CONF_CTRL_REFRESH_INTERVAL,
@@ -58,12 +59,7 @@ from .const import (
     SENSOR_ADVANCED_OPTIONS_COLLAPSED,
     SENSOR_DEVICE_TYPE,
 )
-from .netrofunction import (
-    NETRO_ERROR_CODE_INVALID_KEY,
-    NetroException,
-    async_get_info,
-    mask,
-)
+from .http_client import AiohttpClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -90,7 +86,9 @@ class PlaceholderHub:
 
     async def check(self, hass: HomeAssistant) -> bool:
         """Check if we can get information from the serial number."""
-        self.info = await async_get_info(hass, self.serial)
+        session = async_get_clientsession(hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        self.info = await client.get_info(self.serial)
         return self.info is not None
 
     def is_a_controller(self) -> bool:
@@ -157,35 +155,18 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     #     your_validate_func
     # )
 
-    VALID_TYPES = {CONTROLLER_DEVICE_TYPE, SENSOR_DEVICE_TYPE}
-
     serial = _normalize_serial(data[CONF_SERIAL_NUMBER])
     hub = PlaceholderHub(serial)
-    try:
-        ok = await hub.check(hass)
-        if not ok:
-            raise CannotConnect
-
-        dev_type = hub.get_device_type()
-        if dev_type not in VALID_TYPES:
-            raise UnknownDeviceType
-
-    except asyncio.CancelledError:
-        raise
-    except NetroException as netro_error:
-        if getattr(netro_error, "code", None) == NETRO_ERROR_CODE_INVALID_KEY:
-            raise InvalidSerialNumber from netro_error
-        raise NetroDeviceError from netro_error
-    except (asyncio.TimeoutError, ClientError, ValueError, TypeError) as e:  # noqa: UP041
-        raise CannotConnect from e
-    else:
-        return {
-            CONF_DEVICE_TYPE: dev_type,
-            CONF_SERIAL_NUMBER: serial,
-            CONF_DEVICE_NAME: hub.get_name(),
-            CONF_DEVICE_HW_VERSION: hub.get_hw_version(),
-            CONF_DEVICE_SW_VERSION: hub.get_sw_version(),
-        }
+    ok = await hub.check(hass)
+    if not ok:
+        raise CannotConnect
+    return {
+        CONF_DEVICE_TYPE: hub.get_device_type(),
+        CONF_SERIAL_NUMBER: serial,
+        CONF_DEVICE_NAME: hub.get_name(),
+        CONF_DEVICE_HW_VERSION: hub.get_hw_version(),
+        CONF_DEVICE_SW_VERSION: hub.get_sw_version(),
+    }
 
 
 class NetroConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -216,20 +197,17 @@ class NetroConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             try:
                 config_item = await validate_input(self.hass, user_input)
-            except InvalidSerialNumber:
+            except NetroInvalidKey:
                 _LOGGER.warning("Invalid serial number: %s", mask(serial))
                 errors["base"] = "invalid_serial_number"
-            except UnknownDeviceType:
-                _LOGGER.exception("Unknown device type for serial: %s", mask(serial))
-                errors["base"] = "unknown_device_type"
-            except CannotConnect:
-                _LOGGER.exception("Cannot connect for serial: %s", mask(serial))
-                errors["base"] = "cannot_connect"
-            except NetroDeviceError:
+            except NetroException:
                 _LOGGER.exception(
                     "Unexpected Netro API exception for serial: %s", mask(serial)
                 )
                 errors["base"] = "netro_error_occurred"
+            except CannotConnect:
+                _LOGGER.exception("Cannot connect for serial: %s", mask(serial))
+                errors["base"] = "cannot_connect"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception for serial: %s", mask(serial))
                 errors["base"] = "unknown"
@@ -243,20 +221,8 @@ class NetroConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
 
-class InvalidSerialNumber(HomeAssistantError):
-    """Error to indicate there is invalid serial number."""
-
-
 class CannotConnect(HomeAssistantError):
     """Error to indicate a connection failure."""
-
-
-class UnknownDeviceType(HomeAssistantError):
-    """Error to indicate an unknown device type."""
-
-
-class NetroDeviceError(HomeAssistantError):
-    """Error to indicate a netro error."""
 
 
 class OptionsFlowHandler(config_entries.OptionsFlowWithReload):

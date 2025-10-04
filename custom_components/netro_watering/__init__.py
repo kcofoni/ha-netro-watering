@@ -7,6 +7,8 @@ import enum
 import logging
 import re
 
+from pynetro import NetroClient, NetroConfig
+from pynetro.client import mask
 import validators
 import voluptuous as vol
 
@@ -15,6 +17,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -80,12 +83,7 @@ from .coordinator import (
     NetroSensorUpdateCoordinator,
     prepare_slowdown_factors,
 )
-from .netrofunction import (
-    mask,
-    report_weather as netro_report_weather,
-    set_moisture as netro_set_moisture,
-    set_netro_base_url,
-)
+from .http_client import AiohttpClient
 
 # Here is the list of the platforms that we want to support.
 # sensor is for the netro ground sensors, switch is for the zones
@@ -305,7 +303,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     if (netro_watering_config := config.get(DOMAIN)) is not None:
         if netro_watering_config.get("netro_api_url") is not None:
             if validators.url(netro_watering_config["netro_api_url"]):
-                set_netro_base_url(netro_watering_config["netro_api_url"])
+                NetroConfig.default_base_url = netro_watering_config["netro_api_url"]
                 _LOGGER.info(
                     "Set Netro Public API url to %s",
                     netro_watering_config["netro_api_url"],
@@ -640,9 +638,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
                 device_entry.name,
                 zone_id,
             )
-            await hass.async_add_executor_job(
-                netro_set_moisture, key, moisture, zone_id
-            )
+
+            session = async_get_clientsession(hass)
+            client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+            await client.set_moisture(key, moisture=moisture, zones=[zone_id])
 
         # only one Set moisture service to be created for all controllers
         if not hass.services.has_service(DOMAIN, SERVICE_SET_MOISTURE_NAME):
@@ -743,20 +742,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
                 "'date' parameter is missing when running 'Report weather' service provided by Netro Watering integration"
             )
 
-        await hass.async_add_executor_job(
-            netro_report_weather,
+        session = async_get_clientsession(hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        await client.report_weather(
             key,
-            str(weather_asof),
-            weather_condition.value if weather_condition is not None else None,
-            weather_rain,
-            weather_rain_prob,
-            weather_temp,
-            weather_t_min,
-            weather_t_max,
-            weather_t_dew,
-            weather_wind_speed,
-            weather_humidity,
-            weather_pressure,
+            date=str(weather_asof),
+            condition=weather_condition.value
+            if weather_condition is not None
+            else None,
+            rain=weather_rain,
+            rain_prob=weather_rain_prob,
+            temp=weather_temp,
+            t_min=weather_t_min,
+            t_max=weather_t_max,
+            t_dew=weather_t_dew,
+            wind_speed=weather_wind_speed,
+            humidity=weather_humidity,
+            pressure=weather_pressure,
         )
 
     # only one Report weather service to be created for all config entries
