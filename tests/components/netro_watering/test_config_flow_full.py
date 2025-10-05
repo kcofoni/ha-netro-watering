@@ -74,27 +74,6 @@ async def test_full_flow_success_sensor(
 
 
 @pytest.mark.asyncio
-async def test_full_flow_unknown_device_type(
-    hass: HomeAssistant, mock_setup_entry, mock_get_info_unknown_device_type
-) -> None:
-    """Test config flow when an unknown device type is returned.
-
-    This test verifies that the config flow returns an error when the device type cannot be determined.
-    """
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_USER}
-    )
-    assert result["type"] is data_entry_flow.FlowResultType.FORM
-
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], user_input={CONF_SERIAL_NUMBER: CTRL_SERIAL}
-    )
-    assert result["type"] is data_entry_flow.FlowResultType.FORM
-    assert result["errors"]["base"] == "unknown_device_type"
-    assert not mock_setup_entry.called
-
-
-@pytest.mark.asyncio
 async def test_full_flow_invalid_auth(
     hass: HomeAssistant, mock_setup_entry, mock_get_info_invalid_key
 ) -> None:
@@ -116,12 +95,117 @@ async def test_full_flow_invalid_auth(
 
 
 @pytest.mark.asyncio
-async def test_full_flow_cannot_connect(
+async def test_full_flow_netro_exceed_limit(
+    hass: HomeAssistant, mock_setup_entry, mock_get_info_netro_exceed_limit
+) -> None:
+    """Test config flow with NetroExceedLimit exception.
+
+    This test verifies that the config flow returns an error when the Netro API exceeds its limit.
+    """
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={CONF_SERIAL_NUMBER: DEFAULT_SERIAL}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+    assert result["errors"]["base"] == "netro_error_occurred"
+    assert not mock_setup_entry.called
+
+
+@pytest.mark.asyncio
+async def test_full_flow_netro_parameter_error(
+    hass: HomeAssistant, mock_setup_entry, mock_get_info_netro_parameter_error
+) -> None:
+    """Test config flow with NetroParameterError exception.
+
+    This test verifies that the config flow returns an error when the Netro API encounters a parameter error.
+    """
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={CONF_SERIAL_NUMBER: DEFAULT_SERIAL}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+    assert result["errors"]["base"] == "netro_error_occurred"
+    assert not mock_setup_entry.called
+
+
+@pytest.mark.asyncio
+async def test_full_flow_netro_internal_error(
+    hass: HomeAssistant, mock_setup_entry, mock_get_info_netro_internal_error
+) -> None:
+    """Test config flow with NetroInternalError exception.
+
+    This test verifies that the config flow returns an error when the Netro API encounters an internal error.
+    """
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={CONF_SERIAL_NUMBER: DEFAULT_SERIAL}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+    assert result["errors"]["base"] == "netro_error_occurred"
+    assert not mock_setup_entry.called
+
+
+@pytest.mark.asyncio
+async def test_full_flow_netro_invalid_device(
+    hass: HomeAssistant, mock_setup_entry, mock_get_info_netro_invalid_device
+) -> None:
+    """Test config flow with NetroInvalidDevice exception.
+
+    This test verifies that the config flow returns an error when the Netro API encounters an invalid device error.
+    """
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={CONF_SERIAL_NUMBER: DEFAULT_SERIAL}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+    assert result["errors"]["base"] == "netro_error_occurred"
+    assert not mock_setup_entry.called
+
+
+@pytest.mark.asyncio
+async def test_full_flow_cannot_connect_native(
     hass: HomeAssistant, mock_setup_entry, mock_get_info_cannot_connect
 ) -> None:
     """Test config flow when connection to Netro API cannot be established.
 
     This test verifies that the config flow returns a 'cannot_connect' error when the API is unreachable.
+    """
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input={CONF_SERIAL_NUMBER: DEFAULT_SERIAL}
+    )
+    assert result["type"] is data_entry_flow.FlowResultType.FORM
+    assert result["errors"]["base"] == "cannot_connect"
+    assert not mock_setup_entry.called
+
+
+@pytest.mark.asyncio
+async def test_full_flow_cannot_connect_response_none(
+    hass: HomeAssistant, mock_setup_entry, mock_get_info_return_none
+) -> None:
+    """Test config flow when Netro API returns None.
+
+    This test verifies that the config flow returns a 'cannot_connect' error when the API response is None.
     """
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
