@@ -4,16 +4,21 @@ This module verifies successful and error paths for user configuration,
 including device, sensor, fallback, authentication, connection, and duplicate entry handling.
 """
 
+from unittest import mock
+
 import pytest
 
 from homeassistant import data_entry_flow
-from homeassistant.components.netro_watering.config_flow import (
-    CONF_DEVICE_HW_VERSION,
-    CONF_DEVICE_SW_VERSION,
-)
-from homeassistant.components.netro_watering.const import CONF_SERIAL_NUMBER, DOMAIN
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
+
+from .test_imports import (
+    CONF_DEVICE_HW_VERSION,
+    CONF_DEVICE_SW_VERSION,
+    CONF_SERIAL_NUMBER,
+    DOMAIN,
+    config_flow,
+)
 
 CTRL_SERIAL = "CTRL999"
 SENS_SERIAL = "SN123"
@@ -34,6 +39,10 @@ async def test_full_flow_success_device(
     )
     assert result["type"] is data_entry_flow.FlowResultType.FORM
     assert result["step_id"] == "user"
+    assert result["data_schema"] == config_flow.DEVICE_SCHEMA
+    assert result["errors"] == {}
+    assert result["handler"] == "netro_watering"
+    assert result["flow_id"] == mock.ANY
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], user_input={CONF_SERIAL_NUMBER: CTRL_SERIAL}
@@ -42,8 +51,8 @@ async def test_full_flow_success_device(
     assert result["title"] == "Pontaillac"
     data = result["data"]
     assert data[CONF_SERIAL_NUMBER] == CTRL_SERIAL
-    assert data[CONF_DEVICE_HW_VERSION] == "1.2"  # issu de ton payload mock
-    assert data.get(CONF_DEVICE_SW_VERSION) == "1.1.1"  # si tu la renseignes
+    assert data[CONF_DEVICE_HW_VERSION] == "1.2"  # From your mock payload
+    assert data[CONF_DEVICE_SW_VERSION] == "1.1.1"  # If you specify it
     assert mock_setup_entry.called
 
 
@@ -60,6 +69,11 @@ async def test_full_flow_success_sensor(
         DOMAIN, context={"source": SOURCE_USER}
     )
     assert result["type"] is data_entry_flow.FlowResultType.FORM
+    assert result["step_id"] == "user"
+    assert result["data_schema"] == config_flow.DEVICE_SCHEMA
+    assert result["errors"] == {}
+    assert result["handler"] == "netro_watering"
+    assert result["flow_id"] == mock.ANY
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], user_input={CONF_SERIAL_NUMBER: SENS_SERIAL}
@@ -68,8 +82,8 @@ async def test_full_flow_success_sensor(
     assert result["title"] == "Capteur Hortensia"
     data = result["data"]
     assert data[CONF_SERIAL_NUMBER] == SENS_SERIAL
-    assert data[CONF_DEVICE_HW_VERSION] == "3.1"  # issu de ton payload mock
-    assert data.get(CONF_DEVICE_SW_VERSION) == "3.1.3"  # si tu la renseignes
+    assert data[CONF_DEVICE_HW_VERSION] == "3.1"  # From your mock payload
+    assert data.get(CONF_DEVICE_SW_VERSION) == "3.1.3"  # If you specify it
     assert mock_setup_entry.called
 
 
@@ -250,7 +264,7 @@ async def test_abort_if_already_configured_same_unique_id(
     This test verifies that a second config flow with the same unique ID is aborted
     with the 'already_configured' reason.
     """
-    # Premier flow -> crée l'entrée
+    # First flow -> creates the entry
     res1 = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )
@@ -259,7 +273,7 @@ async def test_abort_if_already_configured_same_unique_id(
     )
     assert res1["type"] is data_entry_flow.FlowResultType.CREATE_ENTRY
 
-    # Deuxième flow avec même serial -> abort
+    # Second flow with same serial -> abort
     res2 = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )

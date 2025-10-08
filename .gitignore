@@ -3,3 +3,8 @@ updatefromdev
 .venv
 pipfile
 pipfile.lock
+
+# Python packaging artifacts
+*.egg-info/
+build/
+dist/

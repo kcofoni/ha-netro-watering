@@ -1,0 +1,236 @@
+"""Tests for the Netro Watering integration initialization."""
+
+from unittest.mock import MagicMock, patch
+
+from pynetro import NetroConfig
+import pytest
+
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.typing import ConfigType
+
+from .test_imports import (
+    DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+    DOMAIN,
+    INTEGRATION_PATH,  # ✅ Added
+    PLATFORMS,
+    SENS_REFRESH_INTERVAL_MN,
+    SENSOR_DEVICE_TYPE,
+    async_setup,
+    async_setup_entry,
+)
+
+from tests.common import MockConfigEntry
+
+
+@pytest.mark.asyncio
+async def test_async_setup_returns_true(hass: HomeAssistant) -> None:
+    """Test that async_setup returns True."""
+    config: ConfigType = {DOMAIN: {}}
+    result = await async_setup(hass, config)
+    assert NetroConfig.default_base_url is not None
+    assert result is True
+
+
+@pytest.mark.asyncio
+async def test_async_setup_with_valid_netro_api_url(hass: HomeAssistant) -> None:
+    """Test async_setup with valid netro_api_url sets NetroConfig.default_base_url."""
+    config: ConfigType = {DOMAIN: {"netro_api_url": "https://api.custom-netro.com"}}
+
+    # ✅ Use INTEGRATION_PATH instead of hardcoded path
+    with patch(f"{INTEGRATION_PATH}.NetroConfig") as mock_netro_config:
+        result = await async_setup(hass, config)
+
+        assert result is True
+        # Verify that default_base_url was set to the provided URL
+        assert mock_netro_config.default_base_url == "https://api.custom-netro.com"
+
+
+@pytest.mark.asyncio
+async def test_async_setup_with_invalid_netro_api_url(
+    hass: HomeAssistant, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test async_setup with invalid netro_api_url does not set NetroConfig.default_base_url."""
+    config: ConfigType = {DOMAIN: {"netro_api_url": "not-a-valid-url"}}
+
+    # ✅ Use INTEGRATION_PATH instead of hardcoded path
+    with patch(f"{INTEGRATION_PATH}.NetroConfig") as mock_netro_config:
+        original_url = "https://default-api.netro.com"
+        mock_netro_config.default_base_url = original_url
+
+        result = await async_setup(hass, config)
+
+        assert result is True
+        # Verify that default_base_url was NOT changed
+        assert mock_netro_config.default_base_url == original_url
+        # Verify warning was logged
+        assert "The URL provided for Netro Public API is ignored" in caplog.text
+        assert "not properly formed" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_async_setup_without_netro_api_url(hass: HomeAssistant) -> None:
+    """Test async_setup without netro_api_url does not modify NetroConfig.default_base_url."""
+    config: ConfigType = {DOMAIN: {}}
+
+    # ✅ Use INTEGRATION_PATH instead of hardcoded path
+    with patch(f"{INTEGRATION_PATH}.NetroConfig") as mock_netro_config:
+        original_url = "https://default-api.netro.com"
+        mock_netro_config.default_base_url = original_url
+
+        result = await async_setup(hass, config)
+
+        assert result is True
+        # Verify that default_base_url was NOT changed
+        assert mock_netro_config.default_base_url == original_url
+
+
+@pytest.mark.asyncio
+async def test_async_setup_without_domain_config(hass: HomeAssistant) -> None:
+    """Test async_setup without domain configuration does not modify NetroConfig.default_base_url."""
+    config: ConfigType = {}
+
+    # ✅ Use INTEGRATION_PATH instead of hardcoded path
+    with patch(f"{INTEGRATION_PATH}.NetroConfig") as mock_netro_config:
+        original_url = "https://default-api.netro.com"
+        mock_netro_config.default_base_url = original_url
+
+        result = await async_setup(hass, config)
+
+        assert result is True
+        # Verify that default_base_url was NOT changed
+        assert mock_netro_config.default_base_url == original_url
+
+
+@pytest.mark.asyncio
+async def test_setup_sensor_device_success(
+    hass: HomeAssistant,
+    mock_sensor_config_entry: MockConfigEntry,
+    mock_netro_sensor_coordinator: tuple[MagicMock, MagicMock],
+) -> None:
+    """Test successful setup of a sensor device."""
+    mock_coordinator_class, mock_coordinator_instance = mock_netro_sensor_coordinator
+
+    # Initialize hass.data for the integration
+    hass.data.setdefault(DOMAIN, {})
+
+    with (
+        patch(
+            "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups"
+        ) as mock_forward,
+        patch("homeassistant.core.ServiceRegistry.has_service", return_value=False),
+        patch(
+            "homeassistant.core.ServiceRegistry.async_register"
+        ) as mock_register_service,
+    ):
+        # Call the function under test
+        result = await async_setup_entry(hass, mock_sensor_config_entry)
+
+        # Verifications
+        assert result is True
+
+        # Verify that the coordinator was created with the correct parameters
+        mock_coordinator_class.assert_called_once_with(
+            hass,
+            refresh_interval=SENS_REFRESH_INTERVAL_MN,
+            sensor_value_days_before_today=DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
+            serial_number="SENSOR123",
+            device_type=SENSOR_DEVICE_TYPE,
+            device_name="Test Sensor",
+            hw_version="1.0.0",
+            sw_version="1.0.0",
+        )
+
+        # Verify that first_refresh was called
+        mock_coordinator_instance.async_config_entry_first_refresh.assert_called_once()
+
+        # Verify that the coordinator was stored in hass.data
+        assert hass.data[DOMAIN]["test_sensor_entry"] == mock_coordinator_instance
+
+        # Verify that platforms were configured
+        mock_forward.assert_called_once_with(
+            mock_sensor_config_entry,
+            PLATFORMS,
+        )
+
+        # Verify that services were registered
+        assert (
+            mock_register_service.call_count >= 2
+        )  # At least refresh and report_weather
+
+
+@pytest.mark.asyncio
+async def test_setup_sensor_device_with_custom_options(
+    hass: HomeAssistant,
+    mock_sensor_config_entry_with_options: MockConfigEntry,
+    mock_netro_sensor_coordinator: tuple[MagicMock, MagicMock],
+) -> None:
+    """Test successful setup of a sensor device with custom options."""
+    mock_coordinator_class, mock_coordinator_instance = mock_netro_sensor_coordinator
+
+    # Initialize hass.data for the integration
+    hass.data.setdefault(DOMAIN, {})
+
+    with (
+        patch(
+            "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups"
+        ) as mock_forward,
+        patch("homeassistant.core.ServiceRegistry.has_service", return_value=False),
+        patch(
+            "homeassistant.core.ServiceRegistry.async_register"
+        ) as mock_register_service,
+    ):
+        # Call the function under test
+        result = await async_setup_entry(hass, mock_sensor_config_entry_with_options)
+
+        # Verifications
+        assert result is True
+
+        # Verify that the coordinator was created with the correct parameters
+        mock_coordinator_class.assert_called_once_with(
+            hass,
+            refresh_interval=30,
+            sensor_value_days_before_today=3,
+            serial_number="SENSOR456",
+            device_type=SENSOR_DEVICE_TYPE,
+            device_name="Test Sensor with Options",
+            hw_version="2.0.0",
+            sw_version="2.0.0",
+        )
+
+        # Verify that first_refresh was called
+        mock_coordinator_instance.async_config_entry_first_refresh.assert_called_once()
+
+        # Verify that the coordinator was stored in hass.data
+        assert (
+            hass.data[DOMAIN]["test_sensor_options_entry"] == mock_coordinator_instance
+        )
+
+        # Verify that platforms were configured
+        mock_forward.assert_called_once_with(
+            mock_sensor_config_entry_with_options,
+            PLATFORMS,
+        )
+
+        # Verify that services were registered
+        assert (
+            mock_register_service.call_count >= 2
+        )  # At least refresh and report_weather
+
+
+# TODOs:
+# - Add tests to verify behavior with different configurations
+# - Add tests to verify error handling during initialization
+# - Add tests to verify alignment of domain parameters with configuration file
+#
+# - Test in particular the correct functioning of the slowdown factor
+# Verify that async_setup_entry creates the correct coordinator based on device type
+# Verify that services (set_moisture, report_weather, refresh_data, no_water) are properly registered
+# Test device creation in the Home Assistant registry
+# Simulate a call to the set_moisture service and verify that the Netro client method is called with the correct parameters
+# Simulate a call to the report_weather service and verify that the Netro client method is called with the correct parameters
+# Simulate a call to the refresh_data service and verify that the coordinator is refreshed
+# Simulate a call to the no_water service and verify that the coordinator executes the expected method
+# Verify that errors (HomeAssistantError) are properly raised for invalid cases (unknown zone ID or config entry, wrong device type, etc.)
+# Test handling of out-of-bounds values for parameters (interval, days, etc.)
+# Verify that platforms are properly unloaded and services are removed if needed
+# Verify that data is removed from hass.data

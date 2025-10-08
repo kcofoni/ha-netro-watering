@@ -8,6 +8,7 @@ CONF_DEVICE_NAME = "device_name"
 CONF_DEVICE_TYPE = "device_type"
 CONF_DEVICE_HW_VERSION = "hw_version"
 CONF_DEVICE_SW_VERSION = "sw_version"
+CONF_DEVICE_ZONE_NUMBER = "zone_num"
 
 CONTROLLER_DEVICE_TYPE = "controller"
 SENSOR_DEVICE_TYPE = "sensor"
