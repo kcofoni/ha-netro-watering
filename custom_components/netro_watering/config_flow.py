@@ -5,15 +5,16 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from pynetro import NetroClient, NetroConfig, NetroException, NetroInvalidKey
+from pynetro.client import mask
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult, section
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from pynetro import NetroClient, NetroConfig, NetroException, NetroInvalidKey
-from pynetro.client import mask
 
 from .const import (
     CONF_CTRL_REFRESH_INTERVAL,

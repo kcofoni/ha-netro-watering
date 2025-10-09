@@ -8,8 +8,10 @@ import logging
 from time import gmtime, strftime
 
 from dateutil.relativedelta import relativedelta
+from pynetro import NetroClient, NetroConfig
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -64,16 +66,7 @@ from .const import (
     NETRO_ZONE_SMART,
     TZ_OFFSET,
 )
-from .netrofunction import (
-    get_info as netro_get_info,
-    get_moistures as netro_get_moistures,
-    get_schedules as netro_get_schedules,
-    get_sensor_data as netro_get_sensor_data,
-    no_water as netro_no_water,
-    set_status as netro_set_status,
-    stop_water as netro_stop_water,
-    water as netro_water,
-)
+from .http_client import AiohttpClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -224,14 +217,15 @@ class NetroSensorUpdateCoordinator(DataUpdateCoordinator):
             self.update_interval.total_seconds() / 60,
         )
 
-        res = await self.hass.async_add_executor_job(
-            netro_get_sensor_data,
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        res = await client.get_sensor_data(
             self.serial_number,
-            (
+            start_date=(
                 datetime.date.today()
                 - timedelta(days=self.sensor_value_days_before_today)
             ).strftime("%Y-%m-%d"),
-            datetime.date.today().strftime("%Y-%m-%d"),
+            end_date=datetime.date.today().strftime("%Y-%m-%d"),
         )
 
         # get meta data
@@ -306,21 +300,24 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             self, duration: int, delay: int, start_time: datetime.time
         ) -> None:
             """Start watering for the current zone for given duration in minutes."""
-            await self.parent_controller.hass.async_add_executor_job(
-                netro_water,
+            session = async_get_clientsession(self.parent_controller.hass)
+            client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+            await client.water(
                 self.parent_controller.serial_number,
-                duration,
-                [str(self.ith)],
-                delay,
-                start_time.strftime("%Y-%m-%d %H:%M")
+                duration_minutes=duration,
+                zones=[str(self.ith)],
+                delay_minutes=delay,
+                start_time=start_time.strftime("%Y-%m-%d %H:%M")
                 if start_time is not None
                 else None,
             )
 
         async def stop_watering(self) -> None:
             """Stop watering (all zone included as unexpected - improvement expected)."""
-            await self.parent_controller.hass.async_add_executor_job(
-                netro_stop_water, self.parent_controller.serial_number
+            session = async_get_clientsession(self.parent_controller.hass)
+            client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+            await client.stop_water(
+                self.parent_controller.serial_number,
             )
 
         @property
@@ -775,10 +772,9 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         )
 
         # get main data
-        res = await self.hass.async_add_executor_job(
-            netro_get_info,
-            self.serial_number,
-        )
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        res = await client.get_info(self.serial_number)
 
         device_data = res["data"]["device"]
         meta_data = res["meta"]
@@ -817,24 +813,23 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                 )
 
         # get moistures
-        res = await self.hass.async_add_executor_job(
-            netro_get_moistures,
-            self.serial_number,
-        )
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        res = await client.get_moistures(self.serial_number)
 
         # update controller and zone attributes from moistures
         self._update_from_moistures(res["data"]["moistures"])
 
         # get schedules
-        res = await self.hass.async_add_executor_job(
-            netro_get_schedules,
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        res = await client.get_schedules(
             self.serial_number,
-            None,
-            str(
+            start_date=str(
                 datetime.date.today()
                 - relativedelta(months=self.schedules_months_before)
             ),
-            str(
+            end_date=str(
                 datetime.date.today()
                 + relativedelta(months=self.schedules_months_after)
             ),
@@ -845,40 +840,53 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
 
     async def enable(self):
         """Enable controller."""
-        return await self.hass.async_add_executor_job(
-            netro_set_status,
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        return await client.set_status(
             self.serial_number,
-            NETRO_STATUS_ENABLE,
+            enabled=NETRO_STATUS_ENABLE,
         )
 
     async def disable(self):
         """Disable controller."""
-        return await self.hass.async_add_executor_job(
-            netro_set_status,
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        return await client.set_status(
             self.serial_number,
-            NETRO_STATUS_DISABLE,
+            enabled=NETRO_STATUS_DISABLE,
         )
 
     async def no_water(self, days: int | None = None) -> None:
         """Do not water for several days (1 if not specified)."""
-        await self.hass.async_add_executor_job(netro_no_water, self.serial_number, days)
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        await client.no_water(
+            self.serial_number,
+            days=days if days is not None else 1,
+        )
 
     async def start_watering(
         self, duration: int, delay: int, start_time: datetime.time
     ) -> None:
         """Start watering for the current zone for given duration in minutes."""
-        await self.hass.async_add_executor_job(
-            netro_water,
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        await client.water(
             self.serial_number,
-            duration,
-            None,
-            delay,
-            start_time.strftime("%Y-%m-%d %H:%M") if start_time is not None else None,
+            duration_minutes=duration,
+            delay_minutes=delay,
+            start_time=start_time.strftime("%Y-%m-%d %H:%M")
+            if start_time is not None
+            else None,
         )
 
     async def stop_watering(self) -> None:
         """Stop watering (all zone included as expected)."""
-        await self.hass.async_add_executor_job(netro_stop_water, self.serial_number)
+        session = async_get_clientsession(self.hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        await client.stop_water(
+            self.serial_number,
+        )
 
     def __str__(self) -> str:
         """Convert to string, for logging in particular."""

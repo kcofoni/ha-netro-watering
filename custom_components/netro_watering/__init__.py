@@ -2,24 +2,24 @@
 
 from __future__ import annotations
 
+from datetime import date, datetime
 import enum
 import logging
 import re
-from datetime import date, datetime
 
+from pynetro import NetroClient, NetroConfig
+from pynetro.client import mask
 import validators
 import voluptuous as vol
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from pynetro import NetroClient, NetroConfig
-from pynetro.client import mask
 
 from .const import (
     ATTR_CONFIG_ENTRY_ID,
@@ -335,9 +335,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry
-) -> bool:  # noqa: C901
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  # noqa: C901
     """Set up Netro Watering from a config entry."""
 
     _LOGGER.debug(
