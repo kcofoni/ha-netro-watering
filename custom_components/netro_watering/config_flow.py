@@ -5,16 +5,15 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from pynetro import NetroClient, NetroConfig, NetroException, NetroInvalidKey
-from pynetro.client import mask
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult, section
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from pynetro import NetroClient, NetroConfig, NetroException, NetroInvalidKey
+from pynetro.client import mask
 
 from .const import (
     CONF_CTRL_REFRESH_INTERVAL,
@@ -174,6 +173,13 @@ class NetroConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    def is_matching(self, other_flow: dict[str, Any]) -> bool:
+        """Check if this integration matches the discovery info."""
+        # As this integration does not support automatic discovery,
+        # we return False
+
+        return False
+
     @staticmethod
     @callback
     def async_get_options_flow(
@@ -230,7 +236,7 @@ class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
 
     def _gp(self) -> dict[str, Any]:
         """Retrieve already loaded YAML parameters (fallback for defaults)."""
-        return self.hass.data.get(DOMAIN, {}).get(GLOBAL_PARAMETERS, {})  # type: ignore[return-value]
+        return self.hass.data.get(DOMAIN, {}).get(GLOBAL_PARAMETERS, {})
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None

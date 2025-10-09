@@ -2,11 +2,11 @@
 
 from unittest.mock import MagicMock, patch
 
-from pynetro import NetroConfig
 import pytest
-
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
+from pynetro import NetroConfig
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from .test_imports import (
     DEFAULT_SENSOR_VALUE_DAYS_BEFORE_TODAY,
@@ -18,8 +18,6 @@ from .test_imports import (
     async_setup,
     async_setup_entry,
 )
-
-from tests.common import MockConfigEntry
 
 
 @pytest.mark.asyncio
@@ -63,7 +61,7 @@ async def test_async_setup_with_invalid_netro_api_url(
         # Verify that default_base_url was NOT changed
         assert mock_netro_config.default_base_url == original_url
         # Verify warning was logged
-        assert "The URL provided for Netro Public API is ignored" in caplog.text
+        assert "The URL provided for Netro API is ignored" in caplog.text
         assert "not properly formed" in caplog.text
 
 
@@ -86,7 +84,8 @@ async def test_async_setup_without_netro_api_url(hass: HomeAssistant) -> None:
 
 @pytest.mark.asyncio
 async def test_async_setup_without_domain_config(hass: HomeAssistant) -> None:
-    """Test async_setup without domain configuration does not modify NetroConfig.default_base_url."""
+    """Test async_setup without domain configuration
+    does not modify NetroConfig.default_base_url."""
     config: ConfigType = {}
 
     # ✅ Use INTEGRATION_PATH instead of hardcoded path
@@ -224,7 +223,8 @@ async def test_setup_sensor_device_with_custom_options(
 #
 # - Test in particular the correct functioning of the slowdown factor
 # Verify that async_setup_entry creates the correct coordinator based on device type
-# Verify that services (set_moisture, report_weather, refresh_data, no_water) are properly registered
+# Verify that services (set_moisture, report_weather, refresh_data, no_water) are
+# properly registered
 # Test device creation in the Home Assistant registry
 # Simulate a call to the set_moisture service and verify that the Netro client method is called with the correct parameters
 # Simulate a call to the report_weather service and verify that the Netro client method is called with the correct parameters

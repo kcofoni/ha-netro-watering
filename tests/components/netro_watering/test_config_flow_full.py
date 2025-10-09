@@ -7,7 +7,6 @@ including device, sensor, fallback, authentication, connection, and duplicate en
 from unittest import mock
 
 import pytest
-
 from homeassistant import data_entry_flow
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
@@ -135,7 +134,8 @@ async def test_full_flow_netro_parameter_error(
 ) -> None:
     """Test config flow with NetroParameterError exception.
 
-    This test verifies that the config flow returns an error when the Netro API encounters a parameter error.
+    This test verifies that the config flow returns an error
+    when the Netro API encounters a parameter error.
     """
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
@@ -156,7 +156,8 @@ async def test_full_flow_netro_internal_error(
 ) -> None:
     """Test config flow with NetroInternalError exception.
 
-    This test verifies that the config flow returns an error when the Netro API encounters an internal error.
+    This test verifies that the config flow returns an error
+    when the Netro API encounters an internal error.
     """
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
@@ -177,7 +178,8 @@ async def test_full_flow_netro_invalid_device(
 ) -> None:
     """Test config flow with NetroInvalidDevice exception.
 
-    This test verifies that the config flow returns an error when the Netro API encounters an invalid device error.
+    This test verifies that the config flow returns an error
+    when the Netro API encounters an invalid device error.
     """
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
@@ -198,7 +200,8 @@ async def test_full_flow_cannot_connect_native(
 ) -> None:
     """Test config flow when connection to Netro API cannot be established.
 
-    This test verifies that the config flow returns a 'cannot_connect' error when the API is unreachable.
+    This test verifies that the config flow returns a 'cannot_connect' error
+    when the API is unreachable.
     """
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
@@ -219,7 +222,8 @@ async def test_full_flow_cannot_connect_response_none(
 ) -> None:
     """Test config flow when Netro API returns None.
 
-    This test verifies that the config flow returns a 'cannot_connect' error when the API response is None.
+    This test verifies that the config flow returns a 'cannot_connect' error
+    when the API response is None.
     """
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
@@ -240,7 +244,8 @@ async def test_full_flow_unknown(
 ) -> None:
     """Test config flow when an unknown error occurs.
 
-    This test verifies that the config flow returns an 'unknown' error when an unexpected error is encountered.
+    This test verifies that the config flow returns an 'unknown' error
+    when an unexpected error is encountered.
     """
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}

@@ -4,7 +4,18 @@ updatefromdev
 pipfile
 pipfile.lock
 
+# IDE configuration files
+.vscode/
+
+# Development scripts
+activate-project.sh
+
 # Python packaging artifacts
 *.egg-info/
 build/
 dist/
+
+# Cache directories
+.pytest_cache/
+.ruff_cache/
+.*_cache/

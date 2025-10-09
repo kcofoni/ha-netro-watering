@@ -1,16 +1,25 @@
 """Pytest fixtures for Netro Watering integration tests."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+pytest_plugins = ("pytest_homeassistant_custom_component",)
 
-import pytest
+from unittest.mock import (  # noqa: E402  # pylint: disable=wrong-import-position
+    AsyncMock,
+    MagicMock,
+    patch,
+)
 
-from tests.common import MockConfigEntry
+import pytest  # noqa: E402 # pylint: disable=wrong-import-position
+from pytest_homeassistant_custom_component.common import (  # noqa: E402 # pylint: disable=wrong-import-position
+    MockConfigEntry,  # noqa: E402 # pylint: disable=wrong-import-position
+)
 
 # Conditional import
 try:
     # Home Assistant Core environment
-    from homeassistant.components.netro_watering.config_flow import CannotConnect
-    from homeassistant.components.netro_watering.const import (
+    from homeassistant.components.netro_watering.config_flow import (  # type: ignore
+        CannotConnect,  # type: ignore
+    )
+    from homeassistant.components.netro_watering.const import (  # type: ignore
         CONF_DEVICE_HW_VERSION,
         CONF_DEVICE_NAME,
         CONF_DEVICE_SW_VERSION,
@@ -42,7 +51,7 @@ except ImportError:
 
     INTEGRATION_PATCH_PATH = "custom_components.netro_watering"
 
-from pynetro.client import (
+from pynetro.client import (  # noqa: E402 # pylint: disable=wrong-import-position
     NETRO_ERROR_CODE_EXCEED_LIMIT,
     NETRO_ERROR_CODE_INTERNAL_ERROR,
     NETRO_ERROR_CODE_INVALID_DEVICE,
@@ -57,6 +66,12 @@ from pynetro.client import (
 
 CTRL_SERIAL = "CTRL999"
 SENSOR_SERIAL = "SN123"
+
+
+@pytest.fixture(autouse=True)
+def auto_enable_custom_integrations(enable_custom_integrations):
+    """Enable custom_components/ for all tests."""
+    yield
 
 
 @pytest.fixture
