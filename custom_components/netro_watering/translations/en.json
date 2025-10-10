@@ -4,6 +4,7 @@
             "already_configured": "Device is already configured"
         },
         "error": {
+            "cannot_connect": "Cannot connect to the device",
             "invalid_serial_number": "Invalid serial number",
             "netro_error_occurred": "Netro (NPA) returned an error for this serial number",
             "unknown": "Unexpected error",

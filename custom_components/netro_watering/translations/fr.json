@@ -4,6 +4,7 @@
       "already_configured": "L’appareil est déjà configuré"
     },
     "error": {
+      "cannot_connect": "Impossible de se connecter à l’appareil",
       "invalid_serial_number": "Numéro de série invalide",
       "netro_error_occurred": "Netro (NPA) a renvoyé une erreur pour ce numéro de série",
       "unknown": "Erreur inconnue",
@@ -37,9 +38,9 @@
       }
     },
     "button": {
-        "refresh": {
-            "name": "Actualiser"
-        }
+      "refresh": {
+        "name": "Actualiser"
+      }
     },
     "calendar": {
       "schedules": {
@@ -254,7 +255,7 @@
           "name": "Vitesse du vent"
         }
       },
-    "name": "Publier la météo"
+      "name": "Publier la météo"
     },
     "set_moisture": {
       "description": "Définir une valeur d’humidité sur une zone, pour fournir à Netro la valeur d’un capteur externe",

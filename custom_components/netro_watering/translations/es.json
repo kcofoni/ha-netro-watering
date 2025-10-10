@@ -4,6 +4,7 @@
       "already_configured": "El dispositivo ya está configurado"
     },
     "error": {
+      "cannot_connect": "No se puede conectar al dispositivo",
       "invalid_serial_number": "Número de serie inválido",
       "netro_error_occurred": "Netro (NPA) devolvió un error para este número de serie",
       "unknown": "Error inesperado",
@@ -37,9 +38,9 @@
       }
     },
     "button": {
-        "refresh": {
-            "name": "Actualizar"
-        }
+      "refresh": {
+        "name": "Actualizar"
+      }
     },
     "calendar": {
       "schedules": {

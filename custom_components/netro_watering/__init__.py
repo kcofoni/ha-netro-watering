@@ -7,6 +7,8 @@ import enum
 import logging
 import re
 
+from pynetro import NetroClient, NetroConfig
+from pynetro.client import mask
 import validators
 import voluptuous as vol
 
@@ -15,6 +17,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -80,11 +83,7 @@ from .coordinator import (
     NetroSensorUpdateCoordinator,
     prepare_slowdown_factors,
 )
-from .netrofunction import (
-    report_weather as netro_report_weather,
-    set_moisture as netro_set_moisture,
-    set_netro_base_url,
-)
+from .http_client import AiohttpClient
 
 # Here is the list of the platforms that we want to support.
 # sensor is for the netro ground sensors, switch is for the zones
@@ -167,8 +166,9 @@ SLOWDOWN_ITEM_SCHEMA = vol.Schema(
     extra=vol.PREVENT_EXTRA,
 )
 
-# The presence of CONFIG_SCHEMA indicates that this integration supports configuration via configuration.yaml.
-# The configuration provided in configuration.yaml will be validated using CONFIG_SCHEMA.
+# The presence of CONFIG_SCHEMA indicates that this integration supports configuration
+# via configuration.yaml. The configuration provided in configuration.yaml
+# will be validated using CONFIG_SCHEMA.
 CONFIG_SCHEMA = vol.Schema(
     {
         DOMAIN: vol.Schema(
@@ -304,14 +304,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     if (netro_watering_config := config.get(DOMAIN)) is not None:
         if netro_watering_config.get("netro_api_url") is not None:
             if validators.url(netro_watering_config["netro_api_url"]):
-                set_netro_base_url(netro_watering_config["netro_api_url"])
+                NetroConfig.default_base_url = netro_watering_config["netro_api_url"]
                 _LOGGER.info(
                     "Set Netro Public API url to %s",
                     netro_watering_config["netro_api_url"],
                 )
             else:
                 _LOGGER.warning(
-                    "The URL provided for Netro Public API is ignored since it is not properly formed, please check '%s' section in the home assistant configuration file and correct the 'netro_api_url' entry",
+                    "The URL provided for Netro API is ignored since it's not properly formed, "
+                    "please check '%s' section in the home assistant configuration file "
+                    "and correct the 'netro_api_url' entry",
                     DOMAIN,
                 )
 
@@ -339,7 +341,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
     _LOGGER.debug(
         "setting up config entry: device_type = %s, serial_number = %s, config_name = %s",
         entry.data[CONF_DEVICE_TYPE],
-        entry.data[CONF_SERIAL_NUMBER],
+        mask(entry.data[CONF_SERIAL_NUMBER]),
         entry.data[CONF_DEVICE_NAME],
     )
 
@@ -352,7 +354,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         slowdown_factors = gp[CONF_SLOWDOWN_FACTORS]
 
     if entry.data[CONF_DEVICE_TYPE] == SENSOR_DEVICE_TYPE:
-        # get sensor specific parameters, look first in the options, next in the global parameters, otherwise use the default value
+        # get sensor specific parameters, look first in the options,
+        # next in the global parameters, otherwise use the default value
         val = next(
             v
             for v in (
@@ -418,7 +421,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             )
 
         _LOGGER.debug(
-            "creating sensor coordinator: device_name = %s, refresh_interval = %s, sensor_value_days_before_today = %s",
+            "creating sensor coordinator: device_name = %s, refresh_interval = %s, "
+            "sensor_value_days_before_today = %s",
             entry.data[CONF_DEVICE_NAME],
             refresh_interval,
             sensor_value_days_before_today,
@@ -527,7 +531,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             )
 
         _LOGGER.debug(
-            "creating controller: device_name = %s, refresh_interval = %s, schedules_months_before = %s, schedules_months_after = %s, slowdown_factors = %s",
+            "creating controller: device_name = %s, refresh_interval = %s, "
+            "schedules_months_before = %s, schedules_months_after = %s, slowdown_factors = %s",
             entry.data[CONF_DEVICE_NAME],
             refresh_interval,
             schedules_months_before,
@@ -578,9 +583,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             hw_version=controller_coordinator.hw_version,
         )
         _LOGGER.debug(
-            "device explicitely created into the registry: name = %s, serial = %s, model = %s, manufacturer = %s",
+            "device explicitly created into the registry: name = %s, serial = %s, "
+            "model = %s, manufacturer = %s",
             name,
-            serial,
+            mask(serial),
             model,
             MANUFACTURER,
         )
@@ -609,7 +615,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
                 or device_entry.model != NETRO_DEFAULT_ZONE_MODEL
             ):
                 raise HomeAssistantError(
-                    f"Invalid Netro Watering device ID: {device_id}, it doesn't seem to be a zone !?"
+                    f"Invalid Netro Watering device ID: {device_id}, "
+                    "it doesn't seem to be a zone !?"
                 )
 
             # retrieve the config entry related to this device
@@ -628,20 +635,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             key = config_entry.data[CONF_SERIAL_NUMBER]
             for identifier in device_entry.identifiers:
                 if identifier[1].startswith(key):
-                    # assume that device info returned by Zone class is <controller_serial>_<zone_id> as identifiers
+                    # assume that device info returned by Zone class is
+                    # <controller_serial>_<zone_id> as identifiers
                     zone_id = identifier[1].split("_")[1]
                     break
 
             # set moisture by Netro
             _LOGGER.info(
-                "Running custom service 'Set moisture' : the humidity level has been forced to %s%% for zone %s (id = %s)",
+                "Running custom service 'Set moisture' : the humidity level has been "
+                "forced to %s%% for zone %s (id = %s)",
                 moisture,
                 device_entry.name,
                 zone_id,
             )
-            await hass.async_add_executor_job(
-                netro_set_moisture, key, moisture, zone_id
-            )
+
+            session = async_get_clientsession(hass)
+            client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+            await client.set_moisture(key, moisture=moisture, zones=[zone_id])
 
         # only one Set moisture service to be created for all controllers
         if not hass.services.has_service(DOMAIN, SERVICE_SET_MOISTURE_NAME):
@@ -720,9 +730,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             {
                 "controller": coordinator.name,
                 "date": str(weather_asof) if weather_asof else weather_asof,
-                "condition": weather_condition.value
-                if weather_condition is not None
-                else None,
+                "condition": (
+                    weather_condition.value if weather_condition is not None else None
+                ),
                 "rain": weather_rain,
                 "rain_prob": weather_rain_prob,
                 "temp": weather_temp,
@@ -730,32 +740,36 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
                 "t_max": weather_t_max,
                 "t_dew": weather_t_dew,
                 "wind_speed": weather_wind_speed,
-                "humidity": int(weather_humidity)
-                if weather_humidity
-                else weather_humidity,
+                "humidity": (
+                    int(weather_humidity) if weather_humidity else weather_humidity
+                ),
                 "pressure": weather_pressure,
             },
         )
 
         if not weather_asof:
             raise HomeAssistantError(
-                "'date' parameter is missing when running 'Report weather' service provided by Netro Watering integration"
+                "'date' parameter is missing when running 'Report weather' service "
+                "provided by Netro Watering integration"
             )
 
-        await hass.async_add_executor_job(
-            netro_report_weather,
+        session = async_get_clientsession(hass)
+        client = NetroClient(http=AiohttpClient(session), config=NetroConfig())
+        await client.report_weather(
             key,
-            str(weather_asof),
-            weather_condition.value if weather_condition is not None else None,
-            weather_rain,
-            weather_rain_prob,
-            weather_temp,
-            weather_t_min,
-            weather_t_max,
-            weather_t_dew,
-            weather_wind_speed,
-            weather_humidity,
-            weather_pressure,
+            date=str(weather_asof),
+            condition=(
+                weather_condition.value if weather_condition is not None else None
+            ),
+            rain=weather_rain,
+            rain_prob=weather_rain_prob,
+            temp=weather_temp,
+            t_min=weather_t_min,
+            t_max=weather_t_max,
+            t_dew=weather_t_dew,
+            wind_speed=weather_wind_speed,
+            humidity=weather_humidity,
+            pressure=weather_pressure,
         )
 
     # only one Report weather service to be created for all config entries
@@ -823,11 +837,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
         _LOGGER.info("Deleting %s", hass.data[DOMAIN][entry.entry_id])
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    # the Set moisture service has to be removed if the current entry is a controller and the last one
+    # the Set moisture service has to be removed if the current entry is a controller
+    # and the last one
     if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
         other_loaded_entries = [
             _entry
