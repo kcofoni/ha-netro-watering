@@ -1,0 +1,65 @@
+{
+    "status": "OK",
+    "meta":
+    {
+        "time": "2025-10-10T21:47:36",
+        "tid": "1760132856_UoHd",
+        "version": "1.0",
+        "token_limit": 2000,
+        "token_remaining": 466,
+        "last_active": "2025-10-10T21:47:36",
+        "token_reset": "2025-10-11T00:00:00"
+    },
+    "data":
+    {
+        "device":
+        {
+            "name": "Pontaillac",
+            "serial": "E4********38",
+            "zone_num": 6,
+            "status": "STANDBY",
+            "version": "1.2",
+            "sw_version": "1.1.1",
+            "last_active": "2025-10-10T21:35:38",
+            "zones":
+            [
+                {
+                    "name": "Puit",
+                    "ith": 1,
+                    "enabled": true,
+                    "smart": "SMART"
+                },
+                {
+                    "name": "Saule Pleureur",
+                    "ith": 2,
+                    "enabled": true,
+                    "smart": "SMART"
+                },
+                {
+                    "name": "Lilas des Indes",
+                    "ith": 3,
+                    "enabled": true,
+                    "smart": "SMART"
+                },
+                {
+                    "name": "Zone 4",
+                    "ith": 4,
+                    "enabled": false,
+                    "smart": "SMART"
+                },
+                {
+                    "name": "Zone 5",
+                    "ith": 5,
+                    "enabled": false,
+                    "smart": "SMART"
+                },
+                {
+                    "name": "Zone 6",
+                    "ith": 6,
+                    "enabled": false,
+                    "smart": "SMART"
+                }
+            ]
+        }
+    }
+}

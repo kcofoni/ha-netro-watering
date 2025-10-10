@@ -2,24 +2,24 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
 import enum
 import logging
 import re
+from datetime import date, datetime
 
-from pynetro import NetroClient, NetroConfig
-from pynetro.client import mask
 import validators
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from pynetro import NetroClient, NetroConfig
+from pynetro.client import mask
 
 from .const import (
     ATTR_CONFIG_ENTRY_ID,
@@ -335,7 +335,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  # noqa: C901
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> bool:  # noqa: C901
     """Set up Netro Watering from a config entry."""
 
     _LOGGER.debug(
@@ -842,33 +844,39 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.info("Deleting %s", hass.data[DOMAIN][entry.entry_id])
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    # the Set moisture service has to be removed if the current entry is a controller
-    # and the last one
-    if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
+        # Only remove services if platform unload succeeded
+        # the Set moisture service has to be removed if the current entry is a controller
+        # and the last one
+        if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
+            other_loaded_entries = [
+                _entry
+                for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
+                if _entry.entry_id != entry.entry_id
+                and _entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE
+            ]
+
+            if not other_loaded_entries:
+                _LOGGER.info("Removing service %s", SERVICE_SET_MOISTURE_NAME)
+                hass.services.async_remove(DOMAIN, SERVICE_SET_MOISTURE_NAME)
+
+        # if there is no more entry after this one, one must remove the config entry level services
         other_loaded_entries = [
             _entry
             for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
             if _entry.entry_id != entry.entry_id
-            and _entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE
         ]
 
         if not other_loaded_entries:
-            _LOGGER.info("Removing service %s", SERVICE_SET_MOISTURE_NAME)
-            hass.services.async_remove(DOMAIN, SERVICE_SET_MOISTURE_NAME)
-
-    # if there is no more entry after this one, one must remove the config entry level services
-    other_loaded_entries = [
-        _entry
-        for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
-        if _entry.entry_id != entry.entry_id
-    ]
-
-    if not other_loaded_entries:
-        _LOGGER.info("Removing service %s", SERVICE_REPORT_WEATHER_NAME)
-        hass.services.async_remove(DOMAIN, SERVICE_REPORT_WEATHER_NAME)
-        _LOGGER.info("Removing service %s", SERVICE_REFRESH_NAME)
-        hass.services.async_remove(DOMAIN, SERVICE_REFRESH_NAME)
-        _LOGGER.info("Removing service %s", SERVICE_NO_WATER_NAME)
-        hass.services.async_remove(DOMAIN, SERVICE_NO_WATER_NAME)
+            _LOGGER.info("Removing service %s", SERVICE_REPORT_WEATHER_NAME)
+            hass.services.async_remove(DOMAIN, SERVICE_REPORT_WEATHER_NAME)
+            _LOGGER.info("Removing service %s", SERVICE_REFRESH_NAME)
+            hass.services.async_remove(DOMAIN, SERVICE_REFRESH_NAME)
+            _LOGGER.info("Removing service %s", SERVICE_NO_WATER_NAME)
+            hass.services.async_remove(DOMAIN, SERVICE_NO_WATER_NAME)
+    else:
+        _LOGGER.warning(
+            "Failed to unload platforms for entry %s, keeping services active",
+            entry.entry_id,
+        )
 
     return unload_ok

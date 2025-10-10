@@ -1,0 +1,149 @@
+# serializer version: 1
+# name: TestAsyncUnloadEntry.test_unload_complex_scenario_multiple_types
+  dict({
+    'no_services_removed': True,
+    'other_controller_preserved': True,
+    'remaining_entries_count': 3,
+    'sensors_preserved': True,
+    'target_controller_removed': True,
+    'unload_successful': True,
+  })
+# ---
+# name: TestAsyncUnloadEntry.test_unload_controller_with_other_controller_keeps_moisture_service
+  dict({
+    'coordinator_removed': True,
+    'moisture_service_not_removed': True,
+    'no_services_removed': True,
+    'other_coordinator_preserved': True,
+    'unload_successful': True,
+  })
+# ---
+# name: TestAsyncUnloadEntry.test_unload_controller_with_sensors_removes_moisture_but_not_integration
+  dict({
+    'integration_services_not_removed': True,
+    'moisture_service_removed': True,
+    'sensors_preserved': True,
+    'total_service_removals': 1,
+    'unload_successful': True,
+  })
+# ---
+# name: TestAsyncUnloadEntry.test_unload_entry_logging_verification
+  dict({
+    'deletion_logged': True,
+    'service_removal_logs_count': 4,
+    'total_log_calls': 5,
+    'unload_successful': True,
+  })
+# ---
+# name: TestAsyncUnloadEntry.test_unload_last_controller_removes_moisture_service
+  dict({
+    'coordinator_removed': True,
+    'integration_services_removed': True,
+    'moisture_service_removed': True,
+    'total_service_removals': 4,
+    'unload_successful': True,
+  })
+# ---
+# name: TestAsyncUnloadEntry.test_unload_last_sensor_with_no_controllers_removes_integration_services
+  dict({
+    'integration_services_removed': True,
+    'moisture_service_not_removed': True,
+    'sensor_removed': True,
+    'total_service_removals': 3,
+    'unload_successful': True,
+  })
+# ---
+# name: TestAsyncUnloadEntry.test_unload_sensor_does_not_affect_moisture_service
+  dict({
+    'controller_preserved': True,
+    'no_services_removed': True,
+    'sensor_removed': True,
+    'unload_successful': True,
+  })
+# ---
+# name: TestRefreshService.test_refresh_function_coordinator_exception
+  dict({
+    'coordinator_called': True,
+    'exception_message': 'Coordinator error',
+    'exception_propagated': True,
+  })
+# ---
+# name: TestRefreshService.test_refresh_function_invalid_entry_id
+  dict({
+    'coordinator_not_called': True,
+    'error_message': 'Config entry id does not exist: invalid_entry_id',
+    'error_raised': True,
+    'error_type': 'HomeAssistantError',
+  })
+# ---
+# name: TestRefreshService.test_refresh_function_missing_domain_data
+  dict({
+    'coordinator_not_called': True,
+    'error_message': 'Config entry id does not exist: test_entry_id',
+    'error_raised': True,
+  })
+# ---
+# name: TestRefreshService.test_refresh_function_success
+  dict({
+    'call_count': 1,
+    'coordinator_refresh_called': True,
+    'function_executed': True,
+  })
+# ---
+# name: TestRefreshService.test_refresh_function_with_logging
+  dict({
+    'coordinator_name_logged': 'Test Controller',
+    'coordinator_refresh_called': True,
+    'log_message_correct': True,
+    'logging_called': True,
+  })
+# ---
+# name: TestRefreshServiceEdgeCases.test_refresh_multiple_coordinators
+  dict({
+    'both_coordinators_refreshed': True,
+    'coordinator1_call_count': 1,
+    'coordinator1_called': True,
+    'coordinator2_call_count': 1,
+    'coordinator2_called': True,
+  })
+# ---
+# name: TestRefreshServiceEdgeCases.test_refresh_with_empty_call_data
+  dict({
+    'error_type': 'KeyError',
+    'key_error_raised': True,
+    'missing_key': 'config_entry_id',
+  })
+# ---
+# name: TestRefreshServiceEdgeCases.test_refresh_with_none_coordinator
+  dict({
+    'attribute_error_raised': True,
+    'error_message': "'NoneType' object has no attribute 'async_request_refresh'",
+    'error_type': 'AttributeError',
+  })
+# ---
+# name: TestRefreshServiceIntegration.test_service_handler_direct_call
+  dict({
+    'call_count': 1,
+    'coordinator_refresh_called': True,
+    'service_executed': True,
+  })
+# ---
+# name: TestRefreshServiceIntegration.test_service_handler_invalid_data
+  dict({
+    'coordinator_not_called': True,
+    'error_message': 'Config entry id does not exist: invalid_id',
+    'error_raised': True,
+    'error_type': 'HomeAssistantError',
+  })
+# ---
+# name: TestRefreshServiceIntegration.test_service_registration_pattern
+  dict({
+    'has_service_checked': True,
+    'registration_call_args': tuple(
+      'netro_watering',
+      'refresh_data',
+      'mock_refresh_function',
+    ),
+    'service_registered': True,
+  })
+# ---
