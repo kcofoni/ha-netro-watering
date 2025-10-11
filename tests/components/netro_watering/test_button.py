@@ -198,9 +198,9 @@ class TestNetroRefreshButton:
             # Call async_press
             await button_entity.async_press()
 
-            # Verify logger was called
+            # Verify logger was called with masked serial number
             mock_logger.debug.assert_called_once_with(
-                "Netro: refresh button pressed for %s", "CTRL123"
+                "Netro: refresh button pressed for %s", "CT********23"
             )
 
             # Verify coordinator refresh was requested
