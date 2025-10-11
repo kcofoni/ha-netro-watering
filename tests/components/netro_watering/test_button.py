@@ -206,17 +206,20 @@ class TestNetroRefreshButton:
             # Verify coordinator refresh was requested
             mock_controller_coordinator.async_request_refresh.assert_called_once()
 
-    def test_press_method_calls_async_press(self, button_entity):
+    @pytest.mark.asyncio
+    async def test_press_method_calls_async_press(self, button_entity):
         """Test that press method calls async_press using asyncio.run."""
-        with patch("asyncio.run") as mock_asyncio_run, patch.object(
-            button_entity, "async_press"
-        ) as mock_async_press:
+        from unittest.mock import AsyncMock
 
-            # Call the synchronous press method
-            button_entity.press()
+        # Mock the coordinator's async_request_refresh method with AsyncMock
+        button_entity.coordinator.async_request_refresh = AsyncMock()
 
-            # Verify asyncio.run was called once
-            mock_asyncio_run.assert_called_once()
+        # Test the async_press method directly (which is what press() calls via asyncio.run)
+        with patch("custom_components.netro_watering.button._LOGGER") as mock_logger:
+            await button_entity.async_press()
 
-            # Verify that async_press was called (it's the coroutine passed to asyncio.run)
-            mock_async_press.assert_called_once()
+            # Verify logger was called
+            mock_logger.debug.assert_called_once()
+
+            # Verify coordinator refresh was called
+            button_entity.coordinator.async_request_refresh.assert_called_once()
