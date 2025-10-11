@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from typing import Any
 
+import homeassistant.helpers.device_registry as dr
+import homeassistant.helpers.entity_registry as er
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-import homeassistant.helpers.device_registry as dr
-import homeassistant.helpers.entity_registry as er
 
 from .const import CONF_SERIAL_NUMBER, DOMAIN
 
@@ -37,7 +37,7 @@ def _safe(obj: Any) -> Any:
     try:
         # Try a shallow conversion (e.g., attrs/pydantic-like)
         return dict(obj)  # type: ignore[arg-type]
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001 pylint: disable=broad-except
         return str(obj)
 
 
@@ -93,7 +93,7 @@ async def async_get_config_entry_diagnostics(
         ce_serial = entry.data.get(CONF_SERIAL_NUMBER)
         if isinstance(ce_serial, (str, int)):
             serial_secrets.add(str(ce_serial))
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001 pylint: disable=broad-except
         pass
 
     # From coordinator attribute
@@ -101,7 +101,7 @@ async def async_get_config_entry_diagnostics(
         coord_serial = getattr(coordinator, "serial_number", None)
         if isinstance(coord_serial, (str, int)):
             serial_secrets.add(str(coord_serial))
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001 pylint: disable=broad-except
         pass
 
     # From device registry identifiers (DOMAIN, serial-like identifiers)

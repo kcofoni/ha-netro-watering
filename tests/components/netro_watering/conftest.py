@@ -1,12 +1,6 @@
 """Pytest fixtures for Netro Watering integration tests."""
 
-pytest_plugins = ("pytest_homeassistant_custom_component",)
-
-from unittest.mock import (  # noqa: E402  # pylint: disable=wrong-import-position
-    AsyncMock,
-    MagicMock,
-    patch,
-)
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest  # noqa: E402 # pylint: disable=wrong-import-position
 from pytest_homeassistant_custom_component.common import (  # noqa: E402 # pylint: disable=wrong-import-position

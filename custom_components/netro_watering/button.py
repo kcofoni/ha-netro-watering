@@ -60,6 +60,12 @@ class NetroRefreshButton(
         self._attr_unique_id = f"{coordinator.serial_number}-{description.key}"
         self._attr_device_info = coordinator.device_info
 
+    def press(self) -> None:
+        """Synchronous press method required by ButtonEntity."""
+        import asyncio
+
+        asyncio.run(self.async_press())
+
     async def async_press(self) -> None:
         """Pressing the button requests an immediate update."""
         _LOGGER.debug(

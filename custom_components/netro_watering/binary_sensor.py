@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import datetime
 import logging
+from dataclasses import dataclass
 from typing import Any
 
+import homeassistant.util.dt as dt_util
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
@@ -16,7 +17,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-import homeassistant.util.dt as dt_util
 
 from .const import (
     CONF_DEVICE_TYPE,
@@ -42,6 +42,12 @@ class NetroBinarySensorEntityDescription(
     BinarySensorEntityDescription, NetroRequiredKeysMixin
 ):
     """Defines Netro entity description."""
+
+    key: str
+    name: str
+    device_class: BinarySensorDeviceClass | None = None
+    translation_key: str | None = None
+    icon: str | None = None
 
 
 NETRO_ZONE_WATERING_DESCRIPTION = NetroBinarySensorEntityDescription(
@@ -121,9 +127,11 @@ class NetroZone(
         """Return state attributes."""
         zone_attributes = {
             "zone id": self.zone_id,
-            "update interval": f"{round(self.coordinator.update_interval.total_seconds() / 60)} mn"
-            if self.coordinator.update_interval is not None
-            else None,
+            "update interval": (
+                f"{round(self.coordinator.update_interval.total_seconds() / 60)} mn"
+                if self.coordinator.update_interval is not None
+                else None
+            ),
         }
         if self.coordinator.current_slowdown_factor > 1:
             zone_attributes["slowdown factor"] = (
@@ -131,27 +139,43 @@ class NetroZone(
             )
         meta_attributes = {
             EXTRA_STATE_ATTRIBUTE_SEP_LEFT: EXTRA_STATE_ATTRIBUTE_SEP_RIGHT,
-            "request time (UTC)": self.coordinator.metadata.time
-            if self.coordinator.metadata is not None
-            else None,
-            "last active date": dt_util.as_local(
-                self.coordinator.metadata.last_active_date.replace(tzinfo=datetime.UTC)
-            )
-            if self.coordinator.metadata is not None
-            else None,
-            "transaction id": self.coordinator.metadata.tid
-            if self.coordinator.metadata is not None
-            else None,
-            "token limit": self.coordinator.metadata.token_limit
-            if self.coordinator.metadata is not None
-            else None,
-            "token remaining": self.coordinator.metadata.token_remaining
-            if self.coordinator.metadata is not None
-            else None,
-            "token reset": dt_util.as_local(
-                self.coordinator.metadata.token_reset_date.replace(tzinfo=datetime.UTC)
-            )
-            if self.coordinator.metadata is not None
-            else None,
+            "request time (UTC)": (
+                self.coordinator.metadata.time
+                if self.coordinator.metadata is not None
+                else None
+            ),
+            "last active date": (
+                dt_util.as_local(
+                    self.coordinator.metadata.last_active_date.replace(
+                        tzinfo=datetime.UTC
+                    )
+                )
+                if self.coordinator.metadata is not None
+                else None
+            ),
+            "transaction id": (
+                self.coordinator.metadata.tid
+                if self.coordinator.metadata is not None
+                else None
+            ),
+            "token limit": (
+                self.coordinator.metadata.token_limit
+                if self.coordinator.metadata is not None
+                else None
+            ),
+            "token remaining": (
+                self.coordinator.metadata.token_remaining
+                if self.coordinator.metadata is not None
+                else None
+            ),
+            "token reset": (
+                dt_util.as_local(
+                    self.coordinator.metadata.token_reset_date.replace(
+                        tzinfo=datetime.UTC
+                    )
+                )
+                if self.coordinator.metadata is not None
+                else None
+            ),
         }
         return zone_attributes | meta_attributes

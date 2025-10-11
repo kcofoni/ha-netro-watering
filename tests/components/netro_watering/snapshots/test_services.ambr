@@ -61,6 +61,29 @@
     'unload_successful': True,
   })
 # ---
+# name: TestNoWaterService.test_nowater_function_invalid_entry_id
+  dict({
+    'error_message': 'Config entry id does not exist: invalid_entry_id',
+    'error_raised': True,
+    'no_water_not_called': True,
+    'refresh_not_called': True,
+  })
+# ---
+# name: TestNoWaterService.test_nowater_function_success
+  dict({
+    'coordinator_name': 'Test Controller',
+    'no_water_called': True,
+    'no_water_days': 5,
+    'refresh_called': True,
+  })
+# ---
+# name: TestNoWaterService.test_nowater_function_with_different_days
+  dict({
+    'final_no_water_days': 30,
+    'refresh_called_last': True,
+    'total_calls': 3,
+  })
+# ---
 # name: TestRefreshService.test_refresh_function_coordinator_exception
   dict({
     'coordinator_called': True,
@@ -145,5 +168,49 @@
       'mock_refresh_function',
     ),
     'service_registered': True,
+  })
+# ---
+# name: TestReportWeatherService.test_report_weather_function_full_data
+  dict({
+    'call_count': 1,
+    'call_kwargs': dict({
+      'condition': 1,
+      'date': '2025-10-11',
+      'humidity': 65,
+      'pressure': 1013.25,
+      'rain': 2.5,
+      'rain_prob': 80,
+      't_dew': 15.0,
+      't_max': 26.0,
+      't_min': 18.0,
+      'temp': 22.0,
+      'wind_speed': 12.5,
+    }),
+    'client_called': True,
+    'client_class_instantiated': True,
+    'logger_called': True,
+    'replicated_service_logic': True,
+    'serial_number': 'TEST12345',
+    'session_getter_called': True,
+  })
+# ---
+# name: TestReportWeatherService.test_report_weather_function_invalid_entry_id
+  dict({
+    'error_message': 'Config entry id does not exist: invalid_entry_id',
+    'error_raised': True,
+  })
+# ---
+# name: TestReportWeatherService.test_report_weather_function_minimal
+  dict({
+    'coordinator_name': 'Weather Test Controller',
+    'date': '2025-10-11',
+    'serial_number': 'TEST12345',
+  })
+# ---
+# name: TestReportWeatherService.test_report_weather_function_missing_date
+  dict({
+    'error_about_missing_date': True,
+    'error_message': "'date' parameter is missing when running 'Report weather' service provided by Netro Watering integration",
+    'error_raised': True,
   })
 # ---

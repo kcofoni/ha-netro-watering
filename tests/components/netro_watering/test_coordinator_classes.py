@@ -110,8 +110,6 @@ class TestNetroSensorUpdateCoordinator:
         self, coordinator, sensor_data_reference, snapshot
     ):
         """Test that _async_update_data calculates dates correctly."""
-        import datetime
-
         with patch(
             "custom_components.netro_watering.coordinator.NetroClient"
         ) as mock_client_class:
@@ -378,10 +376,19 @@ class TestNetroControllerUpdateCoordinator:
         snapshot,
     ):
         """Test _async_update_data with valid controller data."""
+        # Mock datetime.now() to return a fixed time (13:00) where slowdown_factor = 1
+        fixed_time = datetime.datetime(2025, 10, 11, 13, 0, 0)
+
         with patch(
             "custom_components.netro_watering.coordinator.NetroClient"
-        ) as mock_client_class:
-            # Configure the mock
+        ) as mock_client_class, patch(
+            "custom_components.netro_watering.coordinator.datetime"
+        ) as mock_datetime:
+            # Configure datetime mock
+            mock_datetime.datetime.now.return_value = fixed_time
+            mock_datetime.timedelta = datetime.timedelta  # Keep timedelta working
+
+            # Configure the client mock
             mock_client = AsyncMock()
             mock_client.get_info.return_value = controller_info_reference
             mock_client.get_moistures.return_value = moistures_reference

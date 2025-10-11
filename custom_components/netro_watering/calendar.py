@@ -1,4 +1,6 @@
 """Support for Netro Watering system."""
+
+# pyright: reportShadowedImports=false
 from __future__ import annotations
 
 import datetime
@@ -7,6 +9,7 @@ import logging
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -93,3 +96,26 @@ class NetroCalendar(
             )
             for schedule in self.coordinator.calendar_schedules(start_date, end_date)
         ]
+
+    async def async_create_event(self, **kwargs) -> None:
+        """Create event not supported for Netro calendars."""
+        raise HomeAssistantError("Creating events is not supported for Netro calendars")
+
+    async def async_delete_event(
+        self,
+        uid: str,
+        recurrence_id: str | None = None,
+        recurrence_range: str | None = None,
+    ) -> None:
+        """Delete event not supported for Netro calendars."""
+        raise HomeAssistantError("Deleting events is not supported for Netro calendars")
+
+    async def async_update_event(
+        self,
+        uid: str,
+        event: dict,
+        recurrence_id: str | None = None,
+        recurrence_range: str | None = None,
+    ) -> None:
+        """Update event not supported for Netro calendars."""
+        raise HomeAssistantError("Updating events is not supported for Netro calendars")

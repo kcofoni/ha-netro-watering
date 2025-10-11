@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from enum import IntFlag
-import logging
 from typing import Any
 
+import homeassistant.util.dt as dt_util
 import voluptuous as vol
-
 from homeassistant.components.switch import (
     SwitchDeviceClass,
     SwitchEntity,
@@ -17,10 +17,10 @@ from homeassistant.components.switch import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-import homeassistant.util.dt as dt_util
 
 from .const import (
     ATTR_WATERING_DELAY,
@@ -75,6 +75,23 @@ class NetroRequiredKeysMixin:
 @dataclass
 class NetroSwitchEntityDescription(SwitchEntityDescription, NetroRequiredKeysMixin):
     """Defines Netro entity description."""
+
+    # Required attributes (no default values)
+    key: str
+    netro_on_name: str
+    netro_off_name: str
+
+    # Optional attributes (with default values)
+    device_class: SwitchDeviceClass | None = None
+    entity_category: str | None = None
+    entity_registry_enabled_default: bool = True
+    entity_registry_visible_default: bool = True
+    force_update: bool = False
+    icon: str | None = None
+    has_entity_name: bool = False
+    name: str | None = None
+    translation_key: str | None = None
+    unit_of_measurement: str | None = None
 
 
 # description of the start/stop watering switch
@@ -306,6 +323,14 @@ class ControllerEnablingSwitch(
         await self.coordinator.disable()
         await self.coordinator.async_request_refresh()
 
+    def turn_on(self, **kwargs: Any) -> None:
+        """Synchronously turn the switch on."""
+        asyncio.run(self.async_turn_on(**kwargs))
+
+    def turn_off(self, **kwargs: Any) -> None:
+        """Synchronously turn the switch off."""
+        asyncio.run(self.async_turn_off(**kwargs))
+
     @property
     def is_on(self) -> bool:
         """Return true if switch is on."""
@@ -404,6 +429,14 @@ class ZoneWateringSwitch(
         await asyncio.sleep(self._before_refresh_seconds)
         await self.coordinator.async_request_refresh()
 
+    def turn_on(self, **kwargs: Any) -> None:
+        """Synchronously turn the switch on."""
+        asyncio.run(self.async_turn_on(**kwargs))
+
+    def turn_off(self, **kwargs: Any) -> None:
+        """Synchronously turn the switch off."""
+        asyncio.run(self.async_turn_off(**kwargs))
+
     @property
     def is_on(self) -> bool:
         """Return true if switch is on."""
@@ -488,6 +521,14 @@ class ControllerWateringSwitch(
         )
         await asyncio.sleep(self._before_refresh_seconds)
         await self.coordinator.async_request_refresh()
+
+    def turn_on(self, **kwargs: Any) -> None:
+        """Synchronously turn the switch on."""
+        asyncio.run(self.async_turn_on(**kwargs))
+
+    def turn_off(self, **kwargs: Any) -> None:
+        """Synchronously turn the switch off."""
+        asyncio.run(self.async_turn_off(**kwargs))
 
     @property
     def is_on(self) -> bool:
