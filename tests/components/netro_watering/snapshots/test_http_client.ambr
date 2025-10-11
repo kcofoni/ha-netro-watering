@@ -1,0 +1,298 @@
+# serializer version: 1
+# name: TestAiohttpClient.test_aiohttpclient_adapt_kwargs
+  dict({
+    'data': 'raw_data',
+    'has_timeout_object': True,
+    'headers': dict({
+      'Content-Type': 'application/json',
+    }),
+    'json': dict({
+      'data': 'test',
+    }),
+    'params': dict({
+      'test': 'value',
+    }),
+    'result_keys': list([
+      'data',
+      'headers',
+      'json',
+      'params',
+      'timeout',
+    ]),
+    'unknown_param_ignored': True,
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_all_methods_without_session_error
+  list([
+    dict({
+      'error_message': "Session not initialized. Use 'async with' context manager.",
+      'error_type': 'RuntimeError',
+      'method': 'get',
+    }),
+    dict({
+      'error_message': "Session not initialized. Use 'async with' context manager.",
+      'error_type': 'RuntimeError',
+      'method': 'post',
+    }),
+    dict({
+      'error_message': "Session not initialized. Use 'async with' context manager.",
+      'error_type': 'RuntimeError',
+      'method': 'put',
+    }),
+    dict({
+      'error_message': "Session not initialized. Use 'async with' context manager.",
+      'error_type': 'RuntimeError',
+      'method': 'delete',
+    }),
+  ])
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_context_manager_own_session
+  dict({
+    'context_manager_works': True,
+    'session_closed': True,
+    'session_created': True,
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_context_manager_provided_session
+  dict({
+    'context_manager_works': True,
+    'provided_session_not_closed': True,
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_delete_method
+  dict({
+    'logger_called': True,
+    'method_called': 'DELETE',
+    'session_delete_called': True,
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_get_with_session
+  dict({
+    'kwargs_keys': list([
+      'params',
+    ]),
+    'logger_called': True,
+    'url': 'http://example.com',
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_get_without_session
+  dict({
+    'error_message': "Session not initialized. Use 'async with' context manager.",
+    'error_type': 'RuntimeError',
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_init_with_session
+  dict({
+    'own_session_flag': False,
+    'session_is_provided': True,
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_init_without_session
+  dict({
+    'own_session_flag': True,
+    'session_is_none': True,
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_post_with_json
+  dict({
+    'log_contains_masked_key': True,
+    'method_called': 'POST',
+    'session_post_called': True,
+  })
+# ---
+# name: TestAiohttpClient.test_aiohttpclient_put_method
+  dict({
+    'logger_called': True,
+    'method_called': 'PUT',
+    'session_put_called': True,
+  })
+# ---
+# name: TestAiohttpResponse.test_aiohttpresponse_context_manager
+  dict({
+    'close_called_on_exit': True,
+    'context_manager_works': True,
+  })
+# ---
+# name: TestAiohttpResponse.test_aiohttpresponse_init
+  dict({
+    'has_response': True,
+    'status': 200,
+  })
+# ---
+# name: TestAiohttpResponse.test_aiohttpresponse_json_simple_data
+  dict({
+    'log_message_template': 'HTTP response JSON: %s',
+    'logged_data': dict({
+      'data': list([
+        1,
+        2,
+        3,
+      ]),
+      'message': 'success',
+    }),
+    'returned_data': dict({
+      'data': list([
+        1,
+        2,
+        3,
+      ]),
+      'message': 'success',
+    }),
+  })
+# ---
+# name: TestAiohttpResponse.test_aiohttpresponse_json_with_sensitive_keys
+  dict({
+    'logged_data': dict({
+      'devices': list([
+        dict({
+          'name': 'Controller1',
+          'serial': 'DE********21',
+        }),
+        dict({
+          'id': 42,
+          'key': 'an********et',
+        }),
+      ]),
+      'key': 'se********45',
+      'message': 'success',
+      'nested': dict({
+        'data': 'normal_data',
+        'key': 'ne********ey',
+        'serial': 'ne********al',
+      }),
+      'serial': 'AB********89',
+    }),
+    'original_data_unchanged': True,
+    'sensitive_keys_masked': dict({
+      'key_masked': True,
+      'serial_masked': True,
+    }),
+  })
+# ---
+# name: TestAiohttpResponse.test_aiohttpresponse_raise_for_status
+  dict({
+    'exception_propagated': True,
+    'raise_for_status_called': True,
+  })
+# ---
+# name: TestAiohttpResponse.test_aiohttpresponse_text
+  'This is a text response'
+# ---
+# name: TestAiohttpResponseContextManager.test_response_context_manager
+  dict({
+    'cleanup_called': True,
+    'context_manager_works': True,
+    'returns_aiohttpresponse': True,
+    'status_correct': True,
+  })
+# ---
+# name: TestMaskKeyInKwargs.test_mask_key_in_kwargs_both_json_and_params
+  dict({
+    'headers_unchanged': True,
+    'json_data_unchanged': True,
+    'json_key_masked': True,
+    'originals_unchanged': True,
+    'params_key_masked': True,
+    'params_other_unchanged': True,
+  })
+# ---
+# name: TestMaskKeyInKwargs.test_mask_key_in_kwargs_edge_cases
+  list([
+    dict({
+      'case': 0,
+      'input': dict({
+        'json': 'not_a_dict',
+        'params': dict({
+          'test': 'value',
+        }),
+      }),
+      'is_copy': True,
+      'output': dict({
+        'json': 'not_a_dict',
+        'params': dict({
+          'test': 'value',
+        }),
+      }),
+      'unchanged': True,
+    }),
+    dict({
+      'case': 1,
+      'input': dict({
+        'json': dict({
+          'key': 'secret',
+        }),
+        'params': 'not_a_dict',
+      }),
+      'is_copy': True,
+      'output': dict({
+        'json': dict({
+          'key': 'se********et',
+        }),
+        'params': 'not_a_dict',
+      }),
+      'unchanged': False,
+    }),
+    dict({
+      'case': 2,
+      'input': dict({
+        'json': dict({
+        }),
+        'params': dict({
+        }),
+      }),
+      'is_copy': True,
+      'output': dict({
+        'json': dict({
+        }),
+        'params': dict({
+        }),
+      }),
+      'unchanged': True,
+    }),
+    dict({
+      'case': 3,
+      'input': dict({
+        'headers': dict({
+          'test': 'value',
+        }),
+      }),
+      'is_copy': True,
+      'output': dict({
+        'headers': dict({
+          'test': 'value',
+        }),
+      }),
+      'unchanged': True,
+    }),
+  ])
+# ---
+# name: TestMaskKeyInKwargs.test_mask_key_in_kwargs_no_sensitive_data
+  dict({
+    'data': 'some data',
+    'headers': dict({
+      'Content-Type': 'application/json',
+    }),
+    'params': dict({
+      'test': 'value',
+    }),
+  })
+# ---
+# name: TestMaskKeyInKwargs.test_mask_key_in_kwargs_with_json_key
+  dict({
+    'is_copy': True,
+    'original_unchanged': True,
+    'other_json_data_unchanged': True,
+    'params_unchanged': True,
+    'result_key_masked': True,
+    'serial_not_masked': True,
+  })
+# ---
+# name: TestMaskKeyInKwargs.test_mask_key_in_kwargs_with_params_key
+  dict({
+    'is_copy': True,
+    'json_unchanged': True,
+    'original_unchanged': True,
+    'other_params_unchanged': True,
+    'result_key_masked': True,
+  })
+# ---

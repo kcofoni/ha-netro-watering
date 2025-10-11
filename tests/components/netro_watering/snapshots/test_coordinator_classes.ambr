@@ -1,0 +1,339 @@
+# serializer version: 1
+# name: TestNetroControllerCalendarMethods.test_calendar_schedule_description_formatting
+  dict({
+    'descriptions': list([
+      dict({
+        'schedule_0_description': 'Duration: 20 minutes, schedule from programs, has been executed.',
+        'schedule_0_source': 'FIX',
+        'schedule_0_status': 'EXECUTED',
+      }),
+      dict({
+        'schedule_1_description': 'Duration: 13 minutes, Netro generated schedule, has been executed.',
+        'schedule_1_source': 'SMART',
+        'schedule_1_status': 'EXECUTED',
+      }),
+      dict({
+        'schedule_2_description': 'Duration: 20 minutes, Netro generated schedule, has been executed.',
+        'schedule_2_source': 'SMART',
+        'schedule_2_status': 'EXECUTED',
+      }),
+    ]),
+    'descriptions_tested': 3,
+  })
+# ---
+# name: TestNetroControllerCalendarMethods.test_calendar_schedule_formatting
+  dict({
+    'description_contains_duration': True,
+    'description_contains_source': True,
+    'description_contains_status': True,
+    'end_type': 'datetime',
+    'event_keys': list([
+      'start',
+      'end',
+      'summary',
+      'description',
+    ]),
+    'start_type': 'datetime',
+    'summary_contains_zone_name': True,
+  })
+# ---
+# name: TestNetroControllerCalendarMethods.test_calendar_schedules_date_filtering
+  dict({
+    'all_have_required_keys': True,
+    'all_within_date_range': True,
+    'number_of_filtered_schedules': 106,
+  })
+# ---
+# name: TestNetroControllerCalendarMethods.test_calendar_schedules_no_date_filtering
+  dict({
+    'first_schedule_keys': list([
+      'start',
+      'end',
+      'summary',
+      'description',
+    ]),
+    'has_schedules': True,
+    'total_schedules': 258,
+  })
+# ---
+# name: TestNetroControllerCalendarMethods.test_current_calendar_schedule_no_future_schedules
+  dict({
+    'current_schedule': None,
+  })
+# ---
+# name: TestNetroControllerCalendarMethods.test_current_calendar_schedule_with_future_schedules
+  dict({
+    'has_current_schedule': False,
+    'has_description': None,
+    'has_end_time': None,
+    'has_start_time': None,
+    'has_summary': None,
+    'schedule_keys': None,
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_async_update_data_moistures_processing
+  dict({
+    'moistures_per_zone': dict({
+      1: dict({
+        'current_moisture': 14,
+        'first_moisture_date': '2025-10-08',
+        'moistures_count': 29,
+      }),
+      2: dict({
+        'current_moisture': 49,
+        'first_moisture_date': '2025-10-08',
+        'moistures_count': 29,
+      }),
+      3: dict({
+        'current_moisture': 14,
+        'first_moisture_date': '2025-10-08',
+        'moistures_count': 29,
+      }),
+    }),
+    'total_moistures_in_coordinator': 87,
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_async_update_data_schedules_processing
+  dict({
+    'schedules_per_zone': dict({
+      1: dict({
+        'coming_schedules_count': 0,
+        'first_coming_schedule_status': None,
+        'first_past_schedule_status': 'EXECUTED',
+        'past_schedules_count': 127,
+      }),
+      2: dict({
+        'coming_schedules_count': 0,
+        'first_coming_schedule_status': None,
+        'first_past_schedule_status': 'EXECUTED',
+        'past_schedules_count': 35,
+      }),
+      3: dict({
+        'coming_schedules_count': 0,
+        'first_coming_schedule_status': None,
+        'first_past_schedule_status': 'EXECUTED',
+        'past_schedules_count': 96,
+      }),
+    }),
+    'total_schedules_in_coordinator': 258,
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_async_update_data_slowdown_factor_calculation
+  dict({
+    'current_slowdown_factor': 2,
+    'expected_update_interval': 30,
+    'refresh_interval': 15,
+    'update_interval_minutes': 30.0,
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_async_update_data_with_api_error_get_info
+  dict({
+    'exception_message': 'API Error on get_info',
+    'exception_type': 'Exception',
+    'get_info_called': True,
+    'get_moistures_called': False,
+    'get_schedules_called': False,
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_async_update_data_with_valid_data
+  dict({
+    'active_zones_keys': list([
+      1,
+      2,
+      3,
+    ]),
+    'current_slowdown_factor': 1,
+    'device_name': 'Test Controller',
+    'enabled': False,
+    'metadata_token_remaining': 466,
+    'metadata_version': '1.0',
+    'number_of_active_zones': 3,
+    'serial_number': 'E4********38',
+    'status': 'STANDBY',
+    'watering': False,
+    'zone_num': 6,
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_async_update_data_zone_processing
+  dict({
+    'number_of_zones': 3,
+    'zone_data': dict({
+      1: dict({
+        'enabled': True,
+        'has_coming_schedules': False,
+        'has_moistures': True,
+        'has_past_schedules': True,
+        'ith': 1,
+        'name': 'Puit',
+        'serial_number': 'E4********38_1',
+        'smart': 'SMART',
+      }),
+      2: dict({
+        'enabled': True,
+        'has_coming_schedules': False,
+        'has_moistures': True,
+        'has_past_schedules': True,
+        'ith': 2,
+        'name': 'Saule Pleureur',
+        'serial_number': 'E4********38_2',
+        'smart': 'SMART',
+      }),
+      3: dict({
+        'enabled': True,
+        'has_coming_schedules': False,
+        'has_moistures': True,
+        'has_past_schedules': True,
+        'ith': 3,
+        'name': 'Lilas des Indes',
+        'serial_number': 'E4********38_3',
+        'smart': 'SMART',
+      }),
+    }),
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_device_info_property
+  dict({
+    'identifiers': list([
+      tuple(
+        'netro_watering',
+        'E4********38',
+      ),
+    ]),
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_properties_when_not_initialized
+  dict({
+    'enabled_error': "'NetroControllerUpdateCoordinator' object has no attribute 'status'",
+    'metadata_error': "'NetroControllerUpdateCoordinator' object has no attribute '_metadata'",
+    'number_of_active_zones': None,
+    'token_remaining_error': "'NetroControllerUpdateCoordinator' object has no attribute '_metadata'",
+    'watering_error': "'NetroControllerUpdateCoordinator' object has no attribute 'status'",
+  })
+# ---
+# name: TestNetroControllerUpdateCoordinator.test_str_representation_controller
+  dict({
+    'str_representation': 'controller coordinator "Test Controller" (Sprite/Spark)',
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_async_update_data_date_calculation
+  dict({
+    'actual_days_difference': 2,
+    'call_count': 1,
+    'date_calculation_correct': True,
+    'mock_was_called': True,
+    'sensor_value_days_before_today': 2,
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_async_update_data_metadata_processing
+  dict({
+    'last_active_date_iso': '2025-10-10T20:58:13',
+    'tid': '1760129893_DFwy',
+    'time_iso': '2025-10-10T20:58:13',
+    'token_limit': 2000,
+    'token_remaining': 1956,
+    'token_reset_date_iso': '2025-10-11T00:00:00',
+    'version': '1.0',
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_async_update_data_sensor_data_processing
+  dict({
+    'battery_level': 39,
+    'celsius': 13.6875,
+    'expected_battery_level': 39,
+    'expected_celsius': 13.6875,
+    'expected_fahrenheit': 56.6375,
+    'expected_id': 89663743,
+    'expected_local_date': '2025-10-10',
+    'expected_local_time': '22:51:56',
+    'expected_moisture': 9,
+    'expected_sunlight': 0.0,
+    'fahrenheit': 56.6375,
+    'id': 89663743,
+    'local_date_str': '2025-10-10',
+    'local_time_str': '22:51:56',
+    'moisture': 9,
+    'sunlight': 0.0,
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_async_update_data_with_api_error
+  dict({
+    'exception_message': 'API Error',
+    'exception_type': 'Exception',
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_async_update_data_with_empty_sensor_data
+  dict({
+    'battery_level': None,
+    'celsius': None,
+    'fahrenheit': None,
+    'id': None,
+    'local_date': None,
+    'local_time': None,
+    'metadata_exists': True,
+    'metadata_token_remaining': 1950,
+    'metadata_version': '1.0',
+    'moisture': None,
+    'sunlight': None,
+    'time': None,
+    'token_remaining': 1950,
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_async_update_data_with_valid_data
+  dict({
+    'battery_level': 39,
+    'celsius': 13.6875,
+    'device_name': 'Test Sensor',
+    'fahrenheit': 56.6375,
+    'id': 89663743,
+    'local_date_iso': '2025-10-10',
+    'local_time_str': '22:51:56',
+    'metadata_tid': '1760129893_DFwy',
+    'metadata_token_limit': 2000,
+    'metadata_token_remaining': 1956,
+    'metadata_version': '1.0',
+    'moisture': 9,
+    'serial_number': 'TEST_SENSOR_123',
+    'sunlight': 0.0,
+    'time_iso': '2025-10-10T20:51:56+00:00',
+    'token_remaining': 1956,
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_device_info_property
+  dict({
+    'hw_version': '1.0',
+    'identifiers': list([
+      tuple(
+        'netro_watering',
+        'TEST_SENSOR_123',
+      ),
+    ]),
+    'manufacturer': 'Netro',
+    'model': 'Whisperer',
+    'name': 'Test Sensor',
+    'sw_version': '2.0',
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_metadata_property_when_none
+  dict({
+    'metadata': None,
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_str_representation
+  dict({
+    'str_representation': 'sensor coordinator "Test Sensor" (Whisperer)',
+  })
+# ---
+# name: TestNetroSensorUpdateCoordinator.test_token_remaining_property_when_metadata_none
+  dict({
+    'token_remaining': None,
+  })
+# ---
+# name: TestNetroZoneActionMethods.test_zone_properties_and_relationships
+  dict({
+    'parent_name': 'Parent Controller',
+    'parent_serial': 'PARENT_CONTROLLER_123',
+    'zone_enabled': True,
+    'zone_ith': 2,
+    'zone_serial': 'PARENT_CONTROLLER_123_2',
+  })
+# ---

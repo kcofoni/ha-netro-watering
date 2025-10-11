@@ -3,17 +3,16 @@
 from __future__ import annotations
 
 import datetime
-from datetime import timedelta
 import logging
+from datetime import timedelta
 from time import gmtime, strftime
 
 from dateutil.relativedelta import relativedelta
-from pynetro import NetroClient, NetroConfig
-
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from pynetro import NetroClient, NetroConfig
 
 from .const import (
     DOMAIN,
@@ -95,7 +94,7 @@ def prepare_slowdown_factors(slowdown_factor: list) -> list | None:
 
 
 def get_slowdown_factor(slowdown_factors, this_time: datetime.time) -> int:
-    """Return the update interval obtained by multiplying the refresh interval by a slowdown factor possibly applicable to this time."""
+    """Return the slowdown factor applicable to the given time, or 1 if no matching time window is found."""
 
     # this is the default value
     selected_factor = 1
@@ -307,9 +306,11 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                 duration_minutes=duration,
                 zones=[str(self.ith)],
                 delay_minutes=delay,
-                start_time=start_time.strftime("%Y-%m-%d %H:%M")
-                if start_time is not None
-                else None,
+                start_time=(
+                    start_time.strftime("%Y-%m-%d %H:%M")
+                    if start_time is not None
+                    else None
+                ),
             )
 
         async def stop_watering(self) -> None:
@@ -425,9 +426,11 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         def device_info(self) -> DeviceInfo:
             """Return information about the zone as a device. To be used when creating related entities."""
             return DeviceInfo(
-                name=f"{self.name}"
-                if self.name  # if name is not set this is a Pixie and so we concatenate the controller name and the index of the zone
-                else f"{self.parent_controller.name} {self.ith}",
+                name=(
+                    f"{self.name}"
+                    if self.name  # if name is not set this is a Pixie and so we concatenate the controller name and the index of the zone
+                    else f"{self.parent_controller.name} {self.ith}"
+                ),
                 identifiers={(DOMAIN, self.serial_number)},
                 manufacturer=MANUFACTURER,
                 model=NETRO_DEFAULT_ZONE_MODEL,
@@ -638,18 +641,17 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                 schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
             ),
             "summary": f"{self.active_zones[schedule[NETRO_SCHEDULE_ZONE]].name}",
-            "description": "Duration: {} minutes, {}, {}.".format(
-                round(
-                    (
-                        datetime.datetime.fromisoformat(
-                            schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
-                        )
-                        - datetime.datetime.fromisoformat(
-                            schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
-                        )
-                    ).seconds
-                    / 60
-                ),
+            "description": f"Duration: {round(
+                (
+                    datetime.datetime.fromisoformat(
+                        schedule[NETRO_SCHEDULE_END_TIME] + TZ_OFFSET
+                    )
+                    - datetime.datetime.fromisoformat(
+                        schedule[NETRO_SCHEDULE_START_TIME] + TZ_OFFSET
+                    )
+                ).seconds
+                / 60
+            )} minutes, {
                 {
                     NETRO_SCHEDULE_FIX: "schedule from programs",
                     NETRO_SCHEDULE_SMART: "Netro generated schedule",
@@ -661,7 +663,8 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                     NETRO_SCHEDULE_SMART,
                     NETRO_SCHEDULE_MANUAL,
                 )
-                else f"unknown source({schedule[NETRO_SCHEDULE_SOURCE]})",
+                else f"unknown source({schedule[NETRO_SCHEDULE_SOURCE]})"
+            }, {
                 {
                     NETRO_SCHEDULE_EXECUTED: "has been executed",
                     NETRO_SCHEDULE_EXECUTING: "currently being executed",
@@ -673,8 +676,8 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                     NETRO_SCHEDULE_EXECUTING,
                     NETRO_SCHEDULE_VALID,
                 )
-                else f"unknown status({schedule[NETRO_SCHEDULE_STATUS]})",
-            ),
+                else f"unknown status({schedule[NETRO_SCHEDULE_STATUS]})"
+            }.",
         }
 
     async def _async_update_data(self):
@@ -766,9 +769,11 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             "Polling info for %s controller (repeated every %d minutes%s)",
             self.name,
             self.update_interval.total_seconds() / 60,
-            f", current slowdown factor is {self.current_slowdown_factor}"
-            if self.current_slowdown_factor > 1
-            else "",
+            (
+                f", current slowdown factor is {self.current_slowdown_factor}"
+                if self.current_slowdown_factor > 1
+                else ""
+            ),
         )
 
         # get main data
@@ -803,12 +808,14 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                     zone[NETRO_ZONE_ITH],
                     zone[NETRO_ZONE_ENABLED],
                     zone[NETRO_ZONE_SMART],
-                    zone[NETRO_ZONE_NAME]
-                    if (
-                        zone[NETRO_ZONE_NAME] is not None
-                        and len(zone[NETRO_ZONE_NAME]) > 0
-                    )
-                    else self.device_name + "-" + str(zone[NETRO_ZONE_ITH]),
+                    (
+                        zone[NETRO_ZONE_NAME]
+                        if (
+                            zone[NETRO_ZONE_NAME] is not None
+                            and len(zone[NETRO_ZONE_NAME]) > 0
+                        )
+                        else self.device_name + "-" + str(zone[NETRO_ZONE_ITH])
+                    ),
                     self.serial_number,
                 )
 
@@ -875,9 +882,11 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
             self.serial_number,
             duration_minutes=duration,
             delay_minutes=delay,
-            start_time=start_time.strftime("%Y-%m-%d %H:%M")
-            if start_time is not None
-            else None,
+            start_time=(
+                start_time.strftime("%Y-%m-%d %H:%M")
+                if start_time is not None
+                else None
+            ),
         )
 
     async def stop_watering(self) -> None:

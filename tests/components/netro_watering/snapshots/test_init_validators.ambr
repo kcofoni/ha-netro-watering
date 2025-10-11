@@ -1,0 +1,403 @@
+# serializer version: 1
+# name: TestHhmm_or_hhmmss.test_hhmm_or_hhmmss_edge_cases
+  dict({
+    'invalid_cases': list([
+      dict({
+        'error_message': 'Expected time in HH:MM or HH:MM:SS',
+        'input': '24:00',
+      }),
+      dict({
+        'error_message': 'Expected time in HH:MM or HH:MM:SS',
+        'input': '23:60',
+      }),
+      dict({
+        'error_message': 'Expected time in HH:MM or HH:MM:SS',
+        'input': '24:00:00',
+      }),
+      dict({
+        'error_message': 'Expected time in HH:MM or HH:MM:SS',
+        'input': '23:59:60',
+      }),
+    ]),
+    'valid_cases': list([
+      '00:00',
+      '23:59',
+      '00:00:00',
+      '23:59:59',
+    ]),
+  })
+# ---
+# name: TestHhmm_or_hhmmss.test_hhmm_or_hhmmss_invalid_non_string_types
+  list([
+    dict({
+      'error_message': 'Expected time as string in HH:MM or HH:MM:SS',
+      'input': '123',
+      'input_type': 'int',
+    }),
+    dict({
+      'error_message': 'Expected time as string in HH:MM or HH:MM:SS',
+      'input': '12.34',
+      'input_type': 'float',
+    }),
+    dict({
+      'error_message': 'Expected time as string in HH:MM or HH:MM:SS',
+      'input': 'None',
+      'input_type': 'NoneType',
+    }),
+    dict({
+      'error_message': 'Expected time as string in HH:MM or HH:MM:SS',
+      'input': '[]',
+      'input_type': 'list',
+    }),
+    dict({
+      'error_message': 'Expected time as string in HH:MM or HH:MM:SS',
+      'input': '{}',
+      'input_type': 'dict',
+    }),
+    dict({
+      'error_message': 'Expected time as string in HH:MM or HH:MM:SS',
+      'input': 'True',
+      'input_type': 'bool',
+    }),
+  ])
+# ---
+# name: TestHhmm_or_hhmmss.test_hhmm_or_hhmmss_invalid_time_formats
+  list([
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '24:00',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:60',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:30:60',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '8:30',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '08:5',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:30:5',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': 'abc:def',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:30:45:00',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': ':30',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:30:',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '25:30',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:70',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:30:70',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '-1:30',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:-5',
+    }),
+    dict({
+      'error_message': 'Expected time in HH:MM or HH:MM:SS',
+      'input': '12:30:-1',
+    }),
+  ])
+# ---
+# name: TestHhmm_or_hhmmss.test_hhmm_or_hhmmss_preserves_original_string
+  list([
+    dict({
+      'is_equal_value': True,
+      'is_same_object': True,
+      'original': "'08:30'",
+      'result': "'08:30'",
+    }),
+    dict({
+      'is_equal_value': True,
+      'is_same_object': True,
+      'original': "' 08:30 '",
+      'result': "' 08:30 '",
+    }),
+    dict({
+      'is_equal_value': True,
+      'is_same_object': True,
+      'original': "'\\xa008:30\\xa0'",
+      'result': "'\\xa008:30\\xa0'",
+    }),
+    dict({
+      'is_equal_value': True,
+      'is_same_object': True,
+      'original': "'\\u200b08:30\\u200b'",
+      'result': "'\\u200b08:30\\u200b'",
+    }),
+    dict({
+      'is_equal_value': True,
+      'is_same_object': True,
+      'original': "' \\xa008:30\\xa0 '",
+      'result': "' \\xa008:30\\xa0 '",
+    }),
+  ])
+# ---
+# name: TestHhmm_or_hhmmss.test_hhmm_or_hhmmss_valid_hhmm_format
+  list([
+    '00:00',
+    '08:30',
+    '12:00',
+    '23:59',
+    '09:15',
+  ])
+# ---
+# name: TestHhmm_or_hhmmss.test_hhmm_or_hhmmss_valid_hhmmss_format
+  list([
+    '00:00:00',
+    '08:30:45',
+    '12:00:30',
+    '23:59:59',
+    '09:15:22',
+  ])
+# ---
+# name: TestHhmm_or_hhmmss.test_hhmm_or_hhmmss_with_special_characters
+  list([
+    ' 08:30 ',
+    '\xa008:30\xa0',
+    '\u200b08:30\u200b',
+    ' \xa0\u200b08:30\u200b\xa0 ',
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_boundary_times
+  list([
+    dict({
+      'from': '00:00',
+      'sdf': 1,
+      'to': '23:59',
+    }),
+    dict({
+      'from': '00:00:00',
+      'sdf': 2,
+      'to': '23:59:59',
+    }),
+    dict({
+      'from': '23:59',
+      'sdf': 3,
+      'to': '00:01',
+    }),
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_character_cleaning
+  list([
+    dict({
+      'from': '08:00\xa0',
+      'sdf': 2,
+      'to': '\u200b12:00',
+    }),
+    dict({
+      'from': ' 14:00 ',
+      'sdf': 3,
+      'to': '18:00\xa0\u200b',
+    }),
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_empty_list
+  list([
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_error_includes_index
+  dict({
+    'contains_index_2': True,
+    'error_message': "slowdown_factors[2]: 'from' and 'to' must not be identical",
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_identical_times
+  dict({
+    'error_message': "slowdown_factors[0]: 'from' and 'to' must not be identical",
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_identical_times_with_seconds
+  dict({
+    'error_message': "slowdown_factors[0]: 'from' and 'to' must not be identical",
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_invalid_time_format
+  dict({
+    'error_message': "Expected time in HH:MM or HH:MM:SS (e.g., '23:05' or '23:05:30')",
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_invalid_time_format_minutes
+  dict({
+    'error_message': "Expected time in HH:MM or HH:MM:SS (e.g., '23:05' or '23:05:30')",
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_invalid_type
+  dict({
+    'error_message': 'slowdown_factors must be a list',
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_malformed_time_string
+  list([
+    dict({
+      'from': '8:0',
+      'sdf': 2,
+      'to': '12:00',
+    }),
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_midnight_crossing
+  list([
+    dict({
+      'from': '22:00',
+      'sdf': 2,
+      'to': '06:00',
+    }),
+    dict({
+      'from': '23:30',
+      'sdf': 3,
+      'to': '01:30',
+    }),
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_mixed_time_formats
+  list([
+    dict({
+      'from': '08:00',
+      'sdf': 2,
+      'to': '12:30:45',
+    }),
+    dict({
+      'from': '14:15:30',
+      'sdf': 3,
+      'to': '18:00',
+    }),
+    dict({
+      'from': '20:00:00',
+      'sdf': 1,
+      'to': '23:59:59',
+    }),
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_multiple_items_valid
+  list([
+    dict({
+      'from': '06:00',
+      'sdf': 1,
+      'to': '09:00',
+    }),
+    dict({
+      'from': '09:30',
+      'sdf': 2,
+      'to': '12:30',
+    }),
+    dict({
+      'from': '14:00:00',
+      'sdf': 3,
+      'to': '17:30:30',
+    }),
+    dict({
+      'from': '20:00',
+      'sdf': 4,
+      'to': '23:59',
+    }),
+    dict({
+      'from': '23:30',
+      'sdf': 2,
+      'to': '02:00',
+    }),
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_negative_sdf
+  dict({
+    'error_message': 'slowdown_factors[0].sdf must be >= 1',
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_non_time_string
+  dict({
+    'error_message': "Expected time in HH:MM or HH:MM:SS (e.g., '23:05' or '23:05:30')",
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_none_input
+  list([
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_sdf_edge_values
+  list([
+    dict({
+      'from': '08:00',
+      'sdf': 1,
+      'to': '12:00',
+    }),
+    dict({
+      'from': '14:00',
+      'sdf': 100,
+      'to': '18:00',
+    }),
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_sdf_less_than_one
+  dict({
+    'error_message': 'slowdown_factors[0].sdf must be >= 1',
+  })
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_valid_basic_case
+  list([
+    dict({
+      'from': '08:00',
+      'sdf': 2,
+      'to': '12:00',
+    }),
+    dict({
+      'from': '14:00',
+      'sdf': 3,
+      'to': '18:00',
+    }),
+  ])
+# ---
+# name: TestValidateSlowdownFactors.test_validate_slowdown_factors_valid_with_seconds
+  list([
+    dict({
+      'from': '08:00:30',
+      'sdf': 2,
+      'to': '12:30:45',
+    }),
+    dict({
+      'from': '20:15:00',
+      'sdf': 4,
+      'to': '23:59:59',
+    }),
+  ])
+# ---

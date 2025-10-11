@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from pynetro.client import mask
 
 from .const import DOMAIN
 from .coordinator import NetroControllerUpdateCoordinator
@@ -60,10 +61,16 @@ class NetroRefreshButton(
         self._attr_unique_id = f"{coordinator.serial_number}-{description.key}"
         self._attr_device_info = coordinator.device_info
 
+    def press(self) -> None:
+        """Synchronous press method required by ButtonEntity."""
+        import asyncio
+
+        asyncio.run(self.async_press())
+
     async def async_press(self) -> None:
         """Pressing the button requests an immediate update."""
         _LOGGER.debug(
-            "Netro: refresh button pressed for %s", self.coordinator.serial_number
+            "Netro: refresh button pressed for %s", mask(self.coordinator.serial_number)
         )
 
         # Rescheduling an update via the DataUpdateCoordinator

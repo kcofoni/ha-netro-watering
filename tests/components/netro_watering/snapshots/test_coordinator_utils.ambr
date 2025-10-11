@@ -1,0 +1,178 @@
+# serializer version: 1
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_default_no_factors
+  1
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_empty_list
+  1
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_exact_boundary_end
+  2
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_exact_boundary_start
+  2
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_first_match_wins
+  2
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_midnight_crossing_negative
+  4
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_midnight_crossing_positive
+  4
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_time_in_window
+  2
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_time_outside_windows
+  1
+# ---
+# name: TestGetSlowdownFactor.test_get_slowdown_factor_with_seconds
+  2
+# ---
+# name: TestMeta.test_meta_datetime_conversion_with_microseconds
+  dict({
+    'last_active_microseconds': 123456,
+    'time_microseconds': 987654,
+    'token_reset_microseconds': 0,
+  })
+# ---
+# name: TestMeta.test_meta_datetime_conversion_with_timezone
+  dict({
+    'last_active_tz': 'UTC+02:00',
+    'last_active_utc_offset': datetime.timedelta(seconds=7200),
+    'time_tz': 'UTC',
+    'time_utc_offset': datetime.timedelta(0),
+    'token_reset_tz': 'UTC-05:00',
+  })
+# ---
+# name: TestMeta.test_meta_edge_case_midnight
+  dict({
+    'hour': 0,
+    'minute': 0,
+    'second': 0,
+    'token_remaining_zero': 0,
+  })
+# ---
+# name: TestMeta.test_meta_extreme_values
+  dict({
+    'last_active_year': 1970,
+    'tid_length': 113,
+    'time_year': 2099,
+    'token_limit': 999999,
+    'token_remaining': 0,
+    'token_reset_microsecond': 999999,
+    'version': '999.999.999',
+  })
+# ---
+# name: TestMeta.test_meta_initialization_valid_data
+  dict({
+    'last_active_date': '2024-10-10T08:30:15',
+    'tid': 'TID123456',
+    'time': '2024-10-10T10:45:30',
+    'token_limit': 1000,
+    'token_remaining': 750,
+    'token_reset_date': '2024-10-11T00:00:00',
+    'version': '1.2.3',
+  })
+# ---
+# name: TestMeta.test_meta_invalid_datetime_format
+  dict({
+    'exception_message_contains_invalid': True,
+    'exception_type': 'ValueError',
+  })
+# ---
+# name: TestMeta.test_meta_invalid_time_format
+  dict({
+    'exception_type': 'ValueError',
+    'has_error_message': True,
+  })
+# ---
+# name: TestMeta.test_meta_invalid_token_reset_format
+  dict({
+    'exception_occurred': True,
+    'exception_type': 'ValueError',
+  })
+# ---
+# name: TestPrepareSlowdownFactors.test_prepare_slowdown_factors_basic_case
+  list([
+    dict({
+      'from': 8.5,
+      'sdf': 2,
+      'to': 12.0,
+    }),
+    dict({
+      'from': 14.258333333333333,
+      'sdf': 3,
+      'to': 18.75,
+    }),
+    dict({
+      'from': -2.0,
+      'sdf': 4,
+      'to': 6.5,
+    }),
+  ])
+# ---
+# name: TestPrepareSlowdownFactors.test_prepare_slowdown_factors_complex_case
+  list([
+    dict({
+      'from': 0.0,
+      'sdf': 1,
+      'to': 6.0,
+    }),
+    dict({
+      'from': 6.504166666666666,
+      'sdf': 2,
+      'to': 9.758333333333333,
+    }),
+    dict({
+      'from': 12.0,
+      'sdf': 3,
+      'to': 14.5125,
+    }),
+    dict({
+      'from': 18.25,
+      'sdf': 4,
+      'to': 23.999722222222225,
+    }),
+    dict({
+      'from': -0.5,
+      'sdf': 5,
+      'to': 2.25,
+    }),
+  ])
+# ---
+# name: TestPrepareSlowdownFactors.test_prepare_slowdown_factors_empty_list
+  list([
+  ])
+# ---
+# name: TestPrepareSlowdownFactors.test_prepare_slowdown_factors_midnight_crossing
+  list([
+    dict({
+      'from': -1.5,
+      'sdf': 2,
+      'to': 6.5,
+    }),
+    dict({
+      'from': -0.24166666666666714,
+      'sdf': 3,
+      'to': 1.2625,
+    }),
+  ])
+# ---
+# name: TestPrepareSlowdownFactors.test_prepare_slowdown_factors_none_input
+  None
+# ---
+# name: TestPrepareSlowdownFactors.test_prepare_slowdown_factors_with_seconds
+  list([
+    dict({
+      'from': 8.504166666666666,
+      'sdf': 2,
+      'to': 12.758333333333333,
+    }),
+    dict({
+      'from': 14.0,
+      'sdf': 3,
+      'to': 18.51638888888889,
+    }),
+  ])
+# ---

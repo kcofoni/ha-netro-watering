@@ -2,24 +2,24 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
 import enum
 import logging
 import re
+from datetime import date, datetime
 
-from pynetro import NetroClient, NetroConfig
-from pynetro.client import mask
 import validators
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from pynetro import NetroClient, NetroConfig
+from pynetro.client import mask
 
 from .const import (
     ATTR_CONFIG_ENTRY_ID,
@@ -335,7 +335,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  # noqa: C901
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> bool:  # noqa: C901
     """Set up Netro Watering from a config entry."""
 
     _LOGGER.debug(
@@ -598,6 +600,46 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    # Register services for this entry
+    await _async_register_services(hass, entry)
+
+    return True
+
+
+def _register_service_if_not_exists(
+    hass: HomeAssistant,
+    service_name: str,
+    service_function,
+    service_schema,
+) -> None:
+    """Register a service if it doesn't already exist.
+
+    This utility function factors out the common pattern of checking if a service
+    exists before registering it, along with logging.
+
+    Args:
+        hass: Home Assistant instance
+        service_name: Name of the service to register
+        service_function: The async function that implements the service
+        service_schema: The voluptuous schema for service validation
+    """
+    if not hass.services.has_service(DOMAIN, service_name):
+        _LOGGER.info("Adding custom service : %s", service_name)
+        hass.services.async_register(
+            DOMAIN,
+            service_name,
+            service_function,
+            schema=service_schema,
+        )
+
+
+async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Register Home Assistant services for the Netro Watering integration.
+
+    This function handles the registration of all services related to the integration,
+    including controller-specific services (set_moisture) and global services
+    (report_weather, refresh_data, no_water).
+    """
     if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
 
         async def set_moisture(call: ServiceCall) -> None:
@@ -654,14 +696,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             await client.set_moisture(key, moisture=moisture, zones=[zone_id])
 
         # only one Set moisture service to be created for all controllers
-        if not hass.services.has_service(DOMAIN, SERVICE_SET_MOISTURE_NAME):
-            _LOGGER.info("Adding custom service : %s", SERVICE_SET_MOISTURE_NAME)
-            hass.services.async_register(
-                DOMAIN,
-                SERVICE_SET_MOISTURE_NAME,
-                set_moisture,
-                schema=SERVICE_SET_MOISTURE_SCHEMA,
-            )
+        _register_service_if_not_exists(
+            hass, SERVICE_SET_MOISTURE_NAME, set_moisture, SERVICE_SET_MOISTURE_SCHEMA
+        )
 
     async def report_weather(call: ServiceCall) -> None:
         weather_asof: date = call.data[ATTR_WEATHER_DATE]
@@ -773,14 +810,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         )
 
     # only one Report weather service to be created for all config entries
-    if not hass.services.has_service(DOMAIN, SERVICE_REPORT_WEATHER_NAME):
-        _LOGGER.info("Adding custom service : %s", SERVICE_REPORT_WEATHER_NAME)
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_REPORT_WEATHER_NAME,
-            report_weather,
-            schema=SERVICE_REPORT_WEATHER_SCHEMA,
-        )
+    _register_service_if_not_exists(
+        hass, SERVICE_REPORT_WEATHER_NAME, report_weather, SERVICE_REPORT_WEATHER_SCHEMA
+    )
 
     async def refresh(call: ServiceCall) -> None:
         """Service call to refresh data of Netro devices."""
@@ -797,14 +829,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         await coordinator.async_request_refresh()
 
     # only one Refresh data service to be created for all config entry
-    if not hass.services.has_service(DOMAIN, SERVICE_REFRESH_NAME):
-        _LOGGER.info("Adding custom service : %s", SERVICE_REFRESH_NAME)
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_REFRESH_NAME,
-            refresh,
-            schema=SERVICE_REFRESH_SCHEMA,
-        )
+    _register_service_if_not_exists(
+        hass, SERVICE_REFRESH_NAME, refresh, SERVICE_REFRESH_SCHEMA
+    )
 
     async def nowater(call: ServiceCall) -> None:
         """Service call to stop watering for a given number of days."""
@@ -823,16 +850,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         await coordinator.async_request_refresh()
 
     # only one nowater data service to be created for all config entry
-    if not hass.services.has_service(DOMAIN, SERVICE_NO_WATER_NAME):
-        _LOGGER.info("Adding custom service : %s", SERVICE_NO_WATER_NAME)
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_NO_WATER_NAME,
-            nowater,
-            schema=SERVICE_NO_WATER_SCHEMA,
-        )
-
-    return True
+    _register_service_if_not_exists(
+        hass, SERVICE_NO_WATER_NAME, nowater, SERVICE_NO_WATER_SCHEMA
+    )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -842,33 +862,39 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.info("Deleting %s", hass.data[DOMAIN][entry.entry_id])
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    # the Set moisture service has to be removed if the current entry is a controller
-    # and the last one
-    if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
+        # Only remove services if platform unload succeeded
+        # the Set moisture service has to be removed if the current entry is a controller
+        # and the last one
+        if entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE:
+            other_loaded_entries = [
+                _entry
+                for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
+                if _entry.entry_id != entry.entry_id
+                and _entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE
+            ]
+
+            if not other_loaded_entries:
+                _LOGGER.info("Removing service %s", SERVICE_SET_MOISTURE_NAME)
+                hass.services.async_remove(DOMAIN, SERVICE_SET_MOISTURE_NAME)
+
+        # if there is no more entry after this one, one must remove the config entry level services
         other_loaded_entries = [
             _entry
             for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
             if _entry.entry_id != entry.entry_id
-            and _entry.data[CONF_DEVICE_TYPE] == CONTROLLER_DEVICE_TYPE
         ]
 
         if not other_loaded_entries:
-            _LOGGER.info("Removing service %s", SERVICE_SET_MOISTURE_NAME)
-            hass.services.async_remove(DOMAIN, SERVICE_SET_MOISTURE_NAME)
-
-    # if there is no more entry after this one, one must remove the config entry level services
-    other_loaded_entries = [
-        _entry
-        for _entry in hass.config_entries.async_loaded_entries(DOMAIN)
-        if _entry.entry_id != entry.entry_id
-    ]
-
-    if not other_loaded_entries:
-        _LOGGER.info("Removing service %s", SERVICE_REPORT_WEATHER_NAME)
-        hass.services.async_remove(DOMAIN, SERVICE_REPORT_WEATHER_NAME)
-        _LOGGER.info("Removing service %s", SERVICE_REFRESH_NAME)
-        hass.services.async_remove(DOMAIN, SERVICE_REFRESH_NAME)
-        _LOGGER.info("Removing service %s", SERVICE_NO_WATER_NAME)
-        hass.services.async_remove(DOMAIN, SERVICE_NO_WATER_NAME)
+            _LOGGER.info("Removing service %s", SERVICE_REPORT_WEATHER_NAME)
+            hass.services.async_remove(DOMAIN, SERVICE_REPORT_WEATHER_NAME)
+            _LOGGER.info("Removing service %s", SERVICE_REFRESH_NAME)
+            hass.services.async_remove(DOMAIN, SERVICE_REFRESH_NAME)
+            _LOGGER.info("Removing service %s", SERVICE_NO_WATER_NAME)
+            hass.services.async_remove(DOMAIN, SERVICE_NO_WATER_NAME)
+    else:
+        _LOGGER.warning(
+            "Failed to unload platforms for entry %s, keeping services active",
+            entry.entry_id,
+        )
 
     return unload_ok

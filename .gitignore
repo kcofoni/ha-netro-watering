@@ -19,3 +19,11 @@ dist/
 .pytest_cache/
 .ruff_cache/
 .*_cache/
+
+# Coverage reports
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
