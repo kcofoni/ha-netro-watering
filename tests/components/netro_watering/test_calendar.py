@@ -1,7 +1,7 @@
 """Tests for calendar platform."""
 
 import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from homeassistant.components.calendar import CalendarEvent
@@ -42,6 +42,8 @@ class TestCalendarAsyncSetupEntry:
         coordinator.device_info = {"name": "Test Controller", "model": "Netro Sprite"}
         coordinator.current_calendar_schedule = None
         coordinator.calendar_schedules = MagicMock(return_value=[])
+        # Mock any potential async methods that might be called
+        coordinator.async_request_refresh = AsyncMock()
         return coordinator
 
     @pytest.fixture
@@ -197,6 +199,8 @@ class TestNetroCalendar:
         coordinator.device_info = {"name": "Test Controller"}
         coordinator.current_calendar_schedule = None
         coordinator.calendar_schedules = MagicMock(return_value=[])
+        # Mock any potential async methods that might be called
+        coordinator.async_request_refresh = AsyncMock()
         return coordinator
 
     @pytest.fixture
