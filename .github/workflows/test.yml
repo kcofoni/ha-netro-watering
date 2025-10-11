@@ -1,6 +1,10 @@
 name: Test
 
 on:
+  push:
+    branches: [ main ]  # Run tests on pushes to main and develop branches
+  pull_request:
+    branches: [ main ]           # Run tests on PRs targeting main branch
   workflow_dispatch:  # Manual execution only - you control when tests run
 
 jobs:
@@ -25,4 +29,4 @@ jobs:
 
     - name: Run tests
       run: |
-        python -m pytest tests/components/netro_watering/ -v
+        python -m pytest tests/ -v --cov=custom_components.netro_watering --cov-report=xml
