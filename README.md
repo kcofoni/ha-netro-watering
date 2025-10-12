@@ -1,6 +1,6 @@
 # Netro Smart Garden Integration for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs) ![GitHub repo size](https://img.shields.io/github/repo-size/kcofoni/ha-netro-watering) ![GitHub](https://img.shields.io/github/license/kcofoni/ha-netro-watering)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs) [![CI](https://github.com/kcofoni/ha-netro-watering/workflows/CI/badge.svg)](https://github.com/kcofoni/ha-netro-watering/actions) [![codecov](https://codecov.io/gh/kcofoni/ha-netro-watering/branch/main/graph/badge.svg)](https://codecov.io/gh/kcofoni/ha-netro-watering) ![GitHub repo size](https://img.shields.io/github/repo-size/kcofoni/ha-netro-watering) ![GitHub](https://img.shields.io/github/license/kcofoni/ha-netro-watering)
 
 ## About
 This is a Home Assistant custom integration for **Netro Smart Garden** devices.

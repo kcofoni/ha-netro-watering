@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   push:
@@ -27,6 +27,14 @@ jobs:
     - name: Set PYTHONPATH
       run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
-        python -m pytest tests/ -v --cov=custom_components.netro_watering --cov-report=xml
+        python -m pytest tests/ -v --cov=custom_components.netro_watering --cov-report=term-missing --cov-report=xml
+        echo "=== Coverage Summary ==="
+        python -m coverage report --show-missing
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
