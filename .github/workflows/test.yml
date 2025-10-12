@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]  # Run tests on pushes to main and develop branches
+    branches: [ main, dev ]  # Run tests on pushes to main and develop branches
   pull_request:
     branches: [ main ]           # Run tests on PRs targeting main branch
   workflow_dispatch:  # Manual execution only - you control when tests run
