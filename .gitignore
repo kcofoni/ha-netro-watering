@@ -3,6 +3,7 @@ updatefromdev
 .venv
 pipfile
 pipfile.lock
+temp/
 
 # IDE configuration files
 .vscode/

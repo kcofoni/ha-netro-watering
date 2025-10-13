@@ -1,0 +1,129 @@
+blueprint:
+  name: Netro Weather Sync Script
+  description: >
+    Synchronizes weather data from a weather entity to a Netro controller.
+    This script retrieves daily weather forecasts and transmits them to the controller
+    to optimize watering schedules.
+  
+  source_url: https://github.com/kcofoni/ha-netro-watering/blob/main/blueprints/script/netro_watering/netro_weather_sync.yaml
+  
+  domain: script
+  
+  input:
+    netro_controller:
+      name: Netro Controller
+      description: Select the Netro controller config entry to synchronize
+      selector:
+        config_entry:
+          integration: netro_watering
+          
+    weather_entity:
+      name: Weather Entity
+      description: Select the source weather entity (e.g. weather.paris)
+      selector:
+        entity:
+          domain: weather
+          
+    rain_probability_entity:
+      name: Rain Probability Entity (Optional)
+      description: Sensor entity for rain probability if available
+      default: ""
+      selector:
+        entity:
+          domain: sensor
+
+variables:
+  weather_entity_id: !input weather_entity
+  rain_prob_entity: !input rain_probability_entity
+  config_entry_controller: !input netro_controller
+
+fields:
+  number_of_days_forecast:
+    name: Number of Forecast Days
+    description: Number of forecast days to synchronize (in addition to today)
+    required: true
+    default: 3
+    selector:
+      number:
+        min: 0
+        max: 7
+        mode: slider
+
+sequence:
+  - alias: "Get weather forecasts"
+    action: weather.get_forecasts
+    target:
+      entity_id: "{{ weather_entity_id }}"
+    data:
+      type: daily
+    response_variable: myforecasts
+    
+  - alias: "Sync today's weather"
+    action: netro_watering.report_weather
+    data:
+      config_entry_id: "{{ config_entry_controller }}"
+      date: >
+        {{ as_timestamp(myforecasts[weather_entity_id]['forecast'][0].datetime, now()) | timestamp_custom("%Y-%m-%d") }}
+      condition: >
+        {% set mapped_conditions = {
+          'clear-night': 'clear', 'cloudy': 'cloudy', 'exceptional': 'clear',
+          'fog': 'cloudy', 'hail': 'rain', 'lightning': 'rain',
+          'lightning-rainy': 'rain', 'partlycloudy': 'cloudy', 'pouring': 'rain',
+          'rainy': 'rain', 'snowy': 'snow', 'snowy-rainy': 'snow',
+          'sunny': 'clear', 'windy': 'wind', 'windy-variant': 'wind'
+        } %}
+        {% set current_condition = myforecasts[weather_entity_id]['forecast'][0].condition %}
+        {{ mapped_conditions.get(current_condition, 'clear') }}
+      rain: >
+        {{ myforecasts[weather_entity_id]['forecast'][0].precipitation | default(0) }}
+      t_min: >
+        {{ myforecasts[weather_entity_id]['forecast'][0].templow }}
+      t_max: >
+        {{ myforecasts[weather_entity_id]['forecast'][0].temperature }}
+      humidity: >
+        {{ state_attr(weather_entity_id,'humidity') }}
+      rain_prob: >
+        {% if rain_prob_entity != "" %}
+          {{ states(rain_prob_entity) | int }}
+        {% else %}
+          {{ myforecasts[weather_entity_id]['forecast'][0].get('humidity', 50) }}
+        {% endif %}
+      temp: >
+        {{ state_attr(weather_entity_id, 'temperature') }}
+      wind_speed: >
+        {{ (state_attr(weather_entity_id, 'wind_speed') | float / 3.6) | round(1) }}
+      pressure: >
+        {{ state_attr(weather_entity_id, 'pressure') }}
+        
+  - alias: "Sync forecast days"
+    repeat:
+      count: "{{ number_of_days_forecast }}"
+      sequence:
+        - action: netro_watering.report_weather
+          data:
+            config_entry_id: "{{ config_entry_controller }}"
+            date: >
+              {{ as_timestamp(myforecasts[weather_entity_id]['forecast'][repeat.index].datetime, now()) | timestamp_custom("%Y-%m-%d") }}
+            condition: >
+              {% set mapped_conditions = {
+                'clear-night': 'clear', 'cloudy': 'cloudy', 'exceptional': 'clear',
+                'fog': 'cloudy', 'hail': 'rain', 'lightning': 'rain',
+                'lightning-rainy': 'rain', 'partlycloudy': 'cloudy', 'pouring': 'rain',
+                'rainy': 'rain', 'snowy': 'snow', 'snowy-rainy': 'snow',
+                'sunny': 'clear', 'windy': 'wind', 'windy-variant': 'wind'
+              } %}
+              {% set current_condition = myforecasts[weather_entity_id]['forecast'][repeat.index].condition %}
+              {{ mapped_conditions.get(current_condition, 'clear') }}
+            rain: >
+              {% if 'precipitation' in myforecasts[weather_entity_id]['forecast'][repeat.index] %}
+                {{ myforecasts[weather_entity_id]['forecast'][repeat.index].precipitation }}
+              {% else %}
+                0
+              {% endif %}
+            t_min: >
+              {{ myforecasts[weather_entity_id]['forecast'][repeat.index].templow }}
+            t_max: >
+              {{ myforecasts[weather_entity_id]['forecast'][repeat.index].temperature }}
+
+mode: single
+icon: mdi:cloud-arrow-down-outline
