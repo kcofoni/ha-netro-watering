@@ -5,7 +5,7 @@ blueprint:
     This script retrieves daily weather forecasts and transmits them to the controller
     to optimize watering schedules.
   
-  source_url: https://github.com/kcofoni/ha-netro-watering/blob/main/blueprints/script/netro_watering/netro_weather_sync.yaml
+  source_url: https://github.com/kcofoni/ha-netro-watering/blob/main/blueprints/script/kcofoni/netro_weather_sync.yaml
   
   domain: script
   
