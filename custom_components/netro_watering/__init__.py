@@ -685,7 +685,7 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry) -> N
             # set moisture by Netro
             _LOGGER.info(
                 "Running custom service 'Set moisture' : the humidity level has been "
-                "forced to %s%% for zone %s (id = %s)",
+                "forced to %s%% on zone %s (id = %s)",
                 moisture,
                 device_entry.name,
                 zone_id,
@@ -763,7 +763,7 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry) -> N
 
         # report weather by Netro
         _LOGGER.info(
-            "Running custom service report_weather : %s",
+            "Running custom service 'Report Weather' : %s",
             {
                 "controller": coordinator.name,
                 "date": str(weather_asof) if weather_asof else weather_asof,
@@ -823,7 +823,7 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry) -> N
         coordinator: DataUpdateCoordinator = hass.data[DOMAIN][entry_id]
 
         _LOGGER.info(
-            "Running custom service 'Refresh data' for %s devices", coordinator.name
+            "Running custom service 'Refresh data' on %s device", coordinator.name
         )
 
         await coordinator.async_request_refresh()
@@ -842,7 +842,9 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry) -> N
         coordinator: DataUpdateCoordinator = hass.data[DOMAIN][entry_id]
 
         _LOGGER.info(
-            "Running custom service 'Refresh data' for %s devices", coordinator.name
+            "Running custom service 'No Water' for %s days on %s device",
+            call.data[ATTR_NOWATER_DAYS],
+            coordinator.name,
         )
 
         days: int = call.data[ATTR_NOWATER_DAYS]

@@ -8,8 +8,8 @@
   "homekit": {},
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/kcofoni/ha-netro-watering/issues",
-  "requirements": ["pynetro==0.1.4", "validators==0.20.0"],
+  "requirements": ["pynetro==0.1.5", "validators==0.20.0"],
   "ssdp": [],
-  "version": "1.4.0-beta.1",
+  "version": "1.4.0-beta.2",
   "zeroconf": []
 }

@@ -316,11 +316,13 @@ class ControllerEnablingSwitch(
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
         await self.coordinator.enable()
+        _LOGGER.info("Enabling %s device", self.coordinator.name)
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the switch off."""
         await self.coordinator.disable()
+        _LOGGER.info("Disabling %s device", self.coordinator.name)
         await self.coordinator.async_request_refresh()
 
     def turn_on(self, **kwargs: Any) -> None:
