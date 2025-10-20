@@ -150,15 +150,15 @@
         }),
         dict({
           'id': 42,
-          'key': 'an********et',
+          'key': 'an**********et',
         }),
       ]),
-      'key': 'se********45',
+      'key': 'se****************45',
       'message': 'success',
       'nested': dict({
         'data': 'normal_data',
-        'key': 'ne********ey',
-        'serial': 'ne********al',
+        'key': 'ne******ey',
+        'serial': 'ne*********al',
       }),
       'serial': 'AB********89',
     }),
@@ -226,7 +226,7 @@
       'is_copy': True,
       'output': dict({
         'json': dict({
-          'key': 'se********et',
+          'key': 'se**et',
         }),
         'params': 'not_a_dict',
       }),

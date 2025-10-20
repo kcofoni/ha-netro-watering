@@ -200,7 +200,7 @@ class TestNetroRefreshButton:
 
             # Verify logger was called with masked serial number
             mock_logger.debug.assert_called_once_with(
-                "Netro: refresh button pressed for %s", "CT********23"
+                "Netro: refresh button pressed for %s", "CT***23"
             )
 
             # Verify coordinator refresh was requested
