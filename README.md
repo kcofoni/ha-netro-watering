@@ -2,7 +2,8 @@
 # Netro Smart Garden Integration for Home Assistant
 
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs) [![CI](https://github.com/kcofoni/ha-netro-watering/workflows/CI/badge.svg)](https://github.com/kcofoni/ha-netro-watering/actions) [![codecov](https://codecov.io/gh/kcofoni/ha-netro-watering/branch/main/graph/badge.svg)](https://codecov.io/gh/kcofoni/ha-netro-watering) [![GitHub release](https://img.shields.io/github/v/release/kcofoni/ha-netro-watering)](https://github.com/kcofoni/ha-netro-watering/releases) ![GitHub repo size](https://img.shields.io/github/repo-size/kcofoni/ha-netro-watering) ![GitHub](https://img.shields.io/github/license/kcofoni/ha-netro-watering)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs) [![CI](https://github.com/kcofoni/ha-netro-watering/workflows/CI/badge.svg)](https://github.com/kcofoni/ha-netro-watering/actions) [![codecov](https://codecov.io/gh/kcofoni/ha-netro-watering/branch/main/graph/badge.svg)](https://codecov.io/gh/kcofoni/ha-netro-watering) [![GitHub release](https://img.shields.io/github/v/release/kcofoni/ha-netro-watering)](https://github.com/kcofoni/ha-netro-watering/releases) [![GitHub beta](https://img.shields.io/github/v/tag/kcofoni/ha-netro-watering?label=beta&color=orange)](https://github.com/kcofoni/ha-netro-watering/releases)
+![GitHub repo size](https://img.shields.io/github/repo-size/kcofoni/ha-netro-watering) ![GitHub](https://img.shields.io/github/license/kcofoni/ha-netro-watering)
 
 
 ## 📑 Table of Contents
@@ -11,6 +12,7 @@
 - [📖 Description](#📖-description)
 - [🌱 Installation](#🌱-installation)
 - [⚙️ Configuration](#⚙️-configuration)
+- [🔐 Netro Public API v2](#🔐-netro-public-api-v2)
 - [🌦️ Netro Weather Sync Blueprint](#🌦️-netro-weather-sync-blueprint)
 - [🖼️ Lovelace cards](#🖼️-lovelace-cards)
 - [🛠️ Advanced configuration](#🛠️-advanced-configuration)
@@ -82,13 +84,28 @@ Polling intervals can be configured separately for sensors and controllers. A de
 ![change controller options](https://kcofoni.github.io/ha-netro-watering/images/controller_options.png "Controller options")
 ![change sensor options](https://kcofoni.github.io/ha-netro-watering/images/sensor_options.png "Sensor options")
 
-
 > **ℹ️ Note**
 > You no longer need to reload the device after changing options. Changes are applied automatically.
 > - Most updates take effect on the **next polling cycle**.
 > - `default_watering_delay` and `delay_before_refresh` apply to **subsequent commands**.
 > - `sensor_value_days_before_today` is used on the **next sensor update**.
 > - No manual reload or restart is required (except for internal fields like `netro_api_url`, if instructed).
+
+### 🔐 Netro Public API v2
+
+By default, the integration uses [version 1 of the Netro Public API](https://www.netrohome.com/en/shop/articles/10), which authenticates devices using their serial numbers. However, you can switch to version 2, which uses API keys generated on demand for each device.  
+API keys provide a higher level of security: they can be regenerated if compromised, unlike fixed serial numbers.
+
+To use [API v2](https://netrohome.com/en/shop/user_guides/7), simply specify the corresponding URL in your Home Assistant configuration file:
+
+```yaml
+netro_watering:
+  netro_api_url: https://api.netrohome.com/npa/v2/
+```  
+> ⚠️ **Important:**  
+> Some recent Netro devices only work with API version 2.  
+> If your device is rejected when using a serial number with API v1 (the default), carefully check the error message.  
+> It may indicate that you need to use API v2 and an API key for authentication.
 
 ## 🌦️ Netro Weather Sync Blueprint
 
