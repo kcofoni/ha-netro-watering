@@ -335,9 +335,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry
-) -> bool:  # noqa: C901
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  # noqa: C901
     """Set up Netro Watering from a config entry."""
 
     _LOGGER.debug(
@@ -679,7 +677,11 @@ async def _async_register_services(hass: HomeAssistant, entry: ConfigEntry) -> N
                 if identifier[1].startswith(key):
                     # assume that device info returned by Zone class is
                     # <controller_serial>_<zone_id> as identifiers
-                    zone_id = identifier[1].split("_")[1]
+                    zone_id = identifier[1].rsplit("_", 1)[-1]
+                    if not zone_id.isdigit():
+                        raise HomeAssistantError(
+                            f"Could not extract a zone number from identifier '{identifier[1]}'"
+                        )
                     break
 
             # set moisture by Netro
