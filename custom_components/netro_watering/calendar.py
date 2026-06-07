@@ -1,16 +1,16 @@
 """Support for Netro Watering system."""
 
-# pyright: reportShadowedImports=false
-from __future__ import annotations
-
 import datetime
 import logging
 
-from homeassistant.components.calendar import CalendarEntity, CalendarEvent
+from homeassistant.components.calendar import (
+    CalendarEntity,
+    CalendarEntityDescription,
+    CalendarEvent,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -19,7 +19,7 @@ from .coordinator import NetroControllerUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-NETRO_CALENDAR_DESCRIPTION = EntityDescription(
+NETRO_CALENDAR_DESCRIPTION = CalendarEntityDescription(
     key="schedules",
     name="Schedules",
     entity_registry_enabled_default=True,
@@ -57,7 +57,7 @@ class NetroCalendar(
     def __init__(
         self,
         coordinator: NetroControllerUpdateCoordinator,
-        description: EntityDescription,
+        description: CalendarEntityDescription,
     ) -> None:
         """Initialize the Netro calendar."""
         super().__init__(coordinator)
