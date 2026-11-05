@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, dev ]  # Run tests on pushes to main and develop branches
   pull_request:
-    branches: [ main ]           # Run tests on PRs targeting main branch
+    branches: [ main, dev ]      # Run tests on PRs targeting main or dev
   workflow_dispatch:  # Manual execution only - you control when tests run
 
 jobs:
@@ -14,10 +14,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Python 3.13.7
-      uses: actions/setup-python@v4
+    - name: Set up Python 3.14
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.13.7"
+        python-version: "3.14"
     
     - name: Install dependencies
       run: |
