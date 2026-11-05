@@ -573,7 +573,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
         )
 
         dev_reg = dr.async_get(hass)
-        dev_reg.async_get_or_create(
+        controller_device = dev_reg.async_get_or_create(
             config_entry_id=entry.entry_id,
             identifiers={(DOMAIN, serial)},
             manufacturer=MANUFACTURER,
@@ -582,6 +582,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:  #
             sw_version=controller_coordinator.sw_version,
             hw_version=controller_coordinator.hw_version,
         )
+        # zones link to the controller by its device registry id (via_device_id)
+        controller_coordinator.device_id = controller_device.id
         _LOGGER.debug(
             "device explicitly created into the registry: name = %s, serial = %s, "
             "model = %s, manufacturer = %s",

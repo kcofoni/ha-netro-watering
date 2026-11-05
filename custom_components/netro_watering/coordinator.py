@@ -434,7 +434,7 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
                 identifiers={(DOMAIN, self.serial_number)},
                 manufacturer=MANUFACTURER,
                 model=NETRO_DEFAULT_ZONE_MODEL,
-                via_device=(DOMAIN, self.parent_controller.serial_number),
+                via_device_id=self.parent_controller.device_id,
             )
 
     # _schedules and _moistures are list of dict whose key = str and value = any
@@ -475,6 +475,9 @@ class NetroControllerUpdateCoordinator(DataUpdateCoordinator):
         )
         self.schedules_months_before = schedules_months_before
         self.schedules_months_after = schedules_months_after
+        # Device registry id of the controller, set in __init__.py once the
+        # controller device is registered; zones link to it via via_device_id.
+        self.device_id: str | None = None
         self._active_zones = {}
 
     @property
