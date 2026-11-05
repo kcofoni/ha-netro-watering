@@ -22,7 +22,7 @@ Home Assistant integration for Netro Smart Garden devices. It lets you manage Ne
 
 The integration uses [Netro’s Public API](https://www.netrohome.com/en/shop/articles/10) for device access and scheduling.
 
-**Compatibility:** developed and tested with Home Assistant 2023.4.0 and later.
+**Compatibility:** requires Home Assistant 2026.8.0 or later (since version 1.4.3). If you run an older version of Home Assistant, stay on version 1.4.2.
 
 *This project is community-maintained and not affiliated with Netro, Inc.*
 
