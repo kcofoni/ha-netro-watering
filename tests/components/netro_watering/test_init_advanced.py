@@ -141,6 +141,11 @@ class TestAsyncSetupEntry:
             mock_coordinator_class.assert_called_once()
             mock_coordinator.async_config_entry_first_refresh.assert_called_once()
             mock_dev_reg.async_get_or_create.assert_called_once()
+            # zones link to the controller through its device registry id (issue #51)
+            assert (
+                mock_coordinator.device_id
+                == mock_dev_reg.async_get_or_create.return_value.id
+            )
 
     @pytest.mark.asyncio
     async def test_async_setup_entry_invalid_device_type(self, mock_hass):

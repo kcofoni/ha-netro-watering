@@ -7,8 +7,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.netro_watering.const import (
+    DOMAIN,
     NETRO_STATUS_DISABLE,
     NETRO_STATUS_ENABLE,
 )
@@ -930,6 +933,71 @@ class TestNetroZoneActionMethods:
         }
 
         assert result == snapshot
+
+
+class TestNetroZoneDeviceLink:
+    """Tests for the link between a zone device and its parent controller device."""
+
+    @pytest.fixture
+    def parent_controller(self, hass):
+        """Create a parent controller coordinator."""
+        return NetroControllerUpdateCoordinator(
+            hass=hass,
+            device_name="Parent Controller",
+            serial_number="PARENT_CONTROLLER_123",
+            refresh_interval=15,
+            slowdown_factors=[],
+            schedules_months_before=6,
+            schedules_months_after=2,
+            device_type="controller",
+            hw_version="1.0",
+            sw_version="1.0.0",
+        )
+
+    @pytest.fixture
+    def zone(self, parent_controller):
+        """Create a zone of the parent controller."""
+        return parent_controller.Zone(
+            controller=parent_controller,
+            ith=2,
+            enabled=True,
+            smart="smart",
+            name="Test Zone",
+            serial_number="PARENT_CONTROLLER_123_2",
+        )
+
+    def test_controller_device_id_defaults_to_none(self, parent_controller):
+        """Test the controller device id is unset until the device is registered."""
+        assert parent_controller.device_id is None
+
+    def test_zone_device_info_uses_via_device_id(self, parent_controller, zone):
+        """Test the zone device info links to the controller by device id (issue #51)."""
+        parent_controller.device_id = "controller-device-id"
+
+        device_info = zone.device_info
+
+        assert device_info["via_device_id"] == "controller-device-id"
+        assert "via_device" not in device_info
+
+    async def test_zone_device_linked_to_controller_in_registry(
+        self, hass: HomeAssistant, parent_controller, zone
+    ):
+        """Test the zone device is connected via the controller in the device registry."""
+        entry = MockConfigEntry(domain=DOMAIN)
+        entry.add_to_hass(hass)
+        dev_reg = dr.async_get(hass)
+
+        controller_device = dev_reg.async_get_or_create(
+            config_entry_id=entry.entry_id,
+            identifiers={(DOMAIN, parent_controller.serial_number)},
+        )
+        parent_controller.device_id = controller_device.id
+
+        zone_device = dev_reg.async_get_or_create(
+            config_entry_id=entry.entry_id, **zone.device_info
+        )
+
+        assert zone_device.via_device_id == controller_device.id
 
 
 class TestNetroControllerCalendarMethods:
