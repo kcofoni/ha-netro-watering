@@ -52,7 +52,7 @@
         "name": "Batterie"
       },
       "humidity": {
-        "name": "Luftfeuchtigkeit"
+        "name": "Bodenfeuchtigkeit"
       },
       "illuminance": {
         "name": "Beleuchtungsstärke"

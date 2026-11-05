@@ -52,7 +52,7 @@
                 "name": "Battery"
             },
             "humidity": {
-                "name": "Humidity"
+                "name": "Moisture"
             },
             "illuminance": {
                 "name": "Illuminance"

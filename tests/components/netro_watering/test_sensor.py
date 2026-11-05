@@ -321,6 +321,19 @@ class TestSensorEntityDescriptions:
         assert desc.device_class == SensorDeviceClass.BATTERY
         assert desc.translation_key == "battery_percent"
 
+    @pytest.mark.parametrize(
+        "descriptions",
+        [NETRO_SENSOR_DESCRIPTIONS, NETRO_ZONE_DESCRIPTIONS],
+        ids=["whisperer_sensor", "zone"],
+    )
+    def test_soil_moisture_description_properties(self, descriptions):
+        """Test soil moisture sensors use the moisture device class (issue #50)."""
+        desc = next(d for d in descriptions if d.key == "humidity")
+        # key and translation_key are kept to preserve unique ids and history
+        assert desc.translation_key == "humidity"
+        assert desc.name == "Moisture"
+        assert desc.device_class == SensorDeviceClass.MOISTURE
+
     def test_netro_sensor_entity_description_inheritance(self):
         """Test NetroSensorEntityDescription has correct attributes."""
         # Create a test description
